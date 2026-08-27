@@ -1,0 +1,30 @@
+title: Dustin Jones
+tagline: Software engineer — Denver
+description: >-
+  I build the tool that deletes the spreadsheet. Software engineer in Denver,
+  finishing a CS degree at MSU Denver.
+author: Dustin Jones
+email: DBJ2297@gmail.com
+github_username: dustinJ15
+linkedin_url: https://www.linkedin.com/in/dustin-jones-74707038a
+url: https://dustinJ15.github.io
+baseurl: ""
+
+# No theme — layouts and CSS are hand-written and live in this repo.
+plugins:
+  - jekyll-sitemap
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - vendor
+  - .jekyll-cache
+
+defaults:
+  - scope:
+      path: "projects"
+      type: "pages"
+    values:
+      layout: project
+      permalink: /projects/:basename/
