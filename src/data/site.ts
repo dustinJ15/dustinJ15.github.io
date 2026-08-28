@@ -1,6 +1,6 @@
 /**
- * Shared content for the three preview lanes. All three render THIS data, so the
- * comparison is a design comparison and not a copy comparison.
+ * Site-wide copy that is not a case study. Project metadata lives in the content
+ * collection instead, so the home page and a case study cannot disagree.
  *
  * Copy here is ported verbatim from the Jekyll index.md. The editorial pass
  * (ticket 08) rewrites it; do not pre-empt that here.

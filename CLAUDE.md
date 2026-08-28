@@ -67,7 +67,8 @@ three stages fails. It runs, per route:
   The page renders with JavaScript disabled: text present, nothing stuck at opacity 0.
 - The per-route expectations, from the `EXPECTATIONS` table at the top of `scripts/verify.py`.
   A row states what must be true of the page a visitor receives: heading counts, named sections,
-  figure count, non-empty alt text, links that must be present, copy that must appear. **A row
+  figure count, non-empty alt text, links that must be present, links that must be *reachable*
+  and not merely in the DOM, copy that must appear. **A row
   never names a class, a component or a file**, so the table survives a redesign and still catches
   a regression. Adding a page means adding its row; a ticket is finished when the gate passes
   with its row in place.

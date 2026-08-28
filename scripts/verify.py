@@ -13,6 +13,10 @@ Universal checks, per route x viewport x theme:
   5. Renders with JavaScript disabled: text present, nothing stuck at opacity 0.
   6. Em-dashes in rendered text. ADVISORY: printed, does not fail. Ticket 08
      removes the existing ones and flips this to a failure.
+  7. Reachability: a link a route declares as reachable must be hit-testable at
+     some point during the scroll-through, at every viewport. A link can be in
+     the DOM, resolve, and still be clipped out of reach; that is a real bug the
+     link crawl cannot see.
 Plus a link crawl from the entry pages.
 
 Per-route checks come from EXPECTATIONS below: each route declares what must be
@@ -192,15 +196,20 @@ PENDING = {"/process/", "/about/", "/projects/quote-generator/", "/projects/labe
 #   text       ["substring"]   copy that must appear in the rendered text, matched
 #                              case- and whitespace-insensitively so that a
 #                              text-transform or a reflow is not a copy regression
+#   reachable  ["/a/"]        links a visitor must be able to actually get to,
+#                              checked at every viewport by hit-testing the anchor
+#                              at each step of the scroll-through. Presence in the
+#                              DOM is not reachability: a card clipped by an
+#                              overflow-hidden parent with no scroll affordance
+#                              passes `links` and fails this
 #   min_text   int             floor on rendered text length, used by the no-JS
 #                              check (default MIN_TEXT)
 MIN_TEXT = 200
 
 EXPECTATIONS: dict[str, dict] = {
-    # The Obys preview lane, which is the only route built so far. Ticket 02
-    # replaces this row with one for "/".
-    "/preview/2/": {
-        "headings": {"h1": 1, "h2": 2, "h3": 4},
+    "/": {
+        # One hero h1; About, Selected work and Contact; one h3 per project.
+        "headings": {"h1": 1, "h2": 3, "h3": 4},
         "ids": ["main", "marquee", "rail"],
         "figures": 0,
         "alt": True,
@@ -212,13 +221,110 @@ EXPECTATIONS: dict[str, dict] = {
             "/projects/billing-analyzer/",
             "/projects/rental-pipeline/",
         ],
+        # The work rail is horizontal. Every case study has to be gettable at
+        # 375 as well as 1440, which is where the preview lane was broken.
+        "reachable": [
+            "/projects/quote-generator/",
+            "/projects/label-maker/",
+            "/projects/billing-analyzer/",
+            "/projects/rental-pipeline/",
+        ],
         "text": [
             "Dustin Jones",
             "Available now for part-time and contract work",
             "Sixteen parsers into one schema",
         ],
     },
+    # Served by the host on any unknown path, so it is a real page and gets a row.
+    "/404.html": {
+        "headings": {"h1": 1},
+        "ids": ["main"],
+        "figures": 0,
+        "alt": True,
+        "links": ["/", "/about/", "/process/"],
+        "reachable": ["/"],
+        "text": ["Page not found"],
+    },
+
 }
+
+
+# Drives the page through a full scroll so every ScrollTrigger fires, and probes
+# reachability while it goes.
+#
+# Reachability has to be sampled DURING the scroll, not after it: on a wide
+# screen the work rail is pinned and scrubbed, so a given card is only on screen
+# for part of the scroll and a single check at the top or the bottom would miss
+# it. Hit-testing rather than measuring a rect is what catches the real failure
+# mode, which is a card clipped by an overflow-hidden ancestor: it has a
+# perfectly good bounding box, it is just not on the screen and nothing can
+# scroll it there.
+SCROLL_THROUGH = r"""
+async (hrefs) => {
+  const reached = new Set();
+  const targets = hrefs
+    .map((h) => [h, [...document.querySelectorAll('a[href]')]
+      .find((a) => a.getAttribute('href') === h)])
+    .filter(([, el]) => el);
+
+  const probe = () => {
+    for (const [href, el] of targets) {
+      if (reached.has(href)) continue;
+      const r = el.getBoundingClientRect();
+      // Clamp the probe point into the visible part of the rect, so a card that
+      // is only half on screen still counts.
+      const x = Math.round((Math.max(r.left, 0) + Math.min(r.right, innerWidth)) / 2);
+      const y = Math.round((Math.max(r.top, 0) + Math.min(r.bottom, innerHeight)) / 2);
+      if (x < 0 || y < 0 || x >= innerWidth || y >= innerHeight) continue;
+      if (Math.min(r.right, innerWidth) - Math.max(r.left, 0) < 2) continue;
+      if (Math.min(r.bottom, innerHeight) - Math.max(r.top, 0) < 2) continue;
+      const hit = document.elementFromPoint(x, y);
+      if (hit && (hit === el || el.contains(hit) || hit.closest('a') === el)) reached.add(href);
+    }
+  };
+
+  probe();
+  // A third of a viewport per step. A full 0.6 can translate a scrubbed rail by
+  // more than a card's width between probes and skip straight past one.
+  const step = window.innerHeight * 0.33;
+  for (let y = 0; y < document.body.scrollHeight; y += step) {
+    window.scrollTo(0, y);
+    await new Promise((r) => setTimeout(r, 90));
+    probe();
+  }
+  window.scrollTo(0, document.body.scrollHeight);
+  await new Promise((r) => setTimeout(r, 500));
+  probe();
+
+  // Second chance for anything still unreached. A card can live in a container
+  // that scrolls horizontally, which a vertical sweep never touches.
+  //
+  // Deliberately NOT scrollIntoView: that scrolls an `overflow: hidden` box too,
+  // because hidden boxes are still programmatically scrollable. It would report
+  // the exact bug this check exists for as reachable. Only containers a visitor
+  // can actually drive are used, which means overflow-x auto or scroll.
+  const userScrollableX = (el) => {
+    const chain = [];
+    for (let n = el.parentElement; n; n = n.parentElement) {
+      const ox = getComputedStyle(n).overflowX;
+      if ((ox === 'auto' || ox === 'scroll') && n.scrollWidth > n.clientWidth + 1) chain.push(n);
+    }
+    return chain.reverse();   // outermost first
+  };
+  for (const [href, el] of targets) {
+    if (reached.has(href)) continue;
+    for (const c of userScrollableX(el)) {
+      const er = el.getBoundingClientRect(), cr = c.getBoundingClientRect();
+      c.scrollLeft += (er.left + er.width / 2) - (cr.left + cr.width / 2);
+    }
+    const er = el.getBoundingClientRect();
+    window.scrollBy(0, (er.top + er.height / 2) - window.innerHeight / 2);
+    await new Promise((r) => setTimeout(r, 150));
+    probe();
+  }
+  return [...reached];
+}
+"""
 
 
 STRUCTURE_SWEEP = r"""
@@ -345,6 +451,7 @@ def main(paths: list[str]) -> int:
         with sync_playwright() as p:
             browser = p.chromium.launch()
             for path in paths:
+                spec = EXPECTATIONS.get(path, {})
                 for theme in THEMES:
                     for vp_name, (w, h) in VIEWPORTS.items():
                         ctx = browser.new_context(
@@ -428,16 +535,15 @@ def main(paths: list[str]) -> int:
                         # reveals still at opacity 0, and any reveal that never
                         # fires at all would go unnoticed.
                         page.screenshot(path=str(OUT / f"{tag}-hero.png"))
-                        page.evaluate("""async () => {
-                            const step = window.innerHeight * 0.6;
-                            for (let y = 0; y < document.body.scrollHeight; y += step) {
-                                window.scrollTo(0, y);
-                                await new Promise((r) => setTimeout(r, 90));
-                            }
-                            window.scrollTo(0, document.body.scrollHeight);
-                            await new Promise((r) => setTimeout(r, 500));
-                        }""")
+                        reached = page.evaluate(SCROLL_THROUGH, spec.get("reachable") or [])
                         page.wait_for_timeout(700)
+
+                        for href in spec.get("reachable") or []:
+                            if href not in reached:
+                                failures.append(
+                                    f"[reach] {tag}: link to \"{href}\" is on the page but was "
+                                    f"never hit-testable during a full scroll-through"
+                                )
 
                         stuck = page.evaluate(
                             """() => [...document.querySelectorAll('[data-reveal],[data-line]')]
@@ -466,7 +572,17 @@ def main(paths: list[str]) -> int:
                         contrast()
                         measure()
 
-                        page.evaluate("() => window.scrollTo(0, 0)")
+                        # Back to the top, and rewind any horizontal scroller the
+                        # reachability probe drove, so the screenshot a human looks
+                        # at shows the page as a visitor first meets it.
+                        page.evaluate(
+                            """() => {
+                                window.scrollTo(0, 0);
+                                document.querySelectorAll('*').forEach((el) => {
+                                    if (el.scrollLeft) el.scrollLeft = 0;
+                                });
+                            }"""
+                        )
                         page.wait_for_timeout(250)
                         page.screenshot(path=str(OUT / f"{tag}.png"), full_page=True)
                         ctx.close()
@@ -490,7 +606,6 @@ def main(paths: list[str]) -> int:
                 # 6. per-route expectations, plus the em-dash advisory. Both read
                 #    the settled page once at the widest viewport; structure and
                 #    copy do not vary by width.
-                spec = EXPECTATIONS.get(path, {})
                 ctx = browser.new_context(viewport={"width": 1440, "height": 900})
                 page = ctx.new_page()
                 page.goto(base + path, wait_until="load")

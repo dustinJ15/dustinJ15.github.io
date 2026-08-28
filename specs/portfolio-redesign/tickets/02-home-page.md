@@ -47,22 +47,50 @@ work. The rail bug is the serious one.
 
 **Blocked by:** 01.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] `/` serves the home page. `/preview/` no longer exists and nothing links to it.
-- [ ] The hero fills the viewport, its display lines animate in on load, and the width settle
+- [x] `/` serves the home page. `/preview/` no longer exists and nothing links to it.
+- [x] The hero fills the viewport, its display lines animate in on load, and the width settle
       is present. No display line wraps at 375, 768 or 1440.
-- [ ] All four projects appear with year and stack, each linking to its case study, and their
+- [x] All four projects appear with year and stack, each linking to its case study, and their
       metadata is read from the content collection rather than repeated in the page.
-- [ ] On a narrow screen the work rail scrolls normally and nothing is pinned or scrub-jacked,
+- [x] On a narrow screen the work rail scrolls normally and nothing is pinned or scrub-jacked,
       and all four entries are reachable at 375px. The gate's row for `/` asserts reachability,
       not just that the links are in the DOM.
-- [ ] The rail's scroll distance is never negative, at any viewport width the design supports.
-- [ ] Every listener the page adds, the custom cursor's included, is removed on
+- [x] The rail's scroll distance is never negative, at any viewport width the design supports.
+- [x] Every listener the page adds, the custom cursor's included, is removed on
       `astro:before-swap`.
-- [ ] Availability and a contact route are visible without hunting.
-- [ ] The base layout gives every page its own title and description, a canonical URL and
+- [x] Availability and a contact route are visible without hunting.
+- [x] The base layout gives every page its own title and description, a canonical URL and
       social metadata, and no page is marked noindex.
-- [ ] The skip link is reachable by keyboard on first tab and moves focus to the main content.
-- [ ] A 404 route renders in the site's chrome.
-- [ ] The gate passes with a row for `/`.
+- [x] The skip link is reachable by keyboard on first tab and moves focus to the main content.
+- [x] A 404 route renders in the site's chrome.
+- [x] The gate passes with a row for `/`.
+
+**Landed 2026-08-28.** Notes on what the acceptance criteria turned into:
+
+- The rail is a native `overflow-x: auto` scroller by default, at every width and with no
+  JavaScript at all. Above 1024px a `gsap.matchMedia` scope pins the section, scrubs the track
+  and sets the scroller to `overflow-x: hidden` for the duration; reverting the scope restores
+  the scrollable fallback, so a resize back down, reduced motion and a no-JS load all land on
+  the same reachable rail.
+- The pin distance is `max(0, track.scrollWidth - scroller.clientWidth)` and the trigger's end
+  is clamped to at least 1. Measured at 1600, 1920, 2200 and 2560: pinned with a positive
+  distance at 1600, and above roughly 1900 the track fits, so no pin is created at all and no
+  negative end can exist.
+- The gate gained a `reachable` expectation key. It probes hit-testability at every step of the
+  scroll-through, then gives anything still unreached a second chance by driving only the
+  scroll containers a visitor can actually drive, which is `overflow-x: auto` or `scroll`.
+  Deliberately not `scrollIntoView`: that scrolls an `overflow: hidden` box too, and reported
+  the original bug as reachable when it was tried. Reintroducing `overflow-hidden` on the
+  scroller makes the gate fail on cards three and four at 375 and 768, which is the bug.
+- The custom cursor moved into the base layout, and all of its listeners hang off one
+  `AbortController` registered with a new `onTeardown` hook in `motion.ts`. Verified: after
+  dispatching `astro:before-swap`, a `pointermove` no longer moves the cursor.
+- Two things beyond the ticket, both from looking at the screenshots. The hero's availability
+  line was a `[data-reveal]` sitting at the very bottom of the first screenful, so the one line
+  that says he is available was faded out on landing; it is now static. And the display scale
+  went from `8.4vw` to `9.4vw`, which only affects widths below about 1430 where the clamp was
+  not yet at its cap; the hero was small on a phone.
+- Not done here: there is no `og:image`. The Jekyll `assets/` directory is not in Astro's
+  output during the overlap, so any URL would 404. Ticket 07 or 10 is where that lands.

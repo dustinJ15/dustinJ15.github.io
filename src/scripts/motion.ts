@@ -1,5 +1,5 @@
 /**
- * Shared motion runtime for the preview lanes.
+ * Shared motion runtime for the site.
  *
  * Contract, in order of importance:
  *   1. Reduced motion wins. Nothing is hidden, nothing is scroll-jacked.
@@ -19,7 +19,19 @@ export const prefersReducedMotion = () =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 let lenis: Lenis | null = null;
-let ctx: gsap.Context | null = null;
+/** One per `withMotion` call. The layout and the page each register their own. */
+const contexts: gsap.Context[] = [];
+
+/**
+ * Anything a page sets up that GSAP does not own: DOM listeners, matchMedia
+ * queries, observers. Registered here so `teardown` is the single place that
+ * undoes a page, rather than each page hoping it remembered.
+ */
+const cleanups: Array<() => void> = [];
+
+export function onTeardown(fn: () => void) {
+  cleanups.push(fn);
+}
 
 /** Module scope, not a local, so teardown can actually remove it again. */
 const tick = (time: number) => lenis?.raf(time * 1000);
@@ -41,7 +53,7 @@ export function startSmoothScroll() {
 export function withMotion(build: (self: gsap.Context) => void) {
   if (prefersReducedMotion()) return;
   document.documentElement.dataset.motion = 'on';
-  ctx = gsap.context(build);
+  contexts.push(gsap.context(build));
 }
 
 /** Standard entrance: fade + rise, staggered, triggered on scroll. */
@@ -63,8 +75,10 @@ export function revealOnScroll(selector: string, opts: gsap.TweenVars = {}) {
 }
 
 export function teardown() {
-  ctx?.revert();
-  ctx = null;
+  // Page-registered cleanups run first: they may hold references to nodes GSAP
+  // is about to revert.
+  while (cleanups.length) cleanups.pop()!();
+  while (contexts.length) contexts.pop()!.revert();
   ScrollTrigger.getAll().forEach((t) => t.kill());
   // Both of these are global state on the ticker, not on the Lenis instance.
   // Destroying Lenis without removing them leaves a callback running on every

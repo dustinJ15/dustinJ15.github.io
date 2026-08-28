@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../data/site';
+---
+
+<BaseLayout
+  title="Page not found"
+  description="That page does not exist. The work, the process writeup and the about page are all one click away."
+>
+  <section class="flex min-h-[calc(100svh-16rem)] flex-col justify-center px-(--gutter) py-24">
+    <p class="label">Error 404</p>
+    <h1
+      class="mt-6 font-display text-[clamp(2.2rem,11vw,8rem)] font-extrabold uppercase leading-[0.85] tracking-[-0.03em]"
+    >
+      Page not<br /><span class="text-accent">found</span>
+    </h1>
+    <p class="measure mt-8 text-lg leading-relaxed text-ink-soft">
+      That address does not exist on this site. It may have moved, or the link may have been
+      mistyped. Everything here is reachable from the home page.
+    </p>
+    <div class="mt-10 flex flex-wrap gap-6 border-t border-line pt-6">
+      <a class="label transition-colors hover:text-accent" href="/">Work</a>
+      <a class="label transition-colors hover:text-accent" href="/process/">Process</a>
+      <a class="label transition-colors hover:text-accent" href="/about/">About</a>
+      <a class="label transition-colors hover:text-accent" href={`mailto:${site.email}`}>Email</a>
+    </div>
+  </section>
+</BaseLayout>

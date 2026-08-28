@@ -1,0 +1,153 @@
+---
+/**
+ * The one layout every page uses.
+ *
+ * It owns the document head (per-page title and description, canonical URL,
+ * social metadata), the skip link, the site header, the `<main>` landmark and
+ * the footer. Pages own everything between the header and the footer and
+ * nothing else.
+ *
+ * There is no `noindex` here. The preview lane carried one because it was a
+ * throwaway route; the real site is meant to be found.
+ */
+import '../styles/global.css';
+import { site, nav } from '../data/site';
+
+interface Props {
+  /** Page title, without the site name. The wordmark is appended. */
+  title: string;
+  /** Meta and social description. Falls back to the site description. */
+  description?: string;
+  /** og:type. "website" for the home page, "article" for a case study. */
+  ogType?: 'website' | 'article';
+}
+
+const { title, description = site.description, ogType = 'website' } = Astro.props;
+
+const pageTitle = `${title} · ${site.name}`;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const year = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="author" content={site.name} />
+
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+  </head>
+
+  <body>
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:bg-accent focus:px-4 focus:py-2 focus:font-mono focus:text-xs focus:uppercase focus:tracking-[0.18em] focus:text-accent-contrast"
+      >Skip to content</a
+    >
+
+    <div
+      id="cursor"
+      aria-hidden="true"
+      class="pointer-events-none fixed left-0 top-0 z-40 hidden h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent mix-blend-difference lg:block"
+    >
+    </div>
+
+    <header class="flex items-start justify-between gap-6 px-(--gutter) pb-6 pt-8">
+      <a
+        href="/"
+        class="font-mono text-xs uppercase tracking-[0.14em] text-ink transition-colors hover:text-accent"
+        >{site.name}</a
+      >
+      <nav aria-label="Primary" class="flex flex-wrap justify-end gap-x-5 gap-y-1">
+        {
+          nav.map((item) => (
+            <a
+              href={item.href}
+              aria-current={Astro.url.pathname === item.href ? 'page' : undefined}
+              class="label transition-colors hover:text-accent aria-[current=page]:text-accent"
+            >
+              {item.label}
+            </a>
+          ))
+        }
+      </nav>
+    </header>
+
+    <main id="main" tabindex="-1" class="outline-none"><slot /></main>
+
+    <footer
+      class="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-line px-(--gutter) py-8"
+    >
+      <p class="label">© {year} {site.name}</p>
+      <nav aria-label="Elsewhere" class="flex flex-wrap gap-x-5 gap-y-1">
+        <a class="label transition-colors hover:text-accent" href={`mailto:${site.email}`}>Email</a>
+        <a class="label transition-colors hover:text-accent" href={site.github}>GitHub</a>
+        <a class="label transition-colors hover:text-accent" href={site.linkedin}>LinkedIn</a>
+      </nav>
+    </footer>
+  </body>
+</html>
+
+<script>
+  import { startSmoothScroll, prefersReducedMotion, onTeardown } from '../scripts/motion';
+  import gsap from 'gsap';
+
+  startSmoothScroll();
+
+  // Custom cursor. Fine pointers only, and never under reduced motion.
+  const cursor = document.getElementById('cursor');
+  if (cursor && matchMedia('(pointer: fine)').matches && !prefersReducedMotion()) {
+    // Every listener below hangs off one signal, so `astro:before-swap` cannot
+    // leave a detached #cursor being tweened by a live pointermove handler, or
+    // stack a second set of hover listeners on the next navigation.
+    const ac = new AbortController();
+    const { signal } = ac;
+    onTeardown(() => {
+      ac.abort();
+      gsap.killTweensOf(cursor);
+    });
+
+    // Hidden until the pointer first moves. Otherwise it sits parked in the top
+    // left corner of every fresh load, which reads as a stray dot rather than a
+    // cursor.
+    gsap.set(cursor, { autoAlpha: 0 });
+    const x = gsap.quickTo(cursor, 'x', { duration: 0.35, ease: 'power3' });
+    const y = gsap.quickTo(cursor, 'y', { duration: 0.35, ease: 'power3' });
+    let shown = false;
+    window.addEventListener(
+      'pointermove',
+      (e) => {
+        x(e.clientX);
+        y(e.clientY);
+        if (!shown) {
+          shown = true;
+          gsap.to(cursor, { autoAlpha: 1, duration: 0.25 });
+        }
+      },
+      { passive: true, signal },
+    );
+    document.querySelectorAll('a, button').forEach((el) => {
+      el.addEventListener('pointerenter', () => gsap.to(cursor, { scale: 3.5, duration: 0.3 }), {
+        signal,
+      });
+      el.addEventListener('pointerleave', () => gsap.to(cursor, { scale: 1, duration: 0.3 }), {
+        signal,
+      });
+    });
+  } else {
+    cursor?.remove();
+  }
+</script>
