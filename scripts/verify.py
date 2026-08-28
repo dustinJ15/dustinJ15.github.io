@@ -82,7 +82,6 @@ CONTRAST_SWEEP = r"""
     if (!/^(oklab|oklch|color)\(/.test(v)) {
       try { cv.fillStyle = '#000'; cv.fillStyle = v; v = cv.fillStyle; } catch (e) { return null; }
     }
-    const alphaOf = (n, i) => (n.length > i ? (v.includes('/') ? n[i] : n[i]) : 1);
     if (v[0] === '#') {
       return [parseInt(v.slice(1, 3), 16), parseInt(v.slice(3, 5), 16), parseInt(v.slice(5, 7), 16), 1];
     }
@@ -96,8 +95,12 @@ CONTRAST_SWEEP = r"""
       return [...oklabToRgb(n[0], n[1] * Math.cos(h), n[1] * Math.sin(h)), n.length > 3 ? n[3] : 1];
     }
     if (v.startsWith('color(')) {
-      const n = nums(v);
-      return [g2(n[0] <= 0.0031308 ? n[0] : n[0]), 0, 0, 1].length && [
+      // The colour-space keyword has to go before the digits are read, or the
+      // 3 in `display-p3` is picked up as the red channel and every subsequent
+      // channel shifts by one, which fabricates a ratio rather than failing.
+      const n = nums(v.replace(/^color\(\s*[a-z][a-z0-9-]*/i, 'color('));
+      if (n.length < 3) return null;
+      return [
         Math.round(n[0] * 255), Math.round(n[1] * 255), Math.round(n[2] * 255),
         n.length > 3 ? n[3] : 1,
       ];
@@ -361,23 +364,44 @@ def main(paths: list[str]) -> int:
                         page.wait_for_timeout(1400)  # let entrance animations settle
                         tag = f"{path.strip('/').replace('/', '_') or 'index'}-{theme}-{vp_name}"
 
-                        # 1. horizontal scroll
-                        sw, cw = page.evaluate(
-                            "() => [document.documentElement.scrollWidth, document.documentElement.clientWidth]"
-                        )
-                        if sw > cw + 1:
-                            failures.append(f"[h-scroll] {tag}: scrollWidth {sw} > clientWidth {cw}")
+                        # 1. horizontal scroll. Re-measured after the scroll-through
+                        #    below, because a pinned section can introduce overflow
+                        #    that does not exist at the top of the page.
+                        seen: set[str] = set()
+
+                        def measure() -> None:
+                            sw, cw = page.evaluate(
+                                "() => [document.documentElement.scrollWidth, "
+                                "document.documentElement.clientWidth]"
+                            )
+                            if sw > cw + 1:
+                                msg = f"[h-scroll] {tag}: scrollWidth {sw} > clientWidth {cw}"
+                                if msg not in seen:
+                                    seen.add(msg)
+                                    failures.append(msg)
+
+                        def contrast() -> None:
+                            for bad in page.evaluate(CONTRAST_SWEEP):
+                                msg = (
+                                    f"[contrast] {tag}: {bad['ratio']}:1 (need {bad['need']}) "
+                                    f"{bad['size']}px {bad['sel']} \"{bad['text']}\""
+                                )
+                                if msg not in seen:
+                                    seen.add(msg)
+                                    failures.append(msg)
+
+                        measure()
 
                         # 2. console / network
                         for e in errs:
                             failures.append(f"[console] {tag}: {e}")
 
-                        # 3. WCAG AA contrast across every rendered text leaf
-                        for bad in page.evaluate(CONTRAST_SWEEP):
-                            failures.append(
-                                f"[contrast] {tag}: {bad['ratio']}:1 (need {bad['need']}) "
-                                f"{bad['size']}px {bad['sel']} \"{bad['text']}\""
-                            )
+                        # 3. WCAG AA contrast across every rendered text leaf.
+                        #    Run twice: the sweep skips anything under opacity 0.9
+                        #    as mid-animation, so at this point every [data-reveal]
+                        #    below the fold is still at 0 and would never be
+                        #    checked at all. The second pass is after the scroll.
+                        contrast()
 
                         # 4. link crawl, once per path
                         if theme == "dark" and vp_name == "1440":
@@ -436,6 +460,11 @@ def main(paths: list[str]) -> int:
                             failures.append(
                                 f"[wrap] {tag}: display line wrapped to {w['n']} lines: \"{w['text']}\""
                             )
+
+                        # Everything is now in its end state, so sweep the parts of
+                        # the page that were still animating the first time round.
+                        contrast()
+                        measure()
 
                         page.evaluate("() => window.scrollTo(0, 0)")
                         page.wait_for_timeout(250)
