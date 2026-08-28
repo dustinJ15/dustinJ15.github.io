@@ -94,3 +94,19 @@ work. The rail bug is the serious one.
   not yet at its cap; the hero was small on a phone.
 - Not done here: there is no `og:image`. The Jekyll `assets/` directory is not in Astro's
   output during the overlap, so any URL would 404. Ticket 07 or 10 is where that lands.
+
+**Four findings from `/code-review`, all fixed in the same landing:**
+
+- An `overflow: hidden` box is still programmatically scrollable, so the pinned rail could carry
+  a `scrollLeft` from a narrow-width session, or one the browser adds itself to reveal a focused
+  card, and stack it under the scrub transform for the rest of the session. The pinned scope now
+  zeroes `scrollLeft` and holds it there, and removes the holding listener when it reverts.
+  Measured: scroll the rail to 600 at 900px, resize to 1440, `scrollLeft` is 0 and the transform
+  is identity; tab to the last card, still 0; resize back to 700 and the scroller is `auto` again.
+- `teardown()` ran the page cleanups unguarded and ahead of everything else, so one throwing
+  cleanup would skip the GSAP ticker and Lenis teardown and reinstate the per-frame leak fixed
+  in `fa6f9c0`. Each cleanup is isolated now and the runtime teardown sits in a `finally`.
+- The 404 route self-canonicalised to `/404/`, a URL that does not exist. It is `noindex` with
+  no canonical and no `og:url`; every other route is unchanged.
+- The gate could not tell "this link is unreachable" from "this link is not on the page",
+  so a typo in an expectation row read as a layout bug. It now reports the two separately.

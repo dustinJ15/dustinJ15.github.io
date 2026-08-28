@@ -322,7 +322,9 @@ async (hrefs) => {
     await new Promise((r) => setTimeout(r, 150));
     probe();
   }
-  return [...reached];
+  // `found` separately, so a typo in an expectation row reads as a typo and not
+  // as a layout bug.
+  return { reached: [...reached], found: targets.map(([h]) => h) };
 }
 """
 
@@ -535,11 +537,15 @@ def main(paths: list[str]) -> int:
                         # reveals still at opacity 0, and any reveal that never
                         # fires at all would go unnoticed.
                         page.screenshot(path=str(OUT / f"{tag}-hero.png"))
-                        reached = page.evaluate(SCROLL_THROUGH, spec.get("reachable") or [])
+                        walk = page.evaluate(SCROLL_THROUGH, spec.get("reachable") or [])
                         page.wait_for_timeout(700)
 
                         for href in spec.get("reachable") or []:
-                            if href not in reached:
+                            if href not in walk["found"]:
+                                failures.append(
+                                    f"[reach] {tag}: no link to \"{href}\" on the page at all"
+                                )
+                            elif href not in walk["reached"]:
                                 failures.append(
                                     f"[reach] {tag}: link to \"{href}\" is on the page but was "
                                     f"never hit-testable during a full scroll-through"

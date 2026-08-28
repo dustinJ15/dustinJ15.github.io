@@ -7,8 +7,9 @@
  * the footer. Pages own everything between the header and the footer and
  * nothing else.
  *
- * There is no `noindex` here. The preview lane carried one because it was a
- * throwaway route; the real site is meant to be found.
+ * Pages are indexable by default. The preview lane was `noindex` because it was
+ * a throwaway route; the real site is meant to be found. The one exception is
+ * the 404 route, which opts in via the `noindex` prop.
  */
 import '../styles/global.css';
 import { site, nav } from '../data/site';
@@ -20,12 +21,23 @@ interface Props {
   description?: string;
   /** og:type. "website" for the home page, "article" for a case study. */
   ogType?: 'website' | 'article';
+  /**
+   * Keep the page out of search results, and out of the canonical/social block
+   * with it. Only the 404 route wants this: it is served under whatever address
+   * was mistyped, so a self-canonical would point at a URL that does not exist.
+   */
+  noindex?: boolean;
 }
 
-const { title, description = site.description, ogType = 'website' } = Astro.props;
+const {
+  title,
+  description = site.description,
+  ogType = 'website',
+  noindex = false,
+} = Astro.props;
 
 const pageTitle = `${title} · ${site.name}`;
-const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const canonical = noindex ? null : new URL(Astro.url.pathname, Astro.site).href;
 const year = new Date().getFullYear();
 ---
 
@@ -36,7 +48,8 @@ const year = new Date().getFullYear();
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
+    {canonical && <link rel="canonical" href={canonical} />}
+    {noindex && <meta name="robots" content="noindex" />}
     <meta name="author" content={site.name} />
 
     <meta property="og:type" content={ogType} />
@@ -44,7 +57,7 @@ const year = new Date().getFullYear();
     <meta property="og:locale" content="en_US" />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical} />
+    {canonical && <meta property="og:url" content={canonical} />}
 
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content={pageTitle} />

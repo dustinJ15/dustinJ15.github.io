@@ -76,8 +76,24 @@ export function revealOnScroll(selector: string, opts: gsap.TweenVars = {}) {
 
 export function teardown() {
   // Page-registered cleanups run first: they may hold references to nodes GSAP
-  // is about to revert.
-  while (cleanups.length) cleanups.pop()!();
+  // is about to revert. Each one is isolated, and the rest of teardown sits in
+  // a finally, because one throwing cleanup skipping the ticker and Lenis
+  // teardown below reinstates the per-frame leak fixed in fa6f9c0, one more
+  // instance per navigation.
+  try {
+    while (cleanups.length) {
+      try {
+        cleanups.pop()!();
+      } catch (e) {
+        console.warn('teardown: a page cleanup threw', e);
+      }
+    }
+  } finally {
+    tearDownMotionRuntime();
+  }
+}
+
+function tearDownMotionRuntime() {
   while (contexts.length) contexts.pop()!.revert();
   ScrollTrigger.getAll().forEach((t) => t.kill());
   // Both of these are global state on the ticker, not on the Lenis instance.

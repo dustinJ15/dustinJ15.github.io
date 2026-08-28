@@ -217,6 +217,17 @@ const marquee = [...new Set(projects.flatMap((p) => p.data.stack))];
         // matchMedia scope, so reverting restores the scrollable fallback.
         gsap.set(scroller, { overflowX: 'hidden' });
 
+        // Hiding the overflow does not make the box unscrollable, only
+        // unscrollable BY HAND. Any leftover scrollLeft from a narrow-width
+        // session, and any the browser adds itself to reveal a focused card,
+        // stacks on top of the scrub transform and offsets the rail for good.
+        // Pin it to zero for as long as the scrub owns the horizontal axis.
+        scroller.scrollLeft = 0;
+        const hold = () => {
+          if (scroller.scrollLeft !== 0) scroller.scrollLeft = 0;
+        };
+        scroller.addEventListener('scroll', hold);
+
         gsap.to(railTrack, {
           x: () => -distance(),
           ease: 'none',
@@ -231,6 +242,8 @@ const marquee = [...new Set(projects.flatMap((p) => p.data.stack))];
             anticipatePin: 1,
           },
         });
+
+        return () => scroller.removeEventListener('scroll', hold);
       });
     }
   });
