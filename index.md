@@ -28,9 +28,10 @@ professionally for five seasons.
     <div class="work-year">2026</div>
     <div class="work-body">
       <h3><a href="{{ '/projects/quote-generator/' | relative_url }}">Quote Generator</a></h3>
-      <p>Preparing a client quote took hours of manual Excel work. Now an intake form feeds a
-      rules engine that pre-populates a draft, and it's a five-minute review.</p>
-      <p class="work-stack">Flask · SQLite · openpyxl · Playwright · GitHub Actions</p>
+      <p>Preparing a client quote took a specialist about a day and a half of manual Excel work.
+      Now a client intake link feeds a rules engine that pre-populates a draft, and the specialist
+      reviews and decides instead of assembling.</p>
+      <p class="work-stack">Flask · SQLite · openpyxl · Playwright · GitHub Actions · nginx</p>
     </div>
   </div>
 

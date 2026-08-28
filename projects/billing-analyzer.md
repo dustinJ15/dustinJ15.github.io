@@ -54,8 +54,8 @@ copy.
 
 ## Structure
 
-`engine.mjs` (parse, normalize, aggregate) and `charts.js` (data → SVG strings) are both pure —
-no DOM anywhere in them. That's what makes them testable under `node --test` with zero installed
+The engine (parse, normalize, aggregate) and the chart layer (data → SVG strings) are both
+pure — no DOM anywhere in either. That's what makes them testable with zero installed
 dependencies, and it's why the charts are hand-built SVG rather than a charting library: the
 output is a string, and a string is easy to assert against.
 

@@ -45,8 +45,8 @@ to find out you don't actually know what you want.
 
 **A completion claim is not evidence.** An agent will report a task as done, sincerely, and be
 wrong. So the rule in my repos is that a claim of completion without the command output behind it
-doesn't count. That's why there's one command — `check.py` — that runs the whole gate: tests,
-linting, type checking, security scan. Not because a human couldn't run four commands, but
+doesn't count. That's why there's one command that runs the whole gate: tests, linting, type
+checking, security scan. Not because a human couldn't run four commands, but
 because "green" needs a single unambiguous definition that both a person and a machine can reach.
 
 **Two sessions will collide.** On one project, two sessions worked the same checkout for twenty
