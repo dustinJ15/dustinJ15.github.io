@@ -88,7 +88,7 @@ function figureFor(img) {
  */
 const REVEALS = ['h2', 'h3', 'blockquote'];
 
-export default defineHastPlugin({
+const plugin = defineHastPlugin({
   name: 'case-study',
   element: [
     {
@@ -106,3 +106,19 @@ export default defineHastPlugin({
     },
   ],
 });
+
+/**
+ * Scoped to the case studies, and it has to be.
+ *
+ * `data-reveal` is a contract with a page's own motion script: the CSS that
+ * hides it is armed by ANY page calling `withMotion`, so a heading marked here
+ * on a page whose script has no reveal loop would be hidden and never brought
+ * back. Case studies are the only markdown this applies to, and stamping every
+ * markdown document site-wide would hand that trap to whoever writes the next
+ * page as markdown.
+ */
+const CASE_STUDIES = '/src/content/projects/';
+
+export default function caseStudyMarkdown(ctx) {
+  return ctx.fileURL?.pathname.includes(CASE_STUDIES) ? plugin : null;
+}

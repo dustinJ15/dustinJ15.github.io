@@ -61,18 +61,24 @@ const longest = Math.max(...words.map((w) => w.length));
            clip there beheads the tail on "Quote Generator". overflow-clip plus a
            clip margin keeps the mask and lets the tail through. */
         words.map((word, i) => (
-          <span class="block overflow-clip [overflow-clip-margin:0.34em]">
-            <span
-              data-line
-              class:list={[
-                'block',
-                i === words.length - 1 && 'text-accent',
-                i % 2 === 1 && 'lg:pl-[10vw]',
-              ]}
-            >
-              {word}
+          <Fragment>
+            {/* The words are separate block elements, so without this the
+                heading's textContent is "QuoteGenerator" and copying it out of
+                the page loses the space. */}
+            {i > 0 && ' '}
+            <span class="block overflow-clip [overflow-clip-margin:0.34em]">
+              <span
+                data-line
+                class:list={[
+                  'block',
+                  i === words.length - 1 && 'text-accent',
+                  i % 2 === 1 && 'lg:pl-[10vw]',
+                ]}
+              >
+                {word}
+              </span>
             </span>
-          </span>
+          </Fragment>
         ))
       }
     </h1>
@@ -116,21 +122,22 @@ const longest = Math.max(...words.map((w) => w.length));
     </div>
   </section>
 
+  {/* Both halves are optional on the collection, so the band itself is too: a
+      study with neither would otherwise leave an empty stripe of padding. */}
   <!-- ── outcome and metrics, above the argument ───────────────────────── -->
-  <section class="px-(--gutter) py-16 lg:py-24">
-    {outcome && <Outcome before={outcome.before} after={outcome.after} />}
-    {
-      metrics.length > 0 && (
-        <div
-          aria-label="By the numbers"
-          class:list={['flex flex-wrap items-start gap-x-16 gap-y-10', outcome && 'mt-16']}
-        >
-          <p class="label w-full lg:w-auto lg:max-w-24">By the numbers</p>
-          <Metrics metrics={metrics} />
-        </div>
-      )
-    }
-  </section>
+  {
+    (outcome || metrics.length > 0) && (
+      <section class="px-(--gutter) py-16 lg:py-24">
+        {outcome && <Outcome before={outcome.before} after={outcome.after} />}
+        {metrics.length > 0 && (
+          <div class:list={['flex flex-wrap items-start gap-x-16 gap-y-10', outcome && 'mt-16']}>
+            <p class="label w-full lg:w-auto lg:max-w-24">By the numbers</p>
+            <Metrics metrics={metrics} />
+          </div>
+        )}
+      </section>
+    )
+  }
 
   <!-- ── the argument ──────────────────────────────────────────────────── -->
   <div class="prose pb-24">
@@ -159,7 +166,7 @@ const longest = Math.max(...words.map((w) => w.length));
 </BaseLayout>
 
 <script>
-  import { withMotion } from '../../scripts/motion';
+  import { withMotion, revealOnScroll } from '../../scripts/motion';
   import gsap from 'gsap';
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
   import { SplitText } from 'gsap/SplitText';
@@ -189,20 +196,9 @@ const longest = Math.max(...words.map((w) => w.length));
       { fontStretch: '100%', duration: 1.6, ease: 'expo.out' },
     );
 
-    // Everything else is a fade and a short rise, once, on scroll. Nothing is
-    // pinned and nothing scrubs: a reader must never be waiting on the page.
-    gsap.utils.toArray<HTMLElement>('[data-reveal]').forEach((el) => {
-      gsap.fromTo(
-        el,
-        { opacity: 0, y: 28 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.9,
-          ease: 'expo.out',
-          scrollTrigger: { trigger: el, start: 'top 90%', once: true },
-        },
-      );
-    });
+    // Everything else is the shared entrance: a fade and a short rise, once, on
+    // scroll. Nothing is pinned and nothing scrubs, so a reader is never waiting
+    // on the page.
+    revealOnScroll('[data-reveal]');
   });
 </script>

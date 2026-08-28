@@ -15,17 +15,19 @@ const { metrics } = Astro.props;
 
 {
   metrics.length > 0 && (
-    <dl class="flex flex-wrap gap-x-12 gap-y-8">
+    <dl class="flex flex-wrap items-start gap-x-12 gap-y-8">
       {metrics.map((m) => (
-        <div>
-          <dt class="sr-only">{m.label}</dt>
-          <dd>
-            <span class="block font-display text-5xl font-extrabold leading-none tracking-tight text-accent">
-              {m.value}
-            </span>
-            <span class="mt-3 block max-w-40 font-mono text-2xs uppercase leading-relaxed tracking-[0.14em] text-ink-faint">
-              {m.label}
-            </span>
+        /* Reordered rather than duplicated: a <dl> group has to be dt then dd,
+           and the label used to be repeated into an sr-only dt, which read the
+           same words twice. `order` rather than column-reverse, which packs from
+           the bottom and so drops the value of a one-line label below the value
+           of a two-line one. */
+        <div class="flex max-w-40 flex-col">
+          <dt class="order-2 mt-3 font-mono text-2xs uppercase leading-relaxed tracking-[0.14em] text-ink-faint">
+            {m.label}
+          </dt>
+          <dd class="order-1 font-display text-5xl font-extrabold leading-none tracking-tight text-accent">
+            {m.value}
           </dd>
         </div>
       ))}

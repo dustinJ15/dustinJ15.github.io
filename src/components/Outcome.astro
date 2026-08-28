@@ -26,7 +26,9 @@ const { before, after } = Astro.props;
     </p>
   </div>
   <div class="relative bg-surface p-7 lg:p-10">
-    <p class="font-mono text-xs uppercase tracking-[0.14em] text-accent">After</p>
+    {/* Nested rather than `label text-accent`: both are utilities, so which
+        colour wins would be decided by the order Tailwind emits them in. */}
+    <p class="label"><span class="text-accent">After</span></p>
     <p class="mt-5 font-display text-2xl font-semibold leading-[1.2] text-ink">
       {after}
     </p>

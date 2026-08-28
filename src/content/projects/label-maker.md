@@ -33,6 +33,8 @@ running packet numbers and sequential barcodes, each from an approved template.
 That expansion was happening by hand. Someone would take a QC'd single-patient template, copy the
 rows, and increment the numbers, once per patient, once per study.
 
+> A file you can email is a tool people can start using the same afternoon.
+
 ## One file, no install
 
 The whole product is a single `.html` file. You double-click it, or a coworker sends it over
@@ -44,8 +46,6 @@ an approval process, and a login — three places for adoption to die. A file yo
 tool people can start using the same afternoon.
 
 ![The tool's opening screen: four cards, one per label type, each with a title and a one-line description.](../../../assets/img/label-maker-makers.png "The whole tool is this one file. Four makers, no install, no login, nothing uploaded. Screenshots on this page are from a demo run with an invented study.")
-
-> A file you can email is a tool people can start using the same afternoon.
 
 ## Rewriting Excel and Word without breaking them
 
@@ -80,6 +80,8 @@ the thing that ships has no dependencies at all.
 
 ![A barcode label sheet form with a drop area for an .xlsx template, a patient packet prefix, starting number and count, and a barcode prefix and starting number.](../../../assets/img/label-maker-barcode.png "The Excel maker takes the QC'd single-patient template as its input. Rows per patient are read from the file rather than configured, and the leading zeros you type set the number width.")
 
+> The paperwork is unfamiliar. The idea that a claim needs evidence behind it is not.
+
 ## The part I didn't expect to be doing
 
 The tool is used in a regulated environment, which means it needed a formal computer-system
@@ -92,8 +94,6 @@ I had no regulatory background going in. The useful surprise was how much of it 
 engineering discipline written in a different dialect — a requirement you can test, a risk you
 can name, and evidence that the test actually ran. The paperwork is unfamiliar. The idea that a
 claim needs evidence behind it is not.
-
-> The paperwork is unfamiliar. The idea that a claim needs evidence behind it is not.
 
 <p class="note">
 Built for an employer, so the code and the templates stay private. Everything here describes

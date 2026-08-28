@@ -290,7 +290,7 @@
 
 /* Screenshots break out of the measure and sit in dark browser chrome, so a
    light UI capture reads as a pictured window on a near-black page rather than
-   as a hole punched in it. Built by src/plugins/rehype-case-study.mjs. */
+   as a hole punched in it. Built by src/plugins/case-study-markdown.mjs. */
 .prose > figure.shot {
   grid-column: wide;
   margin-block: 3em;
