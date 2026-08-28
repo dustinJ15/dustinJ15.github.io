@@ -4,17 +4,24 @@ Verification gate for the site. Serves the built `dist/` and drives it with
 Playwright. This is the objective floor a ticket must clear; it does not judge
 whether the design is good.
 
-Checks, per page x viewport x theme:
+Universal checks, per route x viewport x theme:
   1. No horizontal scroll  (scrollWidth <= clientWidth). Measured, never eyeballed.
   2. No console errors, no failed requests.
-  3. Body copy contrast >= 4.5:1.
+  3. WCAG AA contrast on every rendered text leaf, at the threshold for its size
+     and weight.
   4. Renders with prefers-reduced-motion forced: content present, not blank.
+  5. Renders with JavaScript disabled: text present, nothing stuck at opacity 0.
+  6. Em-dashes in rendered text. ADVISORY: printed, does not fail. Ticket 08
+     removes the existing ones and flips this to a failure.
 Plus a link crawl from the entry pages.
+
+Per-route checks come from EXPECTATIONS below: each route declares what must be
+true of its own rendered output. Adding a page means adding its row.
 
 Screenshots land in .verify/ (gitignored) for a human to look at.
 
-Run:  npm run verify            (all preview lanes)
-      npm run verify -- /about/ (specific paths)
+Run:  npm run verify              (type check, build, then every route in the table)
+      npm run verify -- /about/   (same, swept against one path for a fast loop)
 """
 from __future__ import annotations
 
@@ -160,6 +167,164 @@ PENDING = {"/process/", "/about/", "/projects/quote-generator/", "/projects/labe
            "/projects/billing-analyzer/", "/projects/rental-pipeline/"}
 
 
+# --------------------------------------------------------------------------
+# Per-route expectations.
+#
+# A row states what must be true of the page a visitor RECEIVES: heading levels,
+# named sections, figures, alt text, links, copy. A row never names a class, a
+# component or a file, so the table survives a redesign and still catches a
+# regression. Every ticket adds its route's row and is finished when the gate
+# passes with that row in place.
+#
+# Keys, all optional:
+#   headings   {"h1": 1, ...}  exact count of each heading level that is listed
+#   ids        ["main", ...]   element ids that must exist (fragment targets and
+#                              named sections)
+#   figures    int             exact count of <figure>
+#   alt        True            every <img> carries non-empty alt text, unless it
+#                              is explicitly decorative (aria-hidden or
+#                              role="presentation")
+#   links      ["/about/"]     internal links that must be present on the page,
+#                              and must resolve unless still listed in PENDING
+#   text       ["substring"]   copy that must appear in the rendered text, matched
+#                              case- and whitespace-insensitively so that a
+#                              text-transform or a reflow is not a copy regression
+#   min_text   int             floor on rendered text length, used by the no-JS
+#                              check (default MIN_TEXT)
+MIN_TEXT = 200
+
+EXPECTATIONS: dict[str, dict] = {
+    # The Obys preview lane, which is the only route built so far. Ticket 02
+    # replaces this row with one for "/".
+    "/preview/2/": {
+        "headings": {"h1": 1, "h2": 2, "h3": 4},
+        "ids": ["main", "marquee", "rail"],
+        "figures": 0,
+        "alt": True,
+        "links": [
+            "/about/",
+            "/process/",
+            "/projects/quote-generator/",
+            "/projects/label-maker/",
+            "/projects/billing-analyzer/",
+            "/projects/rental-pipeline/",
+        ],
+        "text": [
+            "Dustin Jones",
+            "Available now for part-time and contract work",
+            "Sixteen parsers into one schema",
+        ],
+    },
+}
+
+
+STRUCTURE_SWEEP = r"""
+() => {
+  const count = (s) => document.querySelectorAll(s).length;
+  const decorative = (el) =>
+    el.closest('[aria-hidden="true"]') !== null || el.getAttribute('role') === 'presentation';
+  return {
+    headings: Object.fromEntries(
+      ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].map((h) => [h, count(h)])
+    ),
+    headingText: Object.fromEntries(
+      ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].map((h) => [
+        h,
+        [...document.querySelectorAll(h)].map((e) => (e.textContent || '').trim().slice(0, 48)),
+      ])
+    ),
+    ids: [...document.querySelectorAll('[id]')].map((e) => e.id),
+    figures: count('figure'),
+    badAlt: [...document.querySelectorAll('img')]
+      .filter((i) => !decorative(i) && !(i.getAttribute('alt') || '').trim())
+      .map((i) => (i.getAttribute('src') || '(no src)').split('/').pop()),
+    links: [...document.querySelectorAll('a[href]')].map((a) => a.getAttribute('href')),
+    text: document.body.innerText,
+  };
+}
+"""
+
+# Runs in a context with JavaScript disabled. Playwright's own evaluation still
+# works there; the page's scripts do not, which is the point.
+NOJS_SWEEP = r"""
+() => {
+  // opacity does not inherit as a computed value, so an opacity:0 wrapper leaves
+  // its children reading 1. Multiply up the tree to get what is actually seen.
+  const effective = (el) => {
+    let o = 1;
+    for (let n = el; n && n !== document.documentElement; n = n.parentElement) {
+      o *= parseFloat(getComputedStyle(n).opacity);
+    }
+    return o;
+  };
+  const invisible = [];
+  document.querySelectorAll('body *').forEach((el) => {
+    const own = [...el.childNodes].filter((n) => n.nodeType === 3)
+      .map((n) => n.textContent.trim()).join('');
+    if (!own) return;
+    const r = el.getBoundingClientRect();
+    if (r.width < 2 || r.height < 2) return;   // also catches display:none subtrees
+    if (effective(el) >= 0.05) return;
+    invisible.push(own.slice(0, 40));
+  });
+  return { text: document.body.innerText, invisible: invisible.slice(0, 6) };
+}
+"""
+
+
+def em_dashes(text: str, limit: int = 5) -> list[str]:
+    """Every em-dash in rendered text, quoted with enough context to find it."""
+    out: list[str] = []
+    for i, ch in enumerate(text):
+        if ch == "\u2014":
+            out.append(" ".join(text[max(0, i - 30):i + 31].split()))
+            if len(out) == limit:
+                break
+    return out
+
+
+def normalize(text: str) -> str:
+    """Fold case and collapse whitespace, so a text-transform or a line break in
+    the rendered output is not read as missing copy."""
+    return " ".join(text.split()).casefold()
+
+
+def check_structure(path: str, spec: dict, got: dict) -> list[str]:
+    """Compare one route's declared expectations against what it rendered."""
+    bad: list[str] = []
+
+    def fail(what: str, expected, actual) -> None:
+        bad.append(f"[expect] {path}: {what}: expected {expected}, found {actual}")
+
+    for level, want in (spec.get("headings") or {}).items():
+        have = got["headings"].get(level, 0)
+        if have != want:
+            fail(f"{level} count", want, f"{have} {got['headingText'].get(level, [])}")
+
+    ids = set(got["ids"])
+    for wanted in spec.get("ids") or []:
+        if wanted not in ids:
+            fail(f'element id "{wanted}"', "present", f"absent (ids: {sorted(ids)})")
+
+    if "figures" in spec and got["figures"] != spec["figures"]:
+        fail("<figure> count", spec["figures"], got["figures"])
+
+    if spec.get("alt") and got["badAlt"]:
+        fail("non-empty alt on every image", "all", f"missing on {got['badAlt']}")
+
+    hrefs = set(got["links"])
+    for wanted in spec.get("links") or []:
+        if wanted not in hrefs:
+            fail(f'link to "{wanted}"', "present", "no such href on the page")
+
+    rendered = normalize(got["text"])
+    for wanted in spec.get("text") or []:
+        if normalize(wanted) not in rendered:
+            fail(f'copy "{wanted}"', "present in rendered text", "absent")
+
+    return bad
+
+
 def main(paths: list[str]) -> int:
     if not DIST.exists():
         print("dist/ not found. Run `npm run build` first.", file=sys.stderr)
@@ -170,6 +335,8 @@ def main(paths: list[str]) -> int:
     failures: list[str] = []
     checked_links: set[str] = set()
     pending_hits: set[str] = set()
+    advisories: list[str] = []
+    resolved: dict[str, int] = {}
 
     try:
         with sync_playwright() as p:
@@ -290,6 +457,48 @@ def main(paths: list[str]) -> int:
                     failures.append(f"[reduced-motion] {path}: {hidden} element(s) stuck invisible")
                 page.screenshot(path=str(OUT / f"{path.strip('/').replace('/','_') or 'index'}-reducedmotion.png"), full_page=True)
                 ctx.close()
+
+                # 6. per-route expectations, plus the em-dash advisory. Both read
+                #    the settled page once at the widest viewport; structure and
+                #    copy do not vary by width.
+                spec = EXPECTATIONS.get(path, {})
+                ctx = browser.new_context(viewport={"width": 1440, "height": 900})
+                page = ctx.new_page()
+                page.goto(base + path, wait_until="load")
+                page.wait_for_timeout(1400)
+                got = page.evaluate(STRUCTURE_SWEEP)
+                failures.extend(check_structure(path, spec, got))
+                for href in spec.get("links") or []:
+                    if href not in resolved:
+                        resolved[href] = ctx.request.get(base + href).status
+                    if resolved[href] >= 400:
+                        if href in PENDING:
+                            pending_hits.add(href)
+                        else:
+                            failures.append(
+                                f"[expect] {path}: link to \"{href}\": expected to resolve, "
+                                f"found HTTP {resolved[href]}"
+                            )
+                for quote in em_dashes(got["text"]):
+                    advisories.append(f"[em-dash] {path}: ...{quote}...")
+                ctx.close()
+
+                # 7. no JavaScript. A failed script must never produce a blank page.
+                ctx = browser.new_context(
+                    viewport={"width": 1440, "height": 900}, java_script_enabled=False
+                )
+                page = ctx.new_page()
+                page.goto(base + path, wait_until="load")
+                nojs = page.evaluate(NOJS_SWEEP)
+                floor = spec.get("min_text", MIN_TEXT)
+                if len(nojs["text"].strip()) < floor:
+                    failures.append(
+                        f"[no-js] {path}: rendered {len(nojs['text'].strip())} chars of text, "
+                        f"expected at least {floor}"
+                    )
+                for t in nojs["invisible"]:
+                    failures.append(f"[no-js] {path}: text stuck invisible without JS: \"{t}\"")
+                ctx.close()
             browser.close()
     finally:
         httpd.shutdown()
@@ -299,6 +508,10 @@ def main(paths: list[str]) -> int:
         print("\nnot yet migrated (expected during the Jekyll overlap):")
         for h in sorted(pending_hits):
             print("  " + h)
+    if advisories:
+        print(f"\nadvisory, not failing ({len(advisories)}):")
+        for a in advisories:
+            print("  " + a)
     if failures:
         print(f"\nFAIL ({len(failures)}):")
         for f in failures:
@@ -309,5 +522,10 @@ def main(paths: list[str]) -> int:
 
 
 if __name__ == "__main__":
-    args = sys.argv[1:] or ["/preview/1/", "/preview/2/", "/preview/3/"]
+    # The route list is the expectations table. Explicit paths still work, for a
+    # fast single-route loop; a path with no row gets the universal checks only.
+    args = sys.argv[1:] or list(EXPECTATIONS)
+    for a in args:
+        if a not in EXPECTATIONS:
+            print(f"note: {a} has no row in EXPECTATIONS; universal checks only.")
     raise SystemExit(main(args))

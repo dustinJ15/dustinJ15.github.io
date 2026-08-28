@@ -40,23 +40,46 @@ quote-generator page admits an approach that failed and explains why the dumber 
 ## Commands
 
 ```bash
-# Build. Ruby 4.0 cannot install Jekyll locally (http_parser.rb won't compile), so use podman:
-podman run --rm -v "$PWD":/srv/jekyll:Z -w /srv/jekyll docker.io/jekyll/jekyll:4 jekyll build
+# The Astro site
+npm run dev                  # dev server
+npm run build                # build to dist/
+npm run verify               # THE GATE: astro check, then build, then the sweep
+npm run verify -- /about/    # same, swept against one route for a fast loop
 
-# Preview the built output
+# The Jekyll site, until ticket 10 deletes it. Ruby 4.0 cannot install Jekyll
+# locally (http_parser.rb won't compile), so use podman:
+podman run --rm -v "$PWD":/srv/jekyll:Z -w /srv/jekyll docker.io/jekyll/jekyll:4 jekyll build
 cd _site && python3 -m http.server 8899
 
-# Screen (from the repo root)
+# Screen. From the repo root, on tracked plus untracked-not-ignored files only:
+# node_modules matches a screened token hundreds of times and is noise.
 ../career-hub/scripts/screen.sh .
 ```
 
-There is no test suite. The QA loop is: build, screen, grep the built `_site/` by hand (it is
-excluded from the screen by design), click every link, and check 375px and 1440px for horizontal
-scroll. Measure that rather than eyeballing it — compare `document.documentElement.scrollWidth`
-against `clientWidth` on every page at both widths.
+**`npm run verify` is the one command that says whether the site is broken.** It type-checks,
+builds, serves `dist/` and drives every route with Playwright, and exits non-zero if any of the
+three stages fails. It runs, per route:
 
-There is a Playwright in `~/sync/code/work/quote-generator/.venv/bin/python` if you need to drive
-a browser. Nothing is installed system-wide.
+- The universal checks. No horizontal scroll, measured as `scrollWidth` against `clientWidth`.
+  No console errors or failed requests. WCAG AA contrast on every rendered text leaf at the
+  threshold for its size and weight. Internal links resolve. Reduced motion leaves nothing
+  invisible. After a full scroll-through every reveal has fired and no display line has wrapped.
+  The page renders with JavaScript disabled: text present, nothing stuck at opacity 0.
+- The per-route expectations, from the `EXPECTATIONS` table at the top of `scripts/verify.py`.
+  A row states what must be true of the page a visitor receives: heading counts, named sections,
+  figure count, non-empty alt text, links that must be present, copy that must appear. **A row
+  never names a class, a component or a file**, so the table survives a redesign and still catches
+  a regression. Adding a page means adding its row; a ticket is finished when the gate passes
+  with its row in place.
+- The em-dash advisory. Printed, not failing, because the existing copy still carries them.
+  Ticket 08 removes them and flips it to a failure.
+
+The gate is a floor, not a judge. It cannot tell you whether the design is good, and the screen
+script cannot read a PNG, so the screenshots it writes to `.verify/` still have to be opened and
+looked at.
+
+Playwright lives in `~/sync/code/work/quote-generator/.venv/bin/python`; `npm run verify` calls
+it by that path. Nothing is installed system-wide.
 
 ## Design direction: the reference sites
 
