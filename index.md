@@ -3,9 +3,20 @@ layout: default
 title: Work
 ---
 
-<p class="intro">
-I build full-stack applications and the pipelines that keep them reliable.
-</p>
+<div class="hero">
+  <img class="portrait"
+       src="{{ '/assets/img/dustin-jones.jpg' | relative_url }}"
+       srcset="{{ '/assets/img/dustin-jones-500.jpg' | relative_url }} 500w, {{ '/assets/img/dustin-jones.jpg' | relative_url }} 1000w"
+       sizes="(max-width: 36rem) 7rem, 8.5rem"
+       alt="Dustin Jones" width="1000" height="1190">
+  <div class="hero-text">
+    <p class="intro">I build full-stack applications and the pipelines that keep them reliable.</p>
+    <p class="availability">
+      <strong>Available now</strong> for part-time and contract work, Denver or remote.
+      <a href="mailto:DBJ2297@gmail.com">DBJ2297@gmail.com</a>
+    </p>
+  </div>
+</div>
 
 Last summer I shipped three production tools in eight weeks at Frontage Laboratories, a clinical
 CRO. The largest replaced a day-and-a-half manual quoting process: intake form, rules engine,
@@ -14,11 +25,6 @@ Excel and PDF at the end. Tested, containerized, gated behind CI.
 I'm finishing a B.S. in Computer Science at MSU Denver, 4.0 GPA, December 2027. Before this I
 built ETL pipelines for a property management firm, and before *that* I taught skiing
 professionally for five seasons.
-
-<p class="availability">
-<strong>Available now</strong> for part-time and contract work, Denver or remote.
-<a href="mailto:DBJ2297@gmail.com">DBJ2297@gmail.com</a>
-</p>
 
 ## Selected work
 
