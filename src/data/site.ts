@@ -3,7 +3,7 @@
  * comparison is a design comparison and not a copy comparison.
  *
  * Copy here is ported verbatim from the Jekyll index.md. The editorial pass
- * (ticket 9) rewrites it; do not pre-empt that here.
+ * (ticket 08) rewrites it; do not pre-empt that here.
  */
 
 export const site = {

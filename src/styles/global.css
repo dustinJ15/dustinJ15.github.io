@@ -10,7 +10,11 @@
 
 /* Dark is the default. `dark:` exists as an escape hatch, but the semantic tokens
    below are the intended mechanism: they swap, so components never branch on theme. */
-@custom-variant dark (&:where(:root:not([data-theme="light"])) *, &:where(:root:not([data-theme="light"])));
+/* The `*` belongs INSIDE the :where(). Outside it, Tailwind emits
+   `.dark\:x:where(:root:not([data-theme=light])) *`, which requires the element
+   carrying the utility to itself be :root, so every `dark:` utility on a normal
+   element silently does nothing. */
+@custom-variant dark (&:where(:root:not([data-theme="light"]) *), &:where(:root:not([data-theme="light"])));
 
 /* ---------------------------------------------------------------------------
    THE TOKEN CONTRACT

@@ -2,7 +2,7 @@
 #
 # DELIBERATELY manual-only for now. The Jekyll site is still the source of truth
 # for the live pages, and a push-triggered run would replace it the first time
-# anything lands on main. Ticket 11 (delete Jekyll) is what adds:
+# anything lands on main. Ticket 10 (delete Jekyll) is what adds:
 #
 #   push:
 #     branches: [main]

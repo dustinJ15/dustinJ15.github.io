@@ -49,3 +49,18 @@ moment this lands.
 - [x] Em-dashes in rendered text are reported per route as advisory, with the offending text.
 - [x] The existing universal checks and the screenshot output are unchanged in behaviour.
 - [x] The gate passes on the current tree with a row for the existing preview lane.
+
+**Landed 2026-08-28**, commits `bb0e3ec` and `5677cb8`. Two things went beyond what is written
+above, both found by `/code-review` and both defects in the gate itself:
+
+- The contrast sweep skips anything under opacity 0.9 as mid-animation, and it ran before the
+  scroll-through that fires the reveals, so animating content was never checked at all. It now
+  runs a second time once the page has settled, deduped against the first pass. Measured on
+  `/preview/2/` at 1440: 169 text leaves checked before the scroll, 173 after. The horizontal
+  scroll measurement got the same second pass, because a pinned section can introduce overflow
+  that does not exist at the top of the page. This does mean the last acceptance criterion above,
+  "unchanged in behaviour", is true of the screenshot output but not of those two checks, which
+  are now stricter. Nothing was being masked: the gate still passed on the tree as it stood.
+- The `color()` branch of the contrast parser read digits from the whole string, so the `3` in
+  `display-p3` became the red channel and every channel shifted by one, fabricating a ratio
+  rather than failing. The colour-space keyword is stripped before the digits are read.

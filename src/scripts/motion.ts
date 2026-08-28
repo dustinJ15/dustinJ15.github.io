@@ -21,12 +21,14 @@ export const prefersReducedMotion = () =>
 let lenis: Lenis | null = null;
 let ctx: gsap.Context | null = null;
 
+/** Module scope, not a local, so teardown can actually remove it again. */
+const tick = (time: number) => lenis?.raf(time * 1000);
+
 /** Smooth scroll, driven by GSAP's ticker so ScrollTrigger stays in sync. */
 export function startSmoothScroll() {
   if (prefersReducedMotion() || lenis) return null;
   lenis = new Lenis({ duration: 1.05, smoothWheel: true });
   lenis.on('scroll', ScrollTrigger.update);
-  const tick = (time: number) => lenis?.raf(time * 1000);
   gsap.ticker.add(tick);
   gsap.ticker.lagSmoothing(0);
   return lenis;
@@ -64,6 +66,11 @@ export function teardown() {
   ctx?.revert();
   ctx = null;
   ScrollTrigger.getAll().forEach((t) => t.kill());
+  // Both of these are global state on the ticker, not on the Lenis instance.
+  // Destroying Lenis without removing them leaves a callback running on every
+  // frame forever, one more per navigation once view transitions are on.
+  gsap.ticker.remove(tick);
+  gsap.ticker.lagSmoothing(500, 33);
   lenis?.destroy();
   lenis = null;
   delete document.documentElement.dataset.motion;

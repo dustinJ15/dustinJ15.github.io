@@ -22,6 +22,29 @@ stays where it is and keeps building; this ticket does not touch it.
 Copy in this ticket is the ported Jekyll copy. The editorial pass is ticket 08 and this ticket
 does not pre-empt it, beyond removing an em-dash if the port introduces one.
 
+**Carried over from the ticket 01 review.** These are live bugs in the preview lane that this
+ticket replaces, found by `/code-review` on 2026-08-28. They are recorded here because the code
+that carries them is the code this ticket rewrites, so fixing them separately would be wasted
+work. The rail bug is the serious one.
+
+- **Three of the four case studies are unreachable on a phone.** The rail only becomes
+  horizontal when `window.innerWidth >= 768`. Below that the track is `w-max` inside an
+  `overflow-hidden` parent with no `overflow-x: auto` and no transform. Measured at 375px:
+  track `scrollWidth` 1282, cards at x `20..313`, `337..629`, `653..946`, `970..1262`, so cards
+  two through four are clipped with no way to reach them. Note that the gate did not catch this:
+  `overflow-hidden` means there is no document-level horizontal scroll, and a `links` expectation
+  only checks that the href is in the DOM. The row for `/` needs an expectation that every work
+  entry is actually reachable, not merely present.
+- **The rail's scroll distance goes negative on a very wide screen.** It is computed as
+  `railTrack.scrollWidth - window.innerWidth + 64`, which is 475 at 1440 with four cards but
+  turns negative above roughly 1915px, handing ScrollTrigger an end before its start on a pinned
+  section. The gate tops out at 1440 and will not see it.
+- **The custom cursor's listeners are never torn down.** The `pointermove` listener on `window`
+  and the per-anchor `pointerenter`/`pointerleave` listeners are not registered with
+  `motion.ts`'s teardown, so after an `astro:before-swap` the detached `#cursor` node keeps being
+  tweened and a second set of listeners is added. The equivalent leak in `motion.ts` itself was
+  fixed on 2026-08-28; this one was left because the code moves in this ticket.
+
 **Blocked by:** 01.
 
 **Status:** ready-for-agent
@@ -31,7 +54,12 @@ does not pre-empt it, beyond removing an em-dash if the port introduces one.
       is present. No display line wraps at 375, 768 or 1440.
 - [ ] All four projects appear with year and stack, each linking to its case study, and their
       metadata is read from the content collection rather than repeated in the page.
-- [ ] On a narrow screen the work rail scrolls normally and nothing is pinned or scrub-jacked.
+- [ ] On a narrow screen the work rail scrolls normally and nothing is pinned or scrub-jacked,
+      and all four entries are reachable at 375px. The gate's row for `/` asserts reachability,
+      not just that the links are in the DOM.
+- [ ] The rail's scroll distance is never negative, at any viewport width the design supports.
+- [ ] Every listener the page adds, the custom cursor's included, is removed on
+      `astro:before-swap`.
 - [ ] Availability and a contact route are visible without hunting.
 - [ ] The base layout gives every page its own title and description, a canonical URL and
       social metadata, and no page is marked noindex.
