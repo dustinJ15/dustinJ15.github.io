@@ -4,14 +4,14 @@ title: Work
 ---
 
 <p class="intro">
-I build the tool that deletes the spreadsheet.
+I build full-stack applications and the pipelines that keep them reliable.
 </p>
 
-Most operations teams have a workbook. One person unofficially owns it, it eats hours every
-week, and everything stops when they go on vacation. Last summer, at Frontage Laboratories, a
-clinical CRO, I replaced three of them.
+Last summer I shipped three production tools in eight weeks at Frontage Laboratories, a clinical
+CRO. The largest replaced a day-and-a-half manual quoting process: intake form, rules engine,
+Excel and PDF at the end. Tested, containerized, gated behind CI.
 
-I'm finishing a B.S. in Computer Science at MSU Denver — 4.0 GPA, December 2027. Before this I
+I'm finishing a B.S. in Computer Science at MSU Denver, 4.0 GPA, December 2027. Before this I
 built ETL pipelines for a property management firm, and before *that* I taught skiing
 professionally for five seasons.
 
@@ -28,9 +28,9 @@ professionally for five seasons.
     <div class="work-year">2026</div>
     <div class="work-body">
       <h3><a href="{{ '/projects/quote-generator/' | relative_url }}">Quote Generator</a></h3>
-      <p>Preparing a client quote took a specialist about a day and a half of manual Excel work.
-      Now a client intake link feeds a rules engine that pre-populates a draft, and the specialist
-      reviews and decides instead of assembling.</p>
+      <p>Quoting a clinical study meant a thirty-email thread, then a specialist building a
+      pricing workbook by hand. Now a single-use client intake link feeds a rules engine that
+      pre-populates the draft, and the specialist reviews and decides instead of assembling.</p>
       <p class="work-stack">Flask · SQLite · openpyxl · Playwright · GitHub Actions · nginx</p>
     </div>
   </div>
