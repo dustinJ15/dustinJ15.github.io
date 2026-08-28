@@ -2,7 +2,7 @@
 
 Personal site. Jekyll, hand-written CSS, no theme and no framework.
 
-**Not deployed yet.** See `../career-hub/TODO.md` for the gated publish steps.
+**Not deployed yet.** See `../career-hub/workflow/STATE.md` for the gated publish steps.
 
 ## Local preview
 
@@ -18,7 +18,7 @@ bundle exec jekyll serve
 _config.yml            site config; no theme
 _layouts/              default.html, project.html
 assets/css/main.css    all styling, hand-written
-assets/img/            screenshots (synthetic data only)
+assets/img/            screenshots (synthetic data only) — currently empty
 index.md               landing page
 projects/*.md          one case study per project
 process.md             the agentic development workflow
@@ -33,8 +33,10 @@ in `index.md`.
 
 ## Before publishing anything
 
-The three tools described here were built for an employer. No pricing, internal identifiers,
-hostnames, IPs, or coworker names may appear on the site or inside an image.
+Three of the four case studies describe tools built at Frontage Laboratories. Naming the
+employer is fine; describing their internals is not. No pricing or margin, internal identifiers,
+study IDs, client names, hostnames, IPs, or coworker names may appear on the site or inside an
+image. `rental-pipeline` is separate work with its own client data — same rules apply.
 
 Run the screening script before every publish — it lives outside this repo on purpose, so the
 list of strings being screened for is never itself published:
@@ -43,5 +45,6 @@ list of strings being screened for is never itself published:
 ../career-hub/scripts/screen.sh .
 ```
 
-Two pages carry visible **DRAFT** notes and must not ship until rewritten from a `/grill-me`
-session: `about.md` and `projects/quote-generator.md`.
+One page carries a visible **DRAFT** note and must not ship until rewritten from a `/grill-me`
+session: `about.md`. (`projects/quote-generator.md` was rewritten in `feb96b5`; its DRAFT notice
+and every `[GRILL]` marker are gone.)
