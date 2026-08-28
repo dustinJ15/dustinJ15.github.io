@@ -8,8 +8,8 @@ I build the tool that deletes the spreadsheet.
 </p>
 
 Most operations teams have a workbook. One person unofficially owns it, it eats hours every
-week, and everything stops when they go on vacation. Last summer, at a clinical contract
-research lab, I replaced three of them.
+week, and everything stops when they go on vacation. Last summer, at Frontage Laboratories, a
+clinical CRO, I replaced three of them.
 
 I'm finishing a B.S. in Computer Science at MSU Denver — 4.0 GPA, December 2027. Before this I
 built ETL pipelines for a property management firm, and before *that* I taught skiing

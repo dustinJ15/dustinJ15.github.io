@@ -161,8 +161,16 @@ blockquote {
 }
 blockquote p:last-child { margin-bottom: 0; }
 
-figure { margin: 2rem 0; }
+/* Figures break out past the measure: a screenshot at 34rem is unreadable.
+   Capped so they never exceed the viewport, and collapse to the measure on
+   narrow screens. */
+figure {
+  margin: 2.5rem 0;
+  width: min(52rem, 100vw - (2 * var(--gutter)));
+  margin-left: calc(50% - min(26rem, 50vw - var(--gutter)));
+}
 img { max-width: 100%; height: auto; display: block; border: 1px solid var(--rule); }
+figure img { background: #fff; }
 figcaption {
   font-family: var(--sans);
   font-size: 0.75rem;

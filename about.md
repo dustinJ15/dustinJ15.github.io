@@ -6,31 +6,23 @@ permalink: /about/
 
 # About
 
-<p class="note">
-<strong>DRAFT — not ready to publish.</strong> This page is the ski-instructor-to-CS pivot, and
-it must not be ghost-written. A generic career-change narrative ("it taught me resilience") is
-worse than no page at all. Run <code>/grill-me</code> on it, then write from the transcript.
-Facts below are placeholders and verified details only. Delete this note before going live.
-</p>
+I'm a software engineer in Denver, finishing a B.S. in Computer Science at MSU Denver with a 4.0
+GPA and a minor in mathematics, graduating December 2027. I started this degree years ago,
+stopped, and came back to it. In between I taught skiing professionally for Vail Resorts for five
+seasons, in Colorado and in Australia.
 
-I'm a software engineer in Denver, finishing a B.S. in Computer Science at MSU Denver — 4.0 GPA,
-Minor in Mathematics, graduating December 2027.
+Ski school runs on requests, priority lists, and who is visible to the people handing out work, so
+I turned up to my first software job already able to read an office. When I built the quoting
+system at Frontage Laboratories last summer, I modeled it on the office politics as much as on the
+requirements: who got to see what, how a task arrived on someone's screen, what people did and did
+not know about what other people were doing. Its six roles are a model of the organization more
+than they are a security feature.
 
-Before this I spent five seasons teaching skiing professionally for Vail Resorts, in Colorado and
-in Australia. I've also taught hang gliding and guided ziplines. I'm an Eagle Scout.
-
-**[GRILL — the real content goes here]**
-
-Questions to answer, in his own words:
-
-- What actually made you switch? (Not the polished version — the real one.)
-- What specifically transfers from teaching to engineering? The current hypothesis is that
-  teaching is diagnostic work: figuring out what someone is *actually* doing rather than what
-  they say they're doing, then adjusting until it lands — which is most of the job when replacing
-  a manual process someone has run for years. Is that true, or is it just a tidy story?
-- What was hard about going back to school? What's the part people don't ask about?
-- Why do you keep building tools for other people's problems rather than your own?
-- What do you want to be doing in five years?
+The strange part of the shift is that skiing was legible to anyone watching and programming is
+not. *The Pragmatic Programmer* opens by saying most programmers have trouble explaining what they
+do, and that has been the real adjustment. What I want is to keep building things that make other
+people's days easier, and to end up a senior developer running the kind of large projects people
+depend on daily.
 
 <p class="availability">
 <strong>Available now</strong> for part-time and contract work, Denver or remote.
