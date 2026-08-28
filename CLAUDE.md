@@ -58,7 +58,33 @@ against `clientWidth` on every page at both widths.
 There is a Playwright in `~/sync/code/work/quote-generator/.venv/bin/python` if you need to drive
 a browser. Nothing is installed system-wide.
 
+## Design direction: the reference sites
+
+**Chosen 2026-08-28 from three working previews.** The direction is the **Obys lane**. If you are
+an agent picking this up cold, look at these before touching the design. They are the intent.
+
+| Reference | What we took from it |
+| --- | --- |
+| **obys.agency** | The whole direction. Oversized display type, asymmetric layout, aggressive scale contrast, scroll choreography, custom cursor, marquee strips, near-black ground with a single acid accent. |
+| **brittanychiang.com** | The runner-up (built as preview P1, deleted). Numbered work entries and mono-set metadata survive from it into the chosen lane. |
+
+Obys uses custom licensed typefaces we cannot ship. **Bricolage Grotesque Variable** is the
+deliberate stand-in: it carries both a width and a weight axis, which is what makes the hero
+settle from condensed to full width on load. Do not swap it for a static face without
+replacing that animation.
+
+Two directions were built and deleted: P1 (brittanychiang lane, deep navy and teal) and P3
+(a hybrid). Their palettes are in this file's git history at the Phase 1 commit if anyone
+wants them back.
+
 ## Design decisions, and why
+
+> **SUPERSEDED as of the 2026-08-28 redesign.** Everything in this section describes the old
+> Jekyll site and its "protect the reading experience above all" brief. That brief was
+> deliberately inverted: the site is moving to Astro + Tailwind v4, dark only, with heavy
+> scroll choreography. Cards, shadows, gradients, scroll animation and Tailwind are all now
+> allowed. The `--measure` rule is loosened. See the section above for the real direction.
+> This section is kept only until the migration lands, and is rewritten then.
 
 Chosen 2026-08-28 from three working directions. Do not undo these casually.
 

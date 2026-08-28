@@ -1,0 +1,172 @@
+@import "tailwindcss";
+
+/* Self-hosted variable fonts. Each ships unicode-range subsets, so a browser only
+   downloads latin. This replaces the Google Fonts stylesheet the Jekyll site used,
+   which was the whole site's only third-party network dependency. */
+@import "@fontsource-variable/inter/standard.css";
+@import "@fontsource-variable/bricolage-grotesque/standard.css";
+@import "@fontsource-variable/jetbrains-mono/wght.css";
+@import "@fontsource/instrument-serif/400.css";
+
+/* Dark is the default. `dark:` exists as an escape hatch, but the semantic tokens
+   below are the intended mechanism: they swap, so components never branch on theme. */
+@custom-variant dark (&:where(:root:not([data-theme="light"])) *, &:where(:root:not([data-theme="light"])));
+
+/* ---------------------------------------------------------------------------
+   THE TOKEN CONTRACT
+
+   Direction: OBYS (see CLAUDE.md for the reference sites).
+   DARK ONLY, by decision. There is no light palette and no theme toggle: the
+   acid-on-black IS the identity and a light variant dilutes it. Everything
+   reads these names, so adding a light palette later means adding one block
+   here, not touching components.
+   --------------------------------------------------------------------------- */
+
+:root {
+  color-scheme: dark;
+
+  --bg:              #090909;
+  --surface:         #121212;
+  --surface-2:       #1a1a1a;
+  --line:            #262626;
+  --line-strong:     #3d3d3d;
+
+  --ink:             #f4f4f0;
+  --ink-soft:        #918f88;
+  --ink-faint:       #8a8880;   /* WCAG AA floor for mono metadata; do not darken */
+
+  --accent:          #d6ff4b;
+  --accent-soft:     #e8ff8f;
+  --accent-contrast: #090909;
+
+  --font-display: "Bricolage Grotesque Variable", system-ui, sans-serif;
+  --font-body:    "Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono:    "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Prose column. No longer a site-wide constant: sections opt in. */
+  --measure: 38rem;
+  --measure-wide: 60rem;
+  --gutter: clamp(1.25rem, 4vw, 4rem);
+}
+
+/* ---------------------------------------------------------------------------
+   TAILWIND MAPPING
+   `inline` keeps the var() reference in the generated utility instead of baking
+   the resolved value, which is what lets the palettes above swap at runtime.
+   --------------------------------------------------------------------------- */
+@theme inline {
+  --color-bg:              var(--bg);
+  --color-surface:         var(--surface);
+  --color-surface-2:       var(--surface-2);
+  --color-line:            var(--line);
+  --color-line-strong:     var(--line-strong);
+  --color-ink:             var(--ink);
+  --color-ink-soft:        var(--ink-soft);
+  --color-ink-faint:       var(--ink-faint);
+  --color-accent:          var(--accent);
+  --color-accent-soft:     var(--accent-soft);
+  --color-accent-contrast: var(--accent-contrast);
+
+  --font-display: var(--font-display);
+  --font-body:    var(--font-body);
+  --font-mono:    var(--font-mono);
+
+  /* Fluid scale. The Jekyll site had zero fluid type; every size was a fixed rem. */
+  --text-2xs:  0.6875rem;
+  --text-xs:   0.75rem;
+  --text-sm:   0.8125rem;
+  --text-base: clamp(1rem, 0.97rem + 0.15vw, 1.0625rem);
+  --text-lg:   clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem);
+  --text-xl:   clamp(1.1875rem, 1.08rem + 0.5vw, 1.375rem);
+  --text-2xl:  clamp(1.375rem, 1.2rem + 0.85vw, 1.875rem);
+  --text-3xl:  clamp(1.625rem, 1.3rem + 1.6vw, 2.5rem);
+  --text-4xl:  clamp(2rem, 1.4rem + 3vw, 3.5rem);
+  --text-5xl:  clamp(2.5rem, 1.2rem + 6vw, 5rem);
+  --text-6xl:  clamp(3rem, 0.5rem + 11vw, 8rem);
+  --text-7xl:  clamp(3.5rem, -1rem + 18vw, 12rem);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quint: cubic-bezier(0.83, 0, 0.17, 1);
+}
+
+/* ---------------------------------------------------------------------------
+   BASE
+   --------------------------------------------------------------------------- */
+@layer base {
+  * { min-width: 0; }
+
+  html {
+    background: var(--bg);
+    -webkit-text-size-adjust: 100%;
+    scrollbar-color: var(--line-strong) var(--bg);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: 1.65;
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: clip;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--accent-contrast);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    line-height: 1.05;
+    text-wrap: balance;
+  }
+
+  p { text-wrap: pretty; }
+
+  img, svg, video { display: block; max-width: 100%; }
+}
+
+/* ---------------------------------------------------------------------------
+   UTILITIES
+   --------------------------------------------------------------------------- */
+@utility measure    { max-width: var(--measure); }
+@utility measure-wide { max-width: var(--measure-wide); }
+
+/* The mono metadata treatment: years, stack, section labels. */
+@utility label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* ---------------------------------------------------------------------------
+   MOTION
+   Reduced motion is a real fallback: every reveal's END state is the default,
+   so disabling animation can never leave a blank page.
+   --------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Elements JS will animate in. Hidden ONLY once JS has confirmed it can run and
+   motion is allowed, so a no-JS or reduced-motion visitor sees everything. */
+:root[data-motion="on"] [data-reveal] {
+  opacity: 0;
+  will-change: opacity, transform;
+}

@@ -22,6 +22,16 @@ exclude:
   - TODO.md
   - vendor
   - .jekyll-cache
+  - src
+  - public
+  - node_modules
+  - dist
+  - package.json
+  - package-lock.json
+  - astro.config.mjs
+  - tsconfig.json
+  - scripts
+  - specs
 
 defaults:
   - scope:

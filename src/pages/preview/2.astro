@@ -1,0 +1,226 @@
+---
+import { getCollection } from 'astro:content';
+import PreviewLayout from '../../layouts/PreviewLayout.astro';
+import { site, hero, bio, elsewhere } from '../../data/site';
+
+const projects = (await getCollection('projects')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+const marquee = [...new Set(projects.flatMap((p) => p.data.stack))];
+---
+
+<PreviewLayout title="Work">
+  <div
+    id="cursor"
+    aria-hidden="true"
+    class="pointer-events-none fixed left-0 top-0 z-40 hidden h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent mix-blend-difference lg:block"
+  >
+  </div>
+
+  <!-- ── hero ──────────────────────────────────────────────────────────── -->
+  <section class="relative flex min-h-[92svh] flex-col justify-between px-(--gutter) pb-10 pt-8">
+    <div class="flex items-start justify-between gap-6">
+      <span class="label">{site.name}</span>
+      <span class="label text-right">{site.role}<br />{site.location}</span>
+    </div>
+
+    <h1 class="my-auto py-10 font-display font-extrabold uppercase leading-[0.82] tracking-[-0.03em]">
+      {
+        hero.displayLines.map((line, i) => (
+          <span class="block overflow-hidden">
+            <span
+              data-line
+              class:list={[
+                'block text-[clamp(1.9rem,8.4vw,7.5rem)]',
+                i === 2 && 'text-accent',
+                i % 2 === 1 && 'lg:pl-[8vw]',
+                i === 4 && 'lg:pl-[20vw]',
+              ]}
+            >
+              {line}
+            </span>
+          </span>
+        ))
+      }
+    </h1>
+
+    <div class="flex flex-wrap items-end justify-between gap-6 border-t border-line pt-5">
+      <p class="max-w-md text-base leading-relaxed text-ink-soft" data-reveal>
+        {hero.availability}
+      </p>
+      <a
+        href={`mailto:${site.email}`}
+        data-magnetic
+        class="group inline-flex items-center gap-3 border border-accent px-6 py-3 font-mono text-xs uppercase tracking-[0.18em] text-accent transition-colors duration-300 hover:bg-accent hover:text-accent-contrast"
+      >
+        Available now
+        <span class="inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ── marquee ───────────────────────────────────────────────────────── -->
+  <div class="overflow-hidden border-y border-line py-4">
+    <div id="marquee" class="flex w-max gap-8 whitespace-nowrap will-change-transform">
+      {
+        [0, 1].map(() => (
+          <div class="flex shrink-0 gap-8" aria-hidden="true">
+            {marquee.map((t) => (
+              <span class="font-mono text-xs uppercase tracking-[0.18em] text-ink-faint">
+                {t} <span class="text-accent">/</span>
+              </span>
+            ))}
+          </div>
+        ))
+      }
+    </div>
+  </div>
+
+  <!-- ── about, asymmetric ─────────────────────────────────────────────── -->
+  <section class="grid gap-10 px-(--gutter) py-28 lg:grid-cols-12">
+    <h2 class="label lg:col-span-3">About</h2>
+    <div class="space-y-8 lg:col-span-8 lg:col-start-5">
+      <p class="font-display text-3xl font-medium leading-[1.15] text-ink" data-reveal>
+        {bio[0]}
+      </p>
+      <p class="measure text-lg leading-relaxed text-ink-soft" data-reveal>{bio[1]}</p>
+    </div>
+  </section>
+
+  <!-- ── horizontal work rail, scrubbed by vertical scroll ─────────────── -->
+  <section id="rail" class="relative overflow-hidden border-t border-line">
+    <div class="flex items-center justify-between px-(--gutter) py-6">
+      <h2 class="label">Selected work</h2>
+      <span class="label hidden lg:inline">Scroll →</span>
+    </div>
+    <div id="rail-track" class="flex w-max gap-6 px-(--gutter) pb-16">
+      {
+        projects.map((p, i) => (
+          <a
+            href={`/projects/${p.id}/`}
+            class="group flex w-[min(78vw,26rem)] shrink-0 flex-col justify-between border border-line bg-surface p-7 transition-colors duration-500 hover:border-accent hover:bg-surface-2"
+          >
+            <div>
+              <div class="flex items-baseline justify-between">
+                <span class="font-mono text-5xl font-bold leading-none text-ink-faint transition-colors duration-500 group-hover:text-accent">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span class="label">{p.data.year}</span>
+              </div>
+              <h3 class="mt-8 font-display text-3xl font-bold uppercase leading-[0.95] tracking-tight text-ink">
+                {p.data.title}
+              </h3>
+              <p class="mt-4 text-base leading-relaxed text-ink-soft">{p.data.tagline}</p>
+            </div>
+            <div class="mt-8 border-t border-line pt-4">
+              <ul class="flex flex-wrap gap-x-3 gap-y-1">
+                {p.data.stack.slice(0, 4).map((s) => (
+                  <li class="font-mono text-2xs uppercase tracking-wider text-ink-faint">{s}</li>
+                ))}
+              </ul>
+            </div>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- ── contact ───────────────────────────────────────────────────────── -->
+  <section class="px-(--gutter) py-28">
+    <p class="measure-wide text-lg leading-relaxed text-ink-soft" data-reveal>
+      {elsewhere.code}
+    </p>
+    <a
+      href={`mailto:${site.email}`}
+      class="mt-10 block font-display text-[clamp(1.5rem,8.5vw,4.5rem)] font-extrabold uppercase leading-none tracking-tight text-ink transition-colors duration-300 hover:text-accent"
+      data-reveal
+    >
+      {site.email}
+    </a>
+    <div class="mt-12 flex flex-wrap gap-6 border-t border-line pt-6">
+      <a class="label transition-colors hover:text-accent" href="/process/">Process</a>
+      <a class="label transition-colors hover:text-accent" href="/about/">About</a>
+      <a class="label transition-colors hover:text-accent" href={site.github}>GitHub</a>
+      <a class="label transition-colors hover:text-accent" href={site.linkedin}>LinkedIn</a>
+    </div>
+  </section>
+</PreviewLayout>
+
+<script>
+  import { withMotion, startSmoothScroll, prefersReducedMotion } from '../../scripts/motion';
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { SplitText } from 'gsap/SplitText';
+
+  gsap.registerPlugin(ScrollTrigger, SplitText);
+
+  // Custom cursor.
+  const cursor = document.getElementById('cursor');
+  if (cursor && matchMedia('(pointer: fine)').matches && !prefersReducedMotion()) {
+    const x = gsap.quickTo(cursor, 'x', { duration: 0.35, ease: 'power3' });
+    const y = gsap.quickTo(cursor, 'y', { duration: 0.35, ease: 'power3' });
+    window.addEventListener('pointermove', (e) => { x(e.clientX); y(e.clientY); }, { passive: true });
+    document.querySelectorAll('a, button').forEach((el) => {
+      el.addEventListener('pointerenter', () => gsap.to(cursor, { scale: 3.5, duration: 0.3 }));
+      el.addEventListener('pointerleave', () => gsap.to(cursor, { scale: 1, duration: 0.3 }));
+    });
+  } else {
+    cursor?.remove();
+  }
+
+  startSmoothScroll();
+
+  withMotion(() => {
+    // Hero: per-line rise, plus a width-axis settle only Bricolage's wdth axis allows.
+    const lines = gsap.utils.toArray<HTMLElement>('[data-line]');
+    const splits = lines.map((l) => new SplitText(l, { type: 'words,chars' }));
+    gsap.set(lines, { opacity: 1 });
+    splits.forEach((s, i) => {
+      gsap.from(s.chars, {
+        yPercent: 115,
+        opacity: 0,
+        duration: 1.1,
+        ease: 'expo.out',
+        stagger: 0.018,
+        delay: 0.1 + i * 0.09,
+      });
+    });
+    gsap.fromTo(
+      'h1',
+      { fontStretch: '75%' },
+      { fontStretch: '100%', duration: 1.6, ease: 'expo.out' },
+    );
+
+    gsap.utils.toArray<HTMLElement>('[data-reveal]').forEach((el) => {
+      gsap.fromTo(el, { opacity: 0, y: 40 },
+        { opacity: 1, y: 0, duration: 1, ease: 'expo.out',
+          scrollTrigger: { trigger: el, start: 'top 88%', once: true } });
+    });
+
+    // Marquee.
+    const track = document.getElementById('marquee');
+    if (track) {
+      gsap.to(track, { xPercent: -50, duration: 40, ease: 'none', repeat: -1 });
+    }
+
+    // Horizontal rail: pin the section, translate the track by its overflow.
+    const rail = document.getElementById('rail');
+    const railTrack = document.getElementById('rail-track');
+    if (rail && railTrack && window.innerWidth >= 768) {
+      const distance = () => railTrack.scrollWidth - window.innerWidth + 64;
+      gsap.to(railTrack, {
+        x: () => -distance(),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: rail,
+          start: 'top top',
+          end: () => `+=${distance()}`,
+          pin: true,
+          scrub: 0.6,
+          invalidateOnRefresh: true,
+          anticipatePin: 1,
+        },
+      });
+    }
+  });
+</script>

@@ -1,0 +1,37 @@
+import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
+
+// One case study per markdown file. The schema is the single source of truth for
+// project metadata: the home page work list, the project header and the <head>
+// description all read from here, so `stack` can no longer disagree with itself
+// the way the Jekyll front matter did against index.md.
+const projects = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/projects' }),
+  schema: z.object({
+    title: z.string(),
+    /** Display order on the home page. Lower is higher. */
+    order: z.number().int(),
+    year: z.number().int(),
+    role: z.string(),
+    stack: z.array(z.string()).nonempty(),
+    /** Either a public repo, or an honest statement that the code is not public. */
+    code: z.object({
+      label: z.string(),
+      href: z.string().url().optional(),
+    }),
+    /** Long form. Used as the project page lede and the meta description. */
+    summary: z.string(),
+    /** Short form. Used in the home page work list. */
+    tagline: z.string(),
+    /** The before/after pair, structured so it can be designed rather than hand-rolled in HTML. */
+    outcome: z
+      .object({ before: z.string(), after: z.string() })
+      .optional(),
+    /** Small, verifiable figures. Never invented, always traceable to the case study text. */
+    metrics: z
+      .array(z.object({ value: z.string(), label: z.string() }))
+      .default([]),
+  }),
+});
+
+export const collections = { projects };
