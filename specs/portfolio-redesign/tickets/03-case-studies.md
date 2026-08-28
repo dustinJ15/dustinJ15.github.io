@@ -26,21 +26,21 @@ Adding a fifth case study later must mean dropping one markdown file in and noth
 
 **Blocked by:** 02.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] All four case studies render at `/projects/<id>/` and are reachable from the home page.
-- [ ] Each page's title block carries the project name, year, role and stack, all read from the
+- [x] All four case studies render at `/projects/<id>/` and are reachable from the home page.
+- [x] Each page's title block carries the project name, year, role and stack, all read from the
       content collection.
-- [ ] The before/after outcome is a designed component and appears near the top, above the body
+- [x] The before/after outcome is a designed component and appears near the top, above the body
       of the argument.
-- [ ] Body copy sets at a readable measure and is fully visible before any scroll-triggered
+- [x] Body copy sets at a readable measure and is fully visible before any scroll-triggered
       animation runs.
-- [ ] Figures render full-bleed in dark browser chrome with their existing alt text and captions
+- [x] Figures render full-bleed in dark browser chrome with their existing alt text and captions
       carried over, and are legible at 1440.
-- [ ] At least one pull quote per study, drawn from that study's own prose.
-- [ ] Nothing is pinned and no reveal fires inside the prose beyond a fade.
-- [ ] Metrics render only where the collection supplies them, and every value shown is traceable
+- [x] At least one pull quote per study, drawn from that study's own prose.
+- [x] Nothing is pinned and no reveal fires inside the prose beyond a fade.
+- [x] Metrics render only where the collection supplies them, and every value shown is traceable
       to a sentence in that case study.
-- [ ] The Jekyll project pages still build and are untouched.
-- [ ] The gate passes with a row per case study naming its heading structure and figure count,
+- [x] The Jekyll project pages still build and are untouched.
+- [x] The gate passes with a row per case study naming its heading structure and figure count,
       and asserting every figure has non-empty alt text.

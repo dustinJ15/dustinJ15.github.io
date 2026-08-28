@@ -174,3 +174,177 @@
   opacity: 0;
   will-change: opacity, transform;
 }
+
+/* ---------------------------------------------------------------------------
+   CASE-STUDY PROSE
+
+   The argument on a case study is the only part of the site whose job is to be
+   read, so it gets a measure back and nothing else does. The full-bleed grid is
+   what lets a screenshot escape that measure without the prose being wrapped in
+   a container it has to break out of: prose sits in `content`, screenshots and
+   the display headings span `wide`.
+
+   The fr tracks matter. Fixed maxes on the inner columns would be honoured at
+   768 and push the row past the viewport; fr tracks only ever take space that
+   is left over, so the column collapses instead of overflowing.
+
+   The content column is deliberately off centre: `wide` opens further to the
+   right than to the left, which is where the asymmetry in the Obys lane comes
+   from without the prose itself moving around.
+   --------------------------------------------------------------------------- */
+.prose {
+  display: grid;
+  grid-template-columns:
+    [full-start] minmax(var(--gutter), 1fr)
+    [wide-start] minmax(0, 1fr)
+    [content-start] min(100% - 2 * var(--gutter), var(--measure)) [content-end]
+    minmax(0, 3fr)
+    [wide-end] minmax(var(--gutter), 1fr) [full-end];
+  font-size: var(--text-lg);
+  line-height: 1.7;
+  color: var(--ink);
+}
+
+.prose > * {
+  grid-column: content;
+  margin-block: 0;
+}
+
+.prose > * + * { margin-block-start: 1.35em; }
+
+.prose :is(strong, b) { font-weight: 650; color: var(--ink); }
+.prose em { font-style: italic; }
+
+.prose a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 0.22em;
+  text-decoration-thickness: 1px;
+}
+.prose a:hover { text-decoration: none; }
+
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  padding: 0.1em 0.4em;
+}
+
+.prose :is(ul, ol) { padding-inline-start: 1.3em; }
+.prose li { margin-block-start: 0.6em; }
+.prose ul { list-style: none; padding-inline-start: 0; }
+.prose ul > li { position: relative; padding-inline-start: 1.4em; }
+.prose ul > li::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: 0.72em;
+  width: 0.5em;
+  height: 1px;
+  background: var(--accent);
+}
+
+/* Section headings are display moments: they span the wide column, sit on a
+   rule, and are the only thing in the argument allowed to shout. */
+.prose > :is(h2, h3) {
+  grid-column: wide;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: -0.025em;
+  line-height: 0.95;
+  text-wrap: balance;
+  color: var(--ink);
+}
+.prose > h2 {
+  margin-block-start: 3.2em;
+  padding-block-start: 0.5em;
+  border-block-start: 1px solid var(--line);
+  font-size: var(--text-4xl);
+  font-weight: 800;
+}
+.prose > h3 {
+  margin-block-start: 2.4em;
+  font-size: var(--text-2xl);
+  font-weight: 700;
+}
+
+/* A pull quote. One or two sentences per study, lifted from that study's own
+   prose, set at display size against the accent rule. It is a restatement of
+   copy that is already on the page, so it is not marked up as a citation. */
+.prose > blockquote {
+  grid-column: wide;
+  margin-block: 2.6em;
+  padding-inline-start: clamp(1rem, 3vw, 2.5rem);
+  border-inline-start: 2px solid var(--accent);
+}
+.prose > blockquote p {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  color: var(--ink);
+}
+
+/* Screenshots break out of the measure and sit in dark browser chrome, so a
+   light UI capture reads as a pictured window on a near-black page rather than
+   as a hole punched in it. Built by src/plugins/rehype-case-study.mjs. */
+.prose > figure.shot {
+  grid-column: wide;
+  margin-block: 3em;
+}
+
+.shot-frame {
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.shot-chrome {
+  height: 2.25rem;
+  border-block-end: 1px solid var(--line-strong);
+  background: var(--surface-2);
+  /* Three window dots. Drawn rather than marked up: they are pure decoration
+     and there is no reason for them to exist in the accessibility tree. */
+  background-image:
+    radial-gradient(circle at 1.25rem 50%, var(--line-strong) 0.3125rem, transparent 0.3125rem),
+    radial-gradient(circle at 2.5rem 50%, var(--line-strong) 0.3125rem, transparent 0.3125rem),
+    radial-gradient(circle at 3.75rem 50%, var(--line-strong) 0.3125rem, transparent 0.3125rem);
+}
+
+.shot-body img { width: 100%; height: auto; }
+
+.prose figcaption {
+  margin-block-start: 1rem;
+  max-width: var(--measure-wide);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--ink-faint);
+}
+
+/* The standing disclaimer at the foot of every study. */
+.prose > p.note {
+  margin-block-start: 3em;
+  padding-block-start: 1.2em;
+  border-block-start: 1px solid var(--line);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  color: var(--ink-faint);
+}
+
+/* The case-study title. Sized against the longest WORD in it, not against a
+   fixed viewport fraction: every word is its own unbreakable line, so the line
+   that has to fit is the longest word and nothing else. A vw-only clamp big
+   enough for "GENERATOR" leaves "MAKER" looking timid, and one big enough for
+   "MAKER" wraps "GENERATOR", which the gate fails. 0.62em is a measured upper
+   bound on Bricolage's uppercase advance at this weight; the gate's wrap check
+   is what keeps it honest. */
+.display-title {
+  font-size: clamp(
+    2.3rem,
+    calc((100vw - 2 * var(--gutter)) / (var(--title-chars) * 0.62)),
+    8.5rem
+  );
+}

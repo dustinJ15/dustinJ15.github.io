@@ -29,6 +29,8 @@ four report types each, and no two agreeing on what a spreadsheet is.
 
 I built a Dockerized Python ETL pipeline: sixteen parsers, one normalized schema per report type.
 
+> Four vendors, four report types each, and no two agreeing on what a spreadsheet is.
+
 ## What the files actually were
 
 The interesting part of an ETL job is never the transformation. It's what arrives.
@@ -49,6 +51,8 @@ A pipeline that runs unattended has to be able to say whether it worked:
   produced it.
 - **Unit matching against a master property index**, reaching 96–99% match rates across systems
   that each name the same unit differently.
+
+> A report that suddenly has a tenth of its usual rows is a failure, not a small day.
 
 Computed KPI fields — days-to-complete, AR aging buckets, days vacant — are derived in the
 pipeline rather than in each dashboard, so every consumer gets the same definition.

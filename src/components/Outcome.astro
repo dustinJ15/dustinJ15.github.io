@@ -1,0 +1,34 @@
+---
+/**
+ * The before/after pair, near the top of a case study.
+ *
+ * A skimming recruiter should get the outcome without reading the argument, so
+ * this sits above the body and is the loudest thing on the page after the title.
+ * The old Jekyll version was a strikethrough inside a bordered div hand-rolled in
+ * each markdown file; the pair is a structured field on the collection now, so
+ * every study states it the same way and none of them can forget to.
+ *
+ * The before line is not struck through. Strikethrough on a full sentence is hard
+ * to read and says nothing a screen reader can hear; the two are labelled instead.
+ */
+interface Props {
+  before: string;
+  after: string;
+}
+const { before, after } = Astro.props;
+---
+
+<section aria-label="Outcome" class="grid gap-px border border-line bg-line md:grid-cols-2">
+  <div class="bg-bg p-7 lg:p-10">
+    <p class="label">Before</p>
+    <p class="mt-5 font-display text-2xl font-medium leading-[1.2] text-ink-soft">
+      {before}
+    </p>
+  </div>
+  <div class="relative bg-surface p-7 lg:p-10">
+    <p class="font-mono text-xs uppercase tracking-[0.14em] text-accent">After</p>
+    <p class="mt-5 font-display text-2xl font-semibold leading-[1.2] text-ink">
+      {after}
+    </p>
+  </div>
+</section>

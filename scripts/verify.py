@@ -170,8 +170,7 @@ CONTRAST_SWEEP = r"""
 
 # Routes that exist in the Jekyll site but have not been migrated to Astro yet.
 # Emptied as tickets land; a 404 here is a "not built yet", not a broken link.
-PENDING = {"/process/", "/about/", "/projects/quote-generator/", "/projects/label-maker/",
-           "/projects/billing-analyzer/", "/projects/rental-pipeline/"}
+PENDING = {"/process/", "/about/"}
 
 
 # --------------------------------------------------------------------------
@@ -244,6 +243,80 @@ EXPECTATIONS: dict[str, dict] = {
         "links": ["/", "/about/", "/process/"],
         "reachable": ["/"],
         "text": ["Page not found"],
+    },
+
+    # ── case studies ──────────────────────────────────────────────────────
+    # Each row is the same shape: the project title as the one h1, one h2 per
+    # section of the argument, the figure count, the before/after a skimmer is
+    # supposed to leave with, and the pull quote. Metrics are asserted by their
+    # label, so a value that stops being traceable to the prose cannot be
+    # quietly swapped for a rounder one without this row noticing.
+    "/projects/quote-generator/": {
+        "headings": {"h1": 1, "h2": 6, "h3": 0},
+        "ids": ["main"],
+        "figures": 4,
+        "alt": True,
+        "links": ["/", "/projects/label-maker/"],
+        "reachable": ["/projects/label-maker/"],
+        "text": [
+            "Quote Generator",
+            "Sole developer",
+            "A twenty-to-thirty-five-email thread, retyped into a workbook by hand",
+            "A structured record the specialist reviews and decides on.",
+            "emails replaced by one link",
+            "roles modelling the org",
+            "of manual assembly removed",
+            "A better model does not fix a livelock",
+        ],
+    },
+    "/projects/label-maker/": {
+        "headings": {"h1": 1, "h2": 4, "h3": 0},
+        "ids": ["main"],
+        "figures": 3,
+        "alt": True,
+        "links": ["/", "/projects/billing-analyzer/"],
+        "reachable": ["/projects/billing-analyzer/"],
+        "text": [
+            "Label Maker",
+            "Copy rows, increment barcodes, repeat per patient",
+            "Fill in a short form. Download the sheet.",
+            "HTML file, no install",
+            "network calls at runtime",
+            "A file you can email is a tool people can start using the same afternoon.",
+        ],
+    },
+    "/projects/billing-analyzer/": {
+        "headings": {"h1": 1, "h2": 2, "h3": 0},
+        "ids": ["main"],
+        "figures": 4,
+        "alt": True,
+        "links": ["/", "/projects/label-maker/", "/projects/rental-pipeline/"],
+        "reachable": ["/projects/rental-pipeline/"],
+        "text": [
+            "Billing Analyzer",
+            "Open four files, add it up, hope",
+            "Drop the files on the page. Read the whole account.",
+            "tabs per year, reconciled",
+            "dependencies at runtime",
+            "Indexing by column position on a human-maintained file is a bug with a delay on it.",
+        ],
+    },
+    # No outcome pair on the collection for this one, so no before/after block is
+    # rendered. That is the row that proves the component is driven by the data
+    # rather than always drawn.
+    "/projects/rental-pipeline/": {
+        "headings": {"h1": 1, "h2": 2, "h3": 0},
+        "ids": ["main"],
+        "figures": 0,
+        "alt": True,
+        "links": ["/", "/projects/quote-generator/"],
+        "reachable": ["/projects/quote-generator/"],
+        "text": [
+            "Rental Pipeline",
+            "parsers into one schema",
+            "source systems",
+            "no two agreeing on what a spreadsheet is",
+        ],
     },
 
 }

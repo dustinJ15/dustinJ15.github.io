@@ -49,11 +49,6 @@ The failure I kept watching wasn't that the handoff was slow. It was that the ha
 frozen or ambient — and the only place that answer existed was somewhere in a thread the
 specialist couldn't search and hadn't been part of. So the extraction started over.
 
-<div class="outcome">
-  <p><span class="before">A twenty-to-thirty-five-email thread, retyped into a workbook by hand</span></p>
-  <p><strong>A structured record the specialist reviews and decides on.</strong></p>
-</div>
-
 By the time I left, specialists told me it had cut their workload substantially. I won't put a
 number on that one — nobody measured it, and the honest version is better than a made-up figure.
 The day-and-a-half figure is what I was told on my first day; the improvement is what they told
@@ -66,22 +61,16 @@ week. Seven sections, and it can't be submitted half-finished. It lands on the b
 development lead's dashboard, who reviews it, fills in the internal fields the client never
 sees, and releases it to a specialist.
 
-<figure>
-  <img src="{{ '/assets/img/quote-intake-form.png' | relative_url }}"
-       alt="A seven-section web intake form covering contact details, study details, per-region site counts, sample types, laboratory testing, optional services and attachments.">
-  <figcaption>The client-facing intake. Seven sections, one single-use link, and it cannot be submitted half-finished. Top of the form; it continues for three more sections. Screenshot from a demo instance seeded with invented data.</figcaption>
-</figure>
+![A seven-section web intake form covering contact details, study details, per-region site counts, sample types, laboratory testing, optional services and attachments.](../../../assets/img/quote-intake-form.png "The client-facing intake. Seven sections, one single-use link, and it cannot be submitted half-finished. Top of the form; it continues for three more sections. Screenshot from a demo instance seeded with invented data.")
+
+> The failure was not that the handoff was slow. It was that the handoff was incomplete.
 
 What the specialist opens is not a summary of a conversation. It's a **draft quote**. The line
 items the study actually needs are already selected, quantities are already derived, and the kit
 and shipping maths is already done. Their job is to check a document and make the calls that need
 judgment — not to assemble one.
 
-<figure>
-  <img src="{{ '/assets/img/quote-builder-draft.png' | relative_url }}"
-       alt="The quote builder: study information at the top, read-only derived kit and sample calculations, collapsible line-item groups, editable legal notes, and a running total in a sidebar.">
-  <figcaption>What the specialist opens is a draft, not a summary. The kit and sample arithmetic above the line items is derived from the intake, and the line-item groups below it expand in place. Screenshot from a demo instance seeded with invented data.</figcaption>
-</figure>
+![The quote builder: study information at the top, read-only derived kit and sample calculations, collapsible line-item groups, editable legal notes, and a running total in a sidebar.](../../../assets/img/quote-builder-draft.png "What the specialist opens is a draft, not a summary. The kit and sample arithmetic above the line items is derived from the intake, and the line-item groups below it expand in place. Screenshot from a demo instance seeded with invented data.")
 
 The Excel generator underneath all this was done in the first few days. It was the easy part, and
 by a wide margin. Everything that took the rest of the summer was the part nobody thinks about
@@ -116,11 +105,7 @@ The attention queue, the row highlighting, the "waiting on you" filter and the r
 read that same answer — so they agree by construction, rather than by four separate pieces of
 logic that happen to match today.
 
-<figure>
-  <img src="{{ '/assets/img/quote-dashboard-lead.png' | relative_url }}"
-       alt="A business development dashboard with an attention queue of three quotes, each showing status, outcome buttons and a due date, above a full list of that user's quotes.">
-  <figcaption>The business lead's view. The attention queue, the row highlighting and the reminder digest all read the same answer to the question of whose desk a quote is on.</figcaption>
-</figure>
+![A business development dashboard with an attention queue of three quotes, each showing status, outcome buttons and a due date, above a full list of that user's quotes.](../../../assets/img/quote-dashboard-lead.png "The business lead's view. The attention queue, the row highlighting and the reminder digest all read the same answer to the question of whose desk a quote is on.")
 
 An award freezes the quote. What was sold is snapshotted once, and every route that could
 otherwise modify it refuses — checked on the way in for a clear error, and again inside the
@@ -144,11 +129,7 @@ company's senior vice-president, and the colleague I ran standups with all worke
 directly. The rules that decide what a quote contains stopped being something only a developer
 could change.
 
-<figure>
-  <img src="{{ '/assets/img/quote-admin-roles.png' | relative_url }}"
-       alt="A user administration table listing six accounts, each with a role selector showing Admin, Business Development, Project Manager, Proposal Specialist, Super BD team lead and Super PM team lead.">
-  <figcaption>Six roles, editable by an administrator. The roles are less a security boundary than a model of how the work actually moves between people.</figcaption>
-</figure>
+![A user administration table listing six accounts, each with a role selector showing Admin, Business Development, Project Manager, Proposal Specialist, Super BD team lead and Super PM team lead.](../../../assets/img/quote-admin-roles.png "Six roles, editable by an administrator. The roles are less a security boundary than a model of how the work actually moves between people.")
 
 There is a real cost to storing behaviour as data: you can only express what the format supports,
 and a wrong rule is harder to debug than wrong code. I took that trade knowingly. The compensating
@@ -212,6 +193,8 @@ was being derived from our own CI speed, which meant a *fast* pipeline got a *sh
 shorter than the outage's backlog. The queue ejected its own head, which cancelled the checks it
 was waiting for, and drained itself. It is now pinned to an explicit value, with a comment saying
 why.
+
+> A better model does not fix a livelock. It just runs an expensive one.
 
 ## Verification is the actual skill
 

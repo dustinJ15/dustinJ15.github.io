@@ -1,0 +1,208 @@
+---
+/**
+ * One case study.
+ *
+ * Every route under /projects/ is generated from the content collection, so
+ * adding a fifth study is dropping one markdown file into src/content/projects
+ * and nothing else: this page, the home page work rail and the "next" link at
+ * the bottom all pick it up.
+ *
+ * The shape is Obys chrome around calm prose. The title block and the outcome
+ * are the loud part, because a recruiter who reads only the first screenful
+ * should still leave with the outcome. Everything below the outcome is a
+ * reading page: one measure, no pinning, and body copy painted before any
+ * scroll-triggered animation runs.
+ */
+import type { GetStaticPaths } from 'astro';
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Outcome from '../../components/Outcome.astro';
+import Metrics from '../../components/Metrics.astro';
+
+export const getStaticPaths = (async () => {
+  const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+  return projects.map((project, i) => ({
+    params: { id: project.id },
+    // Wrapping to the first study rather than stopping, so the bottom of every
+    // case study has somewhere to go.
+    props: { project, next: projects[(i + 1) % projects.length] },
+  }));
+}) satisfies GetStaticPaths;
+
+const { project, next } = Astro.props;
+const { title, year, role, stack, code, summary, outcome, metrics } = project.data;
+const { Content } = await render(project);
+
+// One <span data-line> per word. The gate fails a display line that wraps, and a
+// word is the only unit that cannot: the words stack instead of reflowing, and
+// the type is sized against the longest of them so a short title ("Label Maker")
+// is set as large as its line allows rather than being held down by the longest
+// title in the collection.
+const words = title.split(' ');
+const longest = Math.max(...words.map((w) => w.length));
+---
+
+<BaseLayout title={title} description={summary} ogType="article">
+  <!-- ── title ─────────────────────────────────────────────────────────── -->
+  <section
+    class="flex min-h-[calc(100svh-11rem)] flex-col justify-between gap-16 px-(--gutter) pb-12 pt-4"
+  >
+    <p class="label">
+      Case study <span class="text-ink-soft">/</span> {year}
+    </p>
+
+    <h1
+      class="display-title font-display font-extrabold uppercase leading-[0.82] tracking-[-0.035em]"
+      style={`--title-chars: ${longest}`}
+    >
+      {
+        /* The mask the characters rise out of. It has to sit near the baseline,
+           but Bricolage's uppercase Q hangs a heavy tail below it, and a hard
+           clip there beheads the tail on "Quote Generator". overflow-clip plus a
+           clip margin keeps the mask and lets the tail through. */
+        words.map((word, i) => (
+          <span class="block overflow-clip [overflow-clip-margin:0.34em]">
+            <span
+              data-line
+              class:list={[
+                'block',
+                i === words.length - 1 && 'text-accent',
+                i % 2 === 1 && 'lg:pl-[10vw]',
+              ]}
+            >
+              {word}
+            </span>
+          </span>
+        ))
+      }
+    </h1>
+
+    <div class="grid gap-8 border-t border-line pt-6 lg:grid-cols-12">
+      {/* Deliberately not revealed on scroll: the lede is the first thing a
+          skimmer reads and it sits inside the first screenful. */}
+      <p class="measure text-lg leading-relaxed text-ink lg:col-span-7">{summary}</p>
+      <dl class="grid gap-6 self-start sm:grid-cols-2 lg:col-span-4 lg:col-start-9">
+        <div>
+          <dt class="label">Role</dt>
+          <dd class="mt-2 text-base text-ink-soft">{role}</dd>
+        </div>
+        <div>
+          <dt class="label">Code</dt>
+          <dd class="mt-2 text-base text-ink-soft">
+            {
+              code.href ? (
+                <a class="text-accent underline underline-offset-4 hover:no-underline" href={code.href}>
+                  {code.label}
+                </a>
+              ) : (
+                code.label
+              )
+            }
+          </dd>
+        </div>
+        <div class="sm:col-span-2">
+          <dt class="label">Stack</dt>
+          <dd>
+            <ul class="mt-2 flex flex-wrap gap-x-3 gap-y-1">
+              {
+                stack.map((s) => (
+                  <li class="font-mono text-2xs uppercase tracking-wider text-ink-faint">{s}</li>
+                ))
+              }
+            </ul>
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ── outcome and metrics, above the argument ───────────────────────── -->
+  <section class="px-(--gutter) py-16 lg:py-24">
+    {outcome && <Outcome before={outcome.before} after={outcome.after} />}
+    {
+      metrics.length > 0 && (
+        <div
+          aria-label="By the numbers"
+          class:list={['flex flex-wrap items-start gap-x-16 gap-y-10', outcome && 'mt-16']}
+        >
+          <p class="label w-full lg:w-auto lg:max-w-24">By the numbers</p>
+          <Metrics metrics={metrics} />
+        </div>
+      )
+    }
+  </section>
+
+  <!-- ── the argument ──────────────────────────────────────────────────── -->
+  <div class="prose pb-24">
+    <Content />
+  </div>
+
+  <!-- ── next ──────────────────────────────────────────────────────────── -->
+  <section class="border-t border-line px-(--gutter) py-16">
+    <p class="label">Next case study</p>
+    <a
+      href={`/projects/${next.id}/`}
+      class="group mt-6 flex flex-wrap items-baseline gap-x-8 gap-y-2"
+    >
+      <span
+        class="font-display text-[clamp(2rem,9vw,5.5rem)] font-extrabold uppercase leading-none tracking-tight text-ink transition-colors duration-300 group-hover:text-accent"
+        >{next.data.title}</span
+      >
+      <span class="label transition-colors group-hover:text-accent">{next.data.year}</span>
+    </a>
+    <div class="mt-12 flex flex-wrap gap-6 border-t border-line pt-6">
+      <a class="label transition-colors hover:text-accent" href="/">All work</a>
+      <a class="label transition-colors hover:text-accent" href="/process/">Process</a>
+      <a class="label transition-colors hover:text-accent" href="/about/">About</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import { withMotion } from '../../scripts/motion';
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { SplitText } from 'gsap/SplitText';
+
+  gsap.registerPlugin(ScrollTrigger, SplitText);
+
+  withMotion(() => {
+    // Title: the same per-character rise and width-axis settle as the home hero,
+    // so arriving on a case study feels like the same site rather than a
+    // document that happens to share a header.
+    const lines = gsap.utils.toArray<HTMLElement>('[data-line]');
+    const splits = lines.map((l) => new SplitText(l, { type: 'words,chars' }));
+    gsap.set(lines, { opacity: 1 });
+    splits.forEach((s, i) => {
+      gsap.from(s.chars, {
+        yPercent: 115,
+        opacity: 0,
+        duration: 1.1,
+        ease: 'expo.out',
+        stagger: 0.02,
+        delay: 0.1 + i * 0.09,
+      });
+    });
+    gsap.fromTo(
+      'h1',
+      { fontStretch: '75%' },
+      { fontStretch: '100%', duration: 1.6, ease: 'expo.out' },
+    );
+
+    // Everything else is a fade and a short rise, once, on scroll. Nothing is
+    // pinned and nothing scrubs: a reader must never be waiting on the page.
+    gsap.utils.toArray<HTMLElement>('[data-reveal]').forEach((el) => {
+      gsap.fromTo(
+        el,
+        { opacity: 0, y: 28 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.9,
+          ease: 'expo.out',
+          scrollTrigger: { trigger: el, start: 'top 90%', once: true },
+        },
+      );
+    });
+  });
+</script>
