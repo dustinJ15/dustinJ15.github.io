@@ -16,6 +16,24 @@ the publish ticket. Nothing here blocks the remaining tickets.
 - [ ] **Dark mode has never been reviewed on a real screen.** Screenshots are light-background
       images sitting on a near-black page. Check the figures especially.
 
+- [ ] **The 1440 full-page PNG shows a large void above the contact rule.** It is the pin spacer
+      holding the scrub distance and no visitor ever sees it. If reading flat screenshots is the
+      review loop, that band will keep looking like a bug. Check it with the viewport captures.
+- [ ] **The larger about portrait upscales on HiDPI.** Source is 1000x1190; a 2x 1440 screen wants
+      about 1220 at the new size. A larger export from the career-hub original fixes it. If the
+      photograph's bright background now reads as a hole at 577px, the lever is `brightness`,
+      not the accent wash, which was dropped deliberately.
+- [ ] **The pinned rail centres its cards in a full-height section**, so about 200px sits above the
+      label and 200px below the cards, and the lower band shows for a moment as the pin releases.
+      Symmetric and deliberate, but a composition choice rather than a forced one.
+- [ ] **The quote-builder screenshot is nearly two viewport-heights** inside its frame at 1440, so
+      the pictured browser window is never seen whole. Cropping shorter costs the line-item groups
+      the alt text and the argument both lean on.
+- [ ] **Seven of the eleven re-shot screenshots have not been opened by the supervising session.**
+      The implementing agent and its reviewer both opened all eleven. The four highest-risk ones
+      were independently checked. The other seven are the three billing shots, two label-maker
+      shots and the intake form.
+
 Ticket 11 now owns the acid-lime `/about/` H1, the portrait's olive cast, the dead vertical space
 above the contact block and the hero's scale at 375.
 
