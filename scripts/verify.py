@@ -136,6 +136,17 @@ CONTRAST_SWEEP = r"""
     return out;
   };
 
+  // How much bigger or smaller than its own user units an SVG element is drawn.
+  // 1 for anything that is not inside an SVG.
+  const svgScale = (el) => {
+    const svg = el.ownerSVGElement;
+    if (!svg) return 1;
+    const vb = svg.viewBox.baseVal;
+    const drawn = svg.getBoundingClientRect().width;
+    if (!vb || !vb.width || !drawn) return 1;
+    return drawn / vb.width;
+  };
+
   const out = [];
   document.querySelectorAll('body *').forEach((el) => {
     const own = [...el.childNodes].filter((n) => n.nodeType === 3)
@@ -153,14 +164,24 @@ CONTRAST_SWEEP = r"""
     const l1 = lum(over(fg, bg)), l2 = lum(bg);
     const [hi, lo] = l1 > l2 ? [l1, l2] : [l2, l1];
     const ratio = (hi + 0.05) / (lo + 0.05);
-    const size = parseFloat(cs.fontSize);
+    // AA's threshold is set by the size the text is PAINTED at. For HTML that is
+    // the computed font-size, but inside an SVG the computed size is in user
+    // units and the whole drawing is then scaled to fit its column: a 26px label
+    // in a 560-unit viewBox paints at ~15.6px in a 335px column. Taking the
+    // computed value there would apply the large-text 3.0 threshold to text that
+    // renders as normal body copy and needs 4.5, which is the gate quietly
+    // green-lighting a real AA failure.
+    const size = parseFloat(cs.fontSize) * svgScale(el);
     const bold = parseInt(cs.fontWeight, 10) >= 700;
     const need = size >= 24 || (bold && size >= 18.66) ? 3.0 : 4.5;
     if (ratio < need) {
       out.push({
         ratio: Math.round(ratio * 100) / 100, need, size: Math.round(size),
         text: own.slice(0, 32),
-        sel: el.tagName.toLowerCase() + '.' + (el.className || '').toString().split(' ')[0],
+        // `className` is an SVGAnimatedString on an SVG element, so stringifying
+        // it reports every SVG failure as "[object". The attribute is a string
+        // on both.
+        sel: el.tagName.toLowerCase() + '.' + (el.getAttribute('class') || '').split(' ')[0],
       });
     }
   });
@@ -189,9 +210,10 @@ PENDING: set[str] = set()
 #   ids        ["main", ...]   element ids that must exist (fragment targets and
 #                              named sections)
 #   figures    int             exact count of <figure>
-#   alt        True            every <img> carries non-empty alt text, unless it
-#                              is explicitly decorative (aria-hidden or
-#                              role="presentation")
+#   alt        True            every picture says what it shows: an <img> carries
+#                              non-empty alt text and an svg[role="img"] carries
+#                              an accessible name, unless it is explicitly
+#                              decorative (aria-hidden or role="presentation")
 #   links      ["/about/"]     internal links that must be present on the page,
 #                              and must resolve unless still listed in PENDING
 #   text       ["substring"]   copy that must appear in the rendered text, matched
@@ -359,6 +381,8 @@ EXPECTATIONS: dict[str, dict] = {
         # screenshot, so a figure count of zero here is the "no visual at all"
         # state the diagram exists to fix, and this row is what keeps it fixed.
         "figures": 1,
+        # This page's visual is drawn inline rather than loaded as a file, so
+        # `alt` is carrying the diagram's accessible name here, not an <img>.
         "alt": True,
         "links": ["/", "/projects/quote-generator/"],
         "reachable": ["/projects/quote-generator/"],
@@ -461,6 +485,20 @@ STRUCTURE_SWEEP = r"""
   const count = (s) => document.querySelectorAll(s).length;
   const decorative = (el) =>
     el.closest('[aria-hidden="true"]') !== null || el.getAttribute('role') === 'presentation';
+
+  // What a screen reader would announce this element as. An inline SVG standing
+  // in for a picture has no `alt` to read, so its name is aria-label, the text
+  // of whatever aria-labelledby points at, or its own <title>.
+  const accessibleName = (el) => {
+    const label = (el.getAttribute('aria-label') || '').trim();
+    if (label) return label;
+    const referenced = (el.getAttribute('aria-labelledby') || '')
+      .split(/\s+/).filter(Boolean)
+      .map((id) => (document.getElementById(id)?.textContent || '').trim())
+      .join(' ').trim();
+    if (referenced) return referenced;
+    return (el.querySelector(':scope > title')?.textContent || '').trim();
+  };
   return {
     headings: Object.fromEntries(
       ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].map((h) => [h, count(h)])
@@ -473,9 +511,18 @@ STRUCTURE_SWEEP = r"""
     ),
     ids: [...document.querySelectorAll('[id]')].map((e) => e.id),
     figures: count('figure'),
-    badAlt: [...document.querySelectorAll('img')]
-      .filter((i) => !decorative(i) && !(i.getAttribute('alt') || '').trim())
-      .map((i) => (i.getAttribute('src') || '(no src)').split('/').pop()),
+    // A picture is a picture whether it arrived as a file or was drawn inline, so
+    // an `svg[role="img"]` is held to the same rule as an `<img>`: it has to say
+    // what it shows. Without this half, a row's `alt: True` is vacuous on a page
+    // whose only visual is an inline diagram.
+    badAlt: [
+      ...[...document.querySelectorAll('img')]
+        .filter((i) => !decorative(i) && !(i.getAttribute('alt') || '').trim())
+        .map((i) => (i.getAttribute('src') || '(no src)').split('/').pop()),
+      ...[...document.querySelectorAll('svg[role="img"]')]
+        .filter((s) => !decorative(s) && !accessibleName(s))
+        .map((s) => 'svg.' + ((s.getAttribute('class') || '(no class)').split(' ')[0])),
+    ],
     links: [...document.querySelectorAll('a[href]')].map((a) => a.getAttribute('href')),
     text: document.body.innerText,
   };
@@ -548,7 +595,7 @@ def check_structure(path: str, spec: dict, got: dict) -> list[str]:
         fail("<figure> count", spec["figures"], got["figures"])
 
     if spec.get("alt") and got["badAlt"]:
-        fail("non-empty alt on every image", "all", f"missing on {got['badAlt']}")
+        fail("a name on every picture", "all", f"missing on {got['badAlt']}")
 
     hrefs = set(got["links"])
     for wanted in spec.get("links") or []:

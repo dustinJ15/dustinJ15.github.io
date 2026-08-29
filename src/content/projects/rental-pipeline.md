@@ -30,7 +30,7 @@ four report types each, and no two agreeing on what a spreadsheet is.
 I built a Dockerized Python ETL pipeline: sixteen parsers, one normalized schema per report type.
 
 <figure class="diagram" data-reveal>
-<svg class="d-svg" viewBox="0 0 560 640" role="img" aria-labelledby="pipeline-shape-title pipeline-shape-desc">
+<svg class="d-svg" viewBox="0 0 560 640" role="img" aria-labelledby="pipeline-shape-title" aria-describedby="pipeline-shape-desc">
 <title id="pipeline-shape-title">Sixteen parsers converging on one schema</title>
 <desc id="pipeline-shape-desc">A column of sixteen blocks, set as four groups of four, runs down the left. A line leaves each block and all sixteen converge on a single point, which feeds one bordered block on the right: the normalized schema every consumer downstream reads.</desc>
 <g aria-hidden="true">
