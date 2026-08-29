@@ -473,6 +473,13 @@
   line-height: 0.9;
 }
 
+/* Explicitly a block. A row is a <span> holding block-level lines, and left
+   inline it becomes a block-in-inline split, which silently drops any padding on
+   the row itself. */
+.hero-row {
+  display: block;
+}
+
 @media (min-width: 64rem) {
   .hero-title {
     font-size: clamp(1.9rem, calc((100vw - 2 * var(--gutter)) / 8.9), 7.5rem);
