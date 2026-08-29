@@ -14,14 +14,14 @@ Copy is otherwise the ported Jekyll copy; the editorial pass is ticket 08.
 
 **Blocked by:** 02.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] `/about/` renders the full content of the existing about page in the new chrome.
-- [ ] The quoted line is a display pull quote with a visible attribution, marked up as a
+- [x] `/about/` renders the full content of the existing about page in the new chrome.
+- [x] The quoted line is a display pull quote with a visible attribution, marked up as a
       quotation with its citation.
-- [ ] The portrait renders through the image pipeline with real alt text and reads as
+- [x] The portrait renders through the image pipeline with real alt text and reads as
       intentional on the dark ground.
-- [ ] No career-change framing and no explanation of the gap appears anywhere on the page.
-- [ ] Body copy sets at a readable measure and is visible before any scroll-triggered animation.
-- [ ] The Jekyll about page still builds and is untouched.
-- [ ] The gate passes with a row for `/about/`.
+- [x] No career-change framing and no explanation of the gap appears anywhere on the page.
+- [x] Body copy sets at a readable measure and is visible before any scroll-triggered animation.
+- [x] The Jekyll about page still builds and is untouched.
+- [x] The gate passes with a row for `/about/`.

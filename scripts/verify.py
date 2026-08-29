@@ -169,8 +169,10 @@ CONTRAST_SWEEP = r"""
 """
 
 # Routes that exist in the Jekyll site but have not been migrated to Astro yet.
-# Emptied as tickets land; a 404 here is a "not built yet", not a broken link.
-PENDING = {"/about/"}
+# A 404 on one of these is a "not built yet", not a broken link. Empty as of
+# tickets 04 and 05: every page the Jekyll site serves now has an Astro route,
+# so from here a 404 on an internal link is a real failure.
+PENDING: set[str] = set()
 
 
 # --------------------------------------------------------------------------
@@ -267,6 +269,29 @@ EXPECTATIONS: dict[str, dict] = {
             "If an agent writes the code, what exactly do you do?",
         ],
     },
+    "/about/": {
+        "headings": {"h1": 1, "h2": 0, "h3": 0},
+        "ids": ["main"],
+        # The portrait is a bare image; the one figure is the pull quote, which is
+        # a figure because it has an attribution to caption it with.
+        "figures": 1,
+        "alt": True,
+        "links": ["/", "/process/"],
+        "reachable": ["/process/"],
+        "text": [
+            # The gap is gestured at and never explained. This row asserts the
+            # gesture is still on the page; nothing may explain it.
+            "I started this degree years ago, stopped, and came back to it",
+            "taught skiing professionally for Vail Resorts for five seasons",
+            "Its six roles are a model of the organization",
+            # The sourced claim and its attribution have to travel together, or
+            # the page is back to an uncited line mid-paragraph.
+            "Most programmers have trouble explaining what they do",
+            "The Pragmatic Programmer",
+            "Available now",
+        ],
+    },
+
     # ── case studies ──────────────────────────────────────────────────────
     # Each row is the same shape: the project title as the one h1, one h2 per
     # section of the argument, the figure count, the before/after a skimmer is

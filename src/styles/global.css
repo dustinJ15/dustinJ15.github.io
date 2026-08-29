@@ -269,16 +269,18 @@
   font-weight: 700;
 }
 
-/* A pull quote. One or two sentences per study, lifted from that study's own
-   prose, set at display size against the accent rule. It is a restatement of
-   copy that is already on the page, so it is not marked up as a citation. */
-.prose > blockquote {
+/* A pull quote, in two shapes against the same accent rule.
+   `blockquote` on its own is a restatement of copy already on the page, so it
+   carries no citation. `figure.pullquote` is somebody else's idea, so it is
+   marked up as one: a blockquote with a cite URL and a visible attribution,
+   which is what lets a reader tell a sourced claim from an unsourced one. */
+.prose > :is(blockquote, figure.pullquote) {
   grid-column: wide;
   margin-block: 2.6em;
   padding-inline-start: clamp(1rem, 3vw, 2.5rem);
   border-inline-start: 2px solid var(--accent);
 }
-.prose > blockquote p {
+.prose > :is(blockquote, figure.pullquote) p {
   font-family: var(--font-display);
   font-size: var(--text-3xl);
   font-weight: 500;
@@ -287,6 +289,17 @@
   text-wrap: balance;
   color: var(--ink);
 }
+.prose > figure.pullquote blockquote { margin: 0; }
+.prose > figure.pullquote figcaption {
+  margin-block-start: 1.4rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: 1.7;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.prose > figure.pullquote cite { font-style: normal; color: var(--ink-soft); }
 
 /* The step list on the process page. Ruled rows, the command in mono against
    the accent, the description beside it on a wide screen and under it on a
@@ -325,6 +338,50 @@
   font-size: var(--text-base);
   line-height: 1.6;
   color: var(--ink-soft);
+}
+
+/* The standing availability line. Ruled in the accent above and below, which is
+   the one place on a prose page that shouts without being display type. */
+.prose > p.availability {
+  grid-column: content;
+  margin-block: 3em;
+  padding-block: 1.1rem;
+  border-block: 1px solid var(--accent);
+  font-size: var(--text-base);
+  line-height: 1.6;
+}
+.prose > p.availability strong { color: var(--accent); }
+
+/* The portrait.
+
+   A light photograph dropped straight onto a near-black page reads as a hole
+   punched in it. Three things stop that: it is desaturated so the page keeps one
+   accent, a thin wash of that accent puts it in the site's own light, and the
+   foot of the frame dissolves into the ground rather than ending on an edge. */
+.portrait {
+  position: relative;
+  isolation: isolate;
+}
+
+.portrait img {
+  width: 100%;
+  height: auto;
+  filter: grayscale(1) contrast(1.08) brightness(0.88);
+}
+
+.portrait::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      to top,
+      var(--bg) 0%,
+      color-mix(in srgb, var(--bg) 55%, transparent) 18%,
+      transparent 52%
+    ),
+    color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
 /* Screenshots break out of the measure and sit in dark browser chrome, so a
