@@ -355,7 +355,10 @@ EXPECTATIONS: dict[str, dict] = {
     "/projects/rental-pipeline/": {
         "headings": {"h1": 1, "h2": 2, "h3": 0},
         "ids": ["main"],
-        "figures": 0,
+        # The one figure is the pipeline diagram. This study has no UI to
+        # screenshot, so a figure count of zero here is the "no visual at all"
+        # state the diagram exists to fix, and this row is what keeps it fixed.
+        "figures": 1,
         "alt": True,
         "links": ["/", "/projects/quote-generator/"],
         "reachable": ["/projects/quote-generator/"],
@@ -364,6 +367,9 @@ EXPECTATIONS: dict[str, dict] = {
             "parsers into one schema",
             "source systems",
             "no two agreeing on what a spreadsheet is",
+            # The diagram's caption, which is also the sighted reader's version
+            # of the description the SVG gives assistive technology.
+            "Every input arrives in its own format and everything downstream reads one",
         ],
     },
 

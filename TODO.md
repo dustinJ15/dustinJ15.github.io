@@ -36,8 +36,9 @@ and approval is per action, not once.
 
 - [ ] **Strip the em-dashes from page copy.** Several pages still use them; Dustin reads them as
       an AI tell. Mechanical but needs care not to mangle sentences.
-- [ ] **`rental-pipeline` has no screenshot.** The other three case studies do now. It is a
-      pipeline rather than a UI, so it may want a diagram instead of a screenshot, or nothing.
+- [x] **`rental-pipeline` has no screenshot.** The other three case studies do now. It is a
+      pipeline rather than a UI, so it got a hand-authored inline SVG of sixteen inputs
+      converging on one schema instead. Ticket 06.
 - [ ] **Dark mode has never been reviewed on a real screen.** The tokens are all defined and the
       palette swaps, but nobody has looked at it. Check the figures especially: screenshots are
       light-background images sitting on a dark page.

@@ -444,3 +444,81 @@
     8.5rem
   );
 }
+
+/* ---------------------------------------------------------------------------
+   THE PIPELINE DIAGRAM
+
+   Hand-authored inline SVG on the rental-pipeline study, which is a pipeline
+   rather than a UI and so has nothing to screenshot. Inline, not an asset,
+   because it has to read the tokens below rather than bake a palette into a
+   file that then goes stale the next time one changes.
+
+   It is a drawing of the shape and nothing else: sixteen inputs, one output. It
+   names no client, no source system and no field.
+
+   Every fill and stroke is a class rather than a presentation attribute, for two
+   reasons. `var()` inside a presentation attribute is not reliably supported,
+   and the labels need a real CSS `color` for the gate's contrast sweep to see:
+   the sweep reads `color`, and a `fill` attribute would leave it measuring the
+   inherited colour instead of the one on the screen. Hence `fill: currentColor`.
+
+   The viewBox is portrait on purpose. The whole drawing scales with the column,
+   so a wide viewBox would shrink the labels to nothing at 375; at roughly 7:8
+   the smallest label still sets above 14px there.
+   --------------------------------------------------------------------------- */
+.prose > figure.diagram {
+  grid-column: wide;
+  margin-block: 3em;
+}
+
+.d-svg {
+  width: 100%;
+  max-width: 38rem;
+  height: auto;
+}
+
+.d-label {
+  font-family: var(--font-mono);
+  font-size: 26px;      /* user units: the viewBox scales this with the column */
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  fill: currentColor;
+}
+
+.d-label-out {
+  font-size: 24px;
+  color: var(--accent);
+}
+
+/* The sixteen inputs. */
+.d-tile {
+  fill: var(--surface-2);
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+
+/* Sixteen paths onto one point. */
+.d-wire {
+  fill: none;
+  stroke: var(--line-strong);
+  stroke-width: 1.5;
+}
+
+.d-node { fill: var(--accent); }
+
+.d-out {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+/* The one schema, and the rows standing for its columns. */
+.d-box {
+  fill: var(--surface);
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.d-row     { stroke: var(--ink-faint); stroke-width: 2; }
+.d-row-key { stroke: var(--accent); stroke-width: 2; }

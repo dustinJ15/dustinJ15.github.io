@@ -11,16 +11,16 @@ output; it does not name a client, a source system or anything specific to that 
 
 **Blocked by:** 03.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] The rental-pipeline case study carries a diagram of sixteen inputs converging on one
+- [x] The rental-pipeline case study carries a diagram of sixteen inputs converging on one
       schema, and no longer sits without a visual.
-- [ ] It is legible at 375, 768 and 1440, and never pushes the page sideways.
-- [ ] It reads correctly on the dark ground and takes its colours from the site's tokens rather
+- [x] It is legible at 375, 768 and 1440, and never pushes the page sideways.
+- [x] It reads correctly on the dark ground and takes its colours from the site's tokens rather
       than hard-coded values.
-- [ ] It carries an accessible description of what it shows; purely decorative parts are hidden
+- [x] It carries an accessible description of what it shows; purely decorative parts are hidden
       from assistive technology.
-- [ ] Any text inside it meets AA contrast at its rendered size.
-- [ ] No client name, source system or business-specific label appears in it, and the screen
+- [x] Any text inside it meets AA contrast at its rendered size.
+- [x] No client name, source system or business-specific label appears in it, and the screen
       passes on the publishable surface.
-- [ ] The gate passes with the rental-pipeline row updated for the added figure.
+- [x] The gate passes with the rental-pipeline row updated for the added figure.
