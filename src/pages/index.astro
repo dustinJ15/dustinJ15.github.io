@@ -26,22 +26,35 @@ const marquee = [...new Set(projects.flatMap((p) => p.data.stack))];
     >
       {
         hero.displayRows.map((row, i) => (
-          <span
-            class:list={[
-              'hero-row',
-              i === 2 && 'text-accent',
-              i % 2 === 1 && 'lg:pl-[8vw]',
-              i === 4 && 'lg:pl-[20vw]',
-            ]}
-          >
-            {row.map((phrase) => (
-              <span class="block overflow-hidden">
-                <span data-line class="block">
-                  {phrase}
-                </span>
-              </span>
-            ))}
-          </span>
+          <Fragment>
+            {/* The rows and the phrases inside them are block-level, so the
+                heading's textContent runs them together without this and the
+                page's primary heading reads "and thepipelines" to a copy-paste,
+                to the computed accessible name and to any extractor. A
+                whitespace-only text node renders as nothing either way round:
+                between block boxes it collapses, and a flex container drops a
+                text run that is only white space. */}
+            {i > 0 && ' '}
+            <span
+              class:list={[
+                'hero-row',
+                i === 2 && 'text-accent',
+                i % 2 === 1 && 'lg:pl-[8vw]',
+                i === 4 && 'lg:pl-[20vw]',
+              ]}
+            >
+              {row.map((phrase, j) => (
+                <Fragment>
+                  {j > 0 && ' '}
+                  <span class="block overflow-hidden">
+                    <span data-line class="block">
+                      {phrase}
+                    </span>
+                  </span>
+                </Fragment>
+              ))}
+            </span>
+          </Fragment>
         ))
       }
     </h1>

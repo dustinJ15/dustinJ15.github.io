@@ -269,6 +269,11 @@ EXPECTATIONS: dict[str, dict] = {
         ],
         "text": [
             "Dustin Jones",
+            # The hero, as ONE sentence. The display type is broken across five
+            # rows at 1440 and seven lines at 375, and the words have to still be
+            # words to a copy-paste and to the computed accessible name whichever
+            # way it broke.
+            "full-stack applications and the pipelines that keep them reliable.",
             "Available now for part-time and contract work",
             "Sixteen parsers into one schema",
         ],
@@ -642,32 +647,42 @@ FOCUS_STEP = r"""
 # anyone who scrolls, so anything that looks for the biggest empty band anywhere
 # on the page fails the home route at 1440 for doing exactly what it should.
 #
-# "Painted" means a text leaf, a replaced element, or a rule. A section's own
-# bottom padding is legitimately part of the gap, which is why the threshold sits
-# well above the largest one on the site rather than at zero.
+# "Painted" means a text leaf, a replaced element, or a rule on ANY side. Every
+# rule on this site is a border-top, so looking only at border-bottom would ignore
+# a trailing divider and measure the gap from the text above it instead. A
+# section's own bottom padding is legitimately part of the gap, which is why the
+# threshold sits well above the largest one on the site rather than at zero.
 TRAILING_EMPTY = r"""
 () => {
   const main = document.querySelector('main');
   const footer = document.querySelector('footer');
   if (!main || !footer) return null;
   const sy = window.scrollY;
-  let bottom = 0;
+  // null, not 0: a route where nothing qualified would otherwise measure the gap
+  // from the top of the document and report a four-figure failure against an
+  // empty element name, which reads as a catastrophic layout bug rather than as
+  // the check having found nothing to measure from.
+  let bottom = null;
   let who = '';
   for (const el of main.querySelectorAll('*')) {
     const cs = getComputedStyle(el);
     if (cs.display === 'none' || cs.visibility === 'hidden') continue;
+    const ruled = ['Top', 'Right', 'Bottom', 'Left'].some(
+      (side) => parseFloat(cs['border' + side + 'Width']) > 0,
+    );
     const paints =
       (el.children.length === 0 && (el.textContent || '').trim().length > 0) ||
       ['IMG', 'SVG', 'VIDEO', 'CANVAS', 'HR'].includes(el.tagName.toUpperCase()) ||
-      parseFloat(cs.borderBottomWidth) > 0;
+      ruled;
     if (!paints) continue;
     const r = el.getBoundingClientRect();
     if (!r.width && !r.height) continue;
-    if (r.bottom + sy > bottom) {
+    if (bottom === null || r.bottom + sy > bottom) {
       bottom = r.bottom + sy;
       who = el.tagName.toLowerCase() + ' "' + (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 32) + '"';
     }
   }
+  if (bottom === null) return { empty: true };
   return { gap: Math.round(footer.getBoundingClientRect().top + sy - bottom), last: who };
 }
 """
@@ -1132,7 +1147,11 @@ def main(paths: list[str]) -> int:
                         # How much unmarked ground the route ends on. See
                         # TRAILING_EMPTY: a trailing gap, not the biggest gap.
                         trailing = page.evaluate(TRAILING_EMPTY)
-                        if trailing and trailing["gap"] > MAX_TRAILING_EMPTY:
+                        if trailing and trailing.get("empty"):
+                            failures.append(
+                                f"[trailing] {tag}: nothing painted inside <main> at all"
+                            )
+                        elif trailing and trailing["gap"] > MAX_TRAILING_EMPTY:
                             failures.append(
                                 f"[trailing] {tag}: {trailing['gap']}px of empty page between "
                                 f"the last painted thing ({trailing['last']}) and the footer, "

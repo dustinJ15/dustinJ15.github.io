@@ -32,14 +32,22 @@ import portrait from '../../assets/img/dustin-jones.jpg';
         modest rectangle with empty ground on three sides; at this size and this
         position it is the thing the page opens with rather than an illustration
         beside the opening. The slot is still a fraction of the grid, not a fixed
-        width, so it keeps growing past 1440, and `sizes` describes that. */}
+        width, so it keeps growing past 1440, and `sizes` describes that.
+
+        The candidates stop at 1000 because that is the source file's own width.
+        At the old four-column size the largest one was comfortably above what a
+        2x screen asked for. At 42vw a 2x 1440 screen wants about 1220 and can
+        only be handed the 1000, so it upscales by a fifth. Listing a 1280 or a
+        1600 does not fix that, it just emits candidates the pipeline clamps back
+        to 1000; a larger export of the portrait would, and the original lives on
+        the career-hub side. */}
     <div
       class="portrait max-w-[18rem] lg:col-span-5 lg:-ml-(--gutter) lg:max-w-none"
     >
       <Image
         src={portrait}
         alt="Dustin Jones"
-        widths={[320, 480, 640, 960, 1280, 1600]}
+        widths={[320, 480, 640, 960, 1000]}
         sizes="(min-width: 1024px) 42vw, 18rem"
         loading="eager"
       />

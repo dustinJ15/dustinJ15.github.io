@@ -83,7 +83,15 @@ export function revealDisplayTitle(stagger = 0.02) {
   const lines = gsap.utils.toArray<HTMLElement>('[data-line]');
   if (!lines.length) return;
 
+  // The beat is per VISUAL LINE, not per `[data-line]`, and the two stopped being
+  // the same thing when the home hero grew rows: at lg "and the" and "pipelines"
+  // are two `[data-line]`s sitting side by side on one line, and delaying by
+  // index rose one half of that line 90ms after the other. Grouping by the top
+  // edge of the rendered box is what a reader sees as a line, whichever width
+  // they are at, and it leaves every one-line-per-element title exactly as it was.
   const splits = lines.map((l) => new SplitText(l, { type: 'words,chars' }));
+  const tops = lines.map((l) => Math.round(l.getBoundingClientRect().top));
+  const rows = [...new Set(tops)].sort((a, b) => a - b);
   gsap.set(lines, { opacity: 1 });
   splits.forEach((s, i) => {
     gsap.from(s.chars, {
@@ -92,7 +100,7 @@ export function revealDisplayTitle(stagger = 0.02) {
       duration: 1.1,
       ease: 'expo.out',
       stagger,
-      delay: 0.1 + i * 0.09,
+      delay: 0.1 + rows.indexOf(tops[i]) * 0.09,
     });
   });
 
