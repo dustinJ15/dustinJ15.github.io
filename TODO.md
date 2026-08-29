@@ -19,7 +19,9 @@ and approval is per action, not once.
       separate approvals. This is the least reversible thing in the list; un-publishing does not
       un-clone. Run `../career-hub/scripts/screen.sh .` immediately before.
       The deploy workflow now builds on every push to `main`, so the first push is also the first
-      deploy once Pages is enabled.
+      deploy. Set Pages to the GitHub Actions source **before** that first push, or the run fails
+      at `configure-pages` with "Get Pages site failed". Enabling Pages is not automated on
+      purpose; it is Dustin's to do.
 - [ ] **Verify live.** Load `https://dustinJ15.github.io` in a real browser, logged out, and click
       every link again. Live is a different environment from local. Then check it on a phone,
       which is the actual use case.

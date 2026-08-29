@@ -2,6 +2,11 @@
 #
 # Runs on every push to main, and can also be started by hand from the Actions tab.
 #
+# Pages has to be switched to the GitHub Actions source before the first run, or
+# configure-pages fails with "Get Pages site failed". Enabling it is deliberately
+# not automated here (no `enablement: true`): it is one of the steps that needs
+# Dustin's explicit approval, so it stays a hand action in the repo settings.
+#
 name: Deploy site
 
 on:

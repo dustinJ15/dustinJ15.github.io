@@ -4,7 +4,7 @@ import { glob } from 'astro/loaders';
 // One case study per markdown file. The schema is the single source of truth for
 // project metadata: the home page work list, the project header and the <head>
 // description all read from here, so `stack` can no longer disagree with itself
-// the way the Jekyll front matter did against index.md.
+// the way the old front matter did against a hand-written list on the home page.
 const projects = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/projects' }),
   schema: z.object({
