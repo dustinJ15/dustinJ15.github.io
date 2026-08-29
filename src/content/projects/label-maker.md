@@ -27,8 +27,9 @@ metrics:
 ---
 
 A clinical lab prints a lot of labels. Every study needs barcode sheets for each patient, child
-aliquot labels for every sample that gets split, envelope labels, and bag labels — each with
-running packet numbers and sequential barcodes, each from an approved template.
+aliquot labels for every sample that gets split, envelope labels, and bag labels. Every one of
+them carries running packet numbers and sequential barcodes, and every one comes from an
+approved template.
 
 That expansion was happening by hand. Someone would take a QC'd single-patient template, copy the
 rows, and increment the numbers, once per patient, once per study.
@@ -42,8 +43,8 @@ Teams and *they* double-click it. It runs offline, uploads nothing, and needs no
 install, and no IT ticket.
 
 That last part is the design decision I'd defend hardest. A web app would have needed hosting,
-an approval process, and a login — three places for adoption to die. A file you can email is a
-tool people can start using the same afternoon.
+an approval process, and a login. That is three places for adoption to die. A file you can email
+is a tool people can start using the same afternoon.
 
 ![The tool's opening screen: four cards, one per label type, each with a title and a one-line description.](../../../assets/img/label-maker-makers.png "The whole tool is this one file. Four makers, no install, no login, nothing uploaded. Screenshots on this page are from a demo run with an invented study.")
 
@@ -56,7 +57,7 @@ no server round-trip.
 
 - **Excel sheets** go through [ExcelJS](https://github.com/exceljs/exceljs), which copies the
   template's styles, number formats, and column widths, and shifts formula row-references as it
-  stamps each new patient block. Barcodes are kept as text — the moment Excel decides a barcode
+  stamps each new patient block. Barcodes are kept as text. The moment Excel decides a barcode
   is a number, leading zeros disappear and the sheet is wrong in a way nobody notices until
   it's printed.
 - **Word labels** go through [PizZip](https://github.com/open-xml-templating/pizzip), and the
@@ -91,7 +92,7 @@ test-script specification, incident log and incident report forms, validation re
 memo, bi-annual review, and a use-and-QC SOP.
 
 I had no regulatory background going in. The useful surprise was how much of it is just
-engineering discipline written in a different dialect — a requirement you can test, a risk you
+engineering discipline written in a different dialect: a requirement you can test, a risk you
 can name, and evidence that the test actually ran. The paperwork is unfamiliar. The idea that a
 claim needs evidence behind it is not.
 

@@ -34,8 +34,9 @@ and approval is per action, not once.
 
 ## Backlog, not blocking
 
-- [ ] **Strip the em-dashes from page copy.** Several pages still use them; Dustin reads them as
-      an AI tell. Mechanical but needs care not to mangle sentences.
+- [x] **Strip the em-dashes from page copy.** Gone from every Astro page, including alt text,
+      captions, tab titles and meta descriptions. The gate's em-dash check now fails the build
+      rather than advising, so one cannot come back. Ticket 08.
 - [x] **`rental-pipeline` has no screenshot.** The other three case studies do now. It is a
       pipeline rather than a UI, so it got a hand-authored inline SVG of sixteen inputs
       converging on one schema instead. Ticket 06.

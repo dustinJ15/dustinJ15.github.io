@@ -23,9 +23,9 @@ metrics:
     label: source systems
 ---
 
-A property management firm pulled operational reports out of four different systems — Yardi,
-ResMan, Entrata, and RealPage — and wanted them in one place for BI dashboards. Four vendors,
-four report types each, and no two agreeing on what a spreadsheet is.
+A property management firm ran four different systems: Yardi, ResMan, Entrata, and RealPage. It
+pulled operational reports out of all four and wanted them in one place for BI dashboards. Four
+vendors, four report types each, and no two agreeing on what a spreadsheet is.
 
 I built a Dockerized Python ETL pipeline: sixteen parsers, one normalized schema per report type.
 
@@ -97,14 +97,14 @@ The interesting part of an ETL job is never the transformation. It's what arrive
 A pipeline that runs unattended has to be able to say whether it worked:
 
 - **File fingerprinting**, so a re-dropped file doesn't get ingested twice.
-- **Configurable row-count validation** — a report that suddenly has a tenth of its usual rows is
-  a failure, not a small day.
+- **Configurable row-count validation**, so a report that suddenly has a tenth of its usual rows
+  fails the run rather than passing as a small day.
 - **Per-run ingestion logging**, so a wrong number downstream can be traced to the run that
   produced it.
 - **Unit matching against a master property index**, reaching 96–99% match rates across systems
   that each name the same unit differently.
 
-Computed KPI fields — days-to-complete, AR aging buckets, days vacant — are derived in the
+Computed KPI fields such as days-to-complete, AR aging buckets and days vacant are derived in the
 pipeline rather than in each dashboard, so every consumer gets the same definition.
 
 <p class="note">

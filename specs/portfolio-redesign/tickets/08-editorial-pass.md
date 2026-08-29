@@ -18,17 +18,17 @@ When this lands, the gate's em-dash check stops being advisory and starts failin
 
 **Blocked by:** 03, 04, 05.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] No em-dash appears in any rendered page, including alt text, captions, titles and meta
+- [x] No em-dash appears in any rendered page, including alt text, captions, titles and meta
       descriptions.
-- [ ] The gate's em-dash check is enforced rather than advisory, and the whole site passes it.
-- [ ] The home page's opening line states what Dustin does without requiring the reader to infer
+- [x] The gate's em-dash check is enforced rather than advisory, and the whole site passes it.
+- [x] The home page's opening line states what Dustin does without requiring the reader to infer
       it from the project list.
-- [ ] Each case study states its before and after in the reader's terms near the top.
-- [ ] The retired spreadsheet motif appears nowhere, in any variant.
-- [ ] No career-change framing and no explanation of the gap appears anywhere.
-- [ ] Every figure's alt text describes what the image shows, and reads as written English.
-- [ ] Nothing on any page describes employer internals, and the screen passes on the publishable
+- [x] Each case study states its before and after in the reader's terms near the top.
+- [x] The retired spreadsheet motif appears nowhere, in any variant.
+- [x] No career-change framing and no explanation of the gap appears anywhere.
+- [x] Every figure's alt text describes what the image shows, and reads as written English.
+- [x] Nothing on any page describes employer internals, and the screen passes on the publishable
       surface.
-- [ ] The gate passes on every route.
+- [x] The gate passes on every route.

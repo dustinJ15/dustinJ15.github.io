@@ -30,8 +30,10 @@ quote-generator page admits an approach that failed and explains why the dumber 
    ```
    It exits non-zero on a hit and screens file *names* as well as contents. Passing it is
    necessary, not sufficient: **it cannot read a PNG.** Every image must be opened and looked at.
-4. **No em-dashes in anything Dustin reads.** He reads them as an AI tell. (Existing page copy
-   still contains some; that is a known cleanup, not a licence to add more.)
+4. **No em-dashes in anything Dustin reads.** He reads them as an AI tell. The site copy is
+   clean as of ticket 08 and `npm run verify` fails on one, in alt text and meta descriptions
+   as well as body copy. Removing one is never mechanical: rewrite the sentence so the
+   punctuation is not missed.
 5. **No career-change framing.** He started a CS degree, stopped, came back to it. It is a
    return. The gap is gestured at and never explained, and no page ever says why.
 6. **The "I replace manual spreadsheet processes" motif is retired**, including the variant
@@ -72,8 +74,8 @@ three stages fails. It runs, per route:
   never names a class, a component or a file**, so the table survives a redesign and still catches
   a regression. Adding a page means adding its row; a ticket is finished when the gate passes
   with its row in place.
-- The em-dash advisory. Printed, not failing, because the existing copy still carries them.
-  Ticket 08 removes them and flips it to a failure.
+- The em-dash check. It fails the build, and it reads everything the page publishes, not only
+  what is painted: body text, alt text, captions, the tab title and the meta description.
 
 The gate is a floor, not a judge. It cannot tell you whether the design is good, and the screen
 script cannot read a PNG, so the screenshots it writes to `.verify/` still have to be opened and

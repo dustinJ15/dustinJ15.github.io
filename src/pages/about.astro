@@ -1,15 +1,15 @@
 ---
 /**
- * /about/ — who is writing all this.
+ * /about/, and who is writing all this.
  *
  * A prose page with two designed moments: the portrait, treated so it belongs on
  * a near-black ground rather than sitting on it as a light rectangle, and the
  * Pragmatic Programmer line, which was buried mid-paragraph and uncited on the
  * Jekyll page and is now a display pull quote with a visible attribution.
  *
- * The copy is ported from the Jekyll about.md. The degree is a return: the gap
- * is gestured at and never explained, and nothing here frames any of it as a
- * career change. Ticket 08 is the editorial pass; do not pre-empt it here.
+ * The copy has been through the ticket 08 editorial pass. The degree is a return:
+ * the gap is gestured at and never explained, and nothing here frames any of it as
+ * a career change. No em-dashes: the gate fails the build on one.
  */
 import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
@@ -65,10 +65,10 @@ import portrait from '../../assets/img/dustin-jones.jpg';
       model of the organization more than they are a security feature.
     </p>
 
-    <p>
-      The strange part of the shift is that skiing was legible to anyone watching and programming
-      is not.
-    </p>
+    {/* Deliberately not "the shift", "the switch" or anything else that reads as a
+        career change. The observation is about whose work is visible, and the
+        page never explains the gap in the degree. */}
+    <p>Skiing was legible to anyone watching. Programming is not.</p>
 
     {/* A sourced claim, so it is marked up as one: a blockquote with a cite URL
         and a visible attribution. The wording is verbatim and the attribution is

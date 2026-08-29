@@ -11,8 +11,8 @@ Universal checks, per route x viewport x theme:
      and weight.
   4. Renders with prefers-reduced-motion forced: content present, not blank.
   5. Renders with JavaScript disabled: text present, nothing stuck at opacity 0.
-  6. Em-dashes in rendered text. ADVISORY: printed, does not fail. Ticket 08
-     removes the existing ones and flips this to a failure.
+  6. No em-dash anywhere the page publishes: body text, alt text, captions,
+     the tab title, the meta description. One fails the build.
   7. Reachability: a link a route declares as reachable must be hit-testable at
      some point during the scroll-through, at every viewport. A link can be in
      the DOM, resolve, and still be clipped out of reach; that is a real bug the
@@ -525,6 +525,33 @@ STRUCTURE_SWEEP = r"""
     ],
     links: [...document.querySelectorAll('a[href]')].map((a) => a.getAttribute('href')),
     text: document.body.innerText,
+    // The published strings that `text` above does NOT contain. Alt text, a
+    // caption's `title`, the tab title and the meta description are prose a
+    // visitor or a screen reader is handed, and are held to the same editorial
+    // rules as a paragraph; checking `innerText` alone would let an em-dash
+    // hide in any of them. Body text is not repeated here, because `text`
+    // already carries it.
+    published: [
+      { where: '<title>', text: document.title },
+      // Every social description and title too, not just the one meta the crawler
+      // reads. They are prose a stranger meets in a link preview, and a page that
+      // ever passes a distinct og: string would otherwise be scanned nowhere.
+      ...[...document.querySelectorAll('meta[name][content], meta[property][content]')]
+        .map((m) => ({
+          key: (m.getAttribute('name') || m.getAttribute('property') || '').toLowerCase(),
+          text: m.getAttribute('content') || '',
+        }))
+        .filter((m) => /description|title/.test(m.key))
+        .map((m) => ({ where: 'meta ' + m.key, text: m.text })),
+      ...[...document.querySelectorAll('img')].flatMap((i) => [
+        { where: 'img alt', text: i.getAttribute('alt') || '' },
+        { where: 'img title', text: i.getAttribute('title') || '' },
+      ]),
+      ...[...document.querySelectorAll('svg title, svg desc')]
+        .map((e) => ({ where: 'svg ' + e.tagName.toLowerCase(), text: e.textContent || '' })),
+      ...[...document.querySelectorAll('[aria-label]')]
+        .map((e) => ({ where: 'aria-label', text: e.getAttribute('aria-label') || '' })),
+    ].filter((p) => p.text.trim()),
   };
 }
 """
@@ -557,14 +584,23 @@ NOJS_SWEEP = r"""
 """
 
 
-def em_dashes(text: str, limit: int = 5) -> list[str]:
-    """Every em-dash in rendered text, quoted with enough context to find it."""
+def em_dashes(published: list[dict], limit: int = 8) -> list[str]:
+    """Every em-dash in anything the page publishes, quoted with enough context to
+    find it and labelled with where it was found.
+
+    Dustin reads an em-dash as a machine having written the sentence, so one is a
+    failure rather than a note. Alt text, captions, the tab title and the meta
+    description count: they are published prose, and a reader meets them the same
+    way they meet a paragraph."""
     out: list[str] = []
-    for i, ch in enumerate(text):
-        if ch == "\u2014":
-            out.append(" ".join(text[max(0, i - 30):i + 31].split()))
-            if len(out) == limit:
-                break
+    for item in published:
+        text = item.get("text") or ""
+        for i, ch in enumerate(text):
+            if ch == "\u2014":
+                quote = " ".join(text[max(0, i - 30):i + 31].split())
+                out.append(f"{item.get('where', '?')}: ...{quote}...")
+                if len(out) == limit:
+                    return out
     return out
 
 
@@ -620,7 +656,6 @@ def main(paths: list[str]) -> int:
     failures: list[str] = []
     checked_links: set[str] = set()
     pending_hits: set[str] = set()
-    advisories: list[str] = []
     resolved: dict[str, int] = {}
 
     try:
@@ -783,9 +818,11 @@ def main(paths: list[str]) -> int:
                 page.screenshot(path=str(OUT / f"{path.strip('/').replace('/','_') or 'index'}-reducedmotion.png"), full_page=True)
                 ctx.close()
 
-                # 6. per-route expectations, plus the em-dash advisory. Both read
+                # 6. per-route expectations, plus the em-dash check. Both read
                 #    the settled page once at the widest viewport; structure and
-                #    copy do not vary by width.
+                #    copy do not vary by width. If a page ever grows a responsive
+                #    display toggle, the copy only shown at a narrow width is
+                #    scanned by neither, and this has to sweep every viewport.
                 ctx = browser.new_context(viewport={"width": 1440, "height": 900})
                 page = ctx.new_page()
                 page.goto(base + path, wait_until="load")
@@ -803,8 +840,13 @@ def main(paths: list[str]) -> int:
                                 f"[expect] {path}: link to \"{href}\": expected to resolve, "
                                 f"found HTTP {resolved[href]}"
                             )
-                for quote in em_dashes(got["text"]):
-                    advisories.append(f"[em-dash] {path}: ...{quote}...")
+                # Metadata first, body text last. The quote list is capped, and a
+                # page with a cap's worth of em-dashes in its prose would
+                # otherwise report none of its alt text or meta descriptions,
+                # sending a fixer round the loop twice to find them.
+                published = [*got["published"], {"where": "body text", "text": got["text"]}]
+                for quote in em_dashes(published):
+                    failures.append(f"[em-dash] {path}: {quote}")
                 ctx.close()
 
                 # 7. no JavaScript. A failed script must never produce a blank page.
@@ -832,10 +874,6 @@ def main(paths: list[str]) -> int:
         print("\nnot yet migrated (expected during the Jekyll overlap):")
         for h in sorted(pending_hits):
             print("  " + h)
-    if advisories:
-        print(f"\nadvisory, not failing ({len(advisories)}):")
-        for a in advisories:
-            print("  " + a)
     if failures:
         print(f"\nFAIL ({len(failures)}):")
         for f in failures:

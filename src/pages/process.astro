@@ -1,14 +1,14 @@
 ---
 /**
- * /process/ — how the work gets made.
+ * /process/, and how the work gets made.
  *
  * A prose page, so it takes the site's chrome and then gets out of the way: a
  * display title, display section headings, and body copy at a measure with no
  * motion inside the argument. Only the headings arrive on scroll; every
  * paragraph is painted at full opacity before any ScrollTrigger runs.
  *
- * The copy is ported from the Jekyll process.md verbatim, em-dashes and all.
- * Ticket 08 is the editorial pass; do not pre-empt it here.
+ * The copy has been through the ticket 08 editorial pass. No em-dashes: the gate
+ * fails the build on one.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageTitle from '../components/PageTitle.astro';
@@ -25,7 +25,7 @@ const chain = [
   { step: '/to-spec', what: 'The interview becomes a written spec.' },
   { step: '/to-tickets', what: 'The spec becomes tracer-bullet tickets with explicit blocking edges.' },
   { step: '/implement', what: 'One ticket: tests first, then the gate, then review, then commit.' },
-  { step: 'ralph-once.sh', what: 'The loop, supervised — one ticket at a time, watched.' },
+  { step: 'ralph-once.sh', what: 'The loop, supervised. One ticket at a time, watched.' },
   { step: 'afk-ralph.sh', what: 'The loop, unattended, against the remaining tickets.' },
 ];
 ---
@@ -50,8 +50,8 @@ const chain = [
 
   <div class="prose pb-24">
     <p>
-      The work I actually do is designing the harness — the specs, the gate, the isolation, the
-      honesty rules — that makes what a machine writes safe to merge. The bottleneck stopped
+      The work I actually do is designing the harness that makes what a machine writes safe to
+      merge: the specs, the gate, the isolation, the honesty rules. The bottleneck stopped
       being how fast code gets written a while ago. It's whether you can trust it.
     </p>
 
@@ -101,9 +101,9 @@ const chain = [
     <p>
       <strong>Two sessions will collide.</strong> On one project, two sessions worked the same
       checkout for twenty minutes before either noticed. Plans are now claimed atomically before
-      any work starts — <code>( set -o noclobber; : &gt; &lt;plan&gt;.claim )</code>, which either
-      succeeds or fails and cannot do both — and execution happens in a git worktree, so two sessions can't share a
-      working tree at all.
+      any work starts, with <code>( set -o noclobber; : &gt; &lt;plan&gt;.claim )</code>, which
+      either succeeds or fails and cannot do both. Execution happens in a git worktree, so two
+      sessions can't share a working tree at all.
     </p>
 
     <p>
@@ -125,18 +125,18 @@ const chain = [
     <h2 data-reveal>Where it's been used</h2>
 
     <p>
-      <strong><a href="https://github.com/dustinJ15/claude-dotfiles">claude-dotfiles</a></strong> —
-      the skills themselves, installable, synced across machines.
+      <strong><a href="https://github.com/dustinJ15/claude-dotfiles">claude-dotfiles</a></strong> is
+      the skills themselves, installable and synced across machines.
     </p>
 
     <p>
-      <strong>Label Maker</strong> — the first real use. <code>specs/</code> and eleven tickets, and
-      the commit log reads "Ticket 01" through "Ticket 11." The workflow leaves fingerprints in
-      git, which is a nice property when someone asks how something was built.
+      <strong>Label Maker</strong> was the first real use. <code>specs/</code> and eleven
+      tickets, and the commit log reads "Ticket 01" through "Ticket 11." The workflow leaves
+      fingerprints in git, which is a nice property when someone asks how something was built.
     </p>
 
     <p>
-      <strong><a href="/projects/quote-generator/">Quote Generator</a></strong> — where it had to
+      <strong><a href="/projects/quote-generator/">Quote Generator</a></strong> is where it had to
       hold up under production pressure: 537 commits and 155 merged pull requests in eight weeks,
       every one through the gate, behind a merge queue, with a test suite larger than the
       application.
