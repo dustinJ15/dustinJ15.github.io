@@ -36,12 +36,25 @@ the publish ticket. Nothing here blocks the remaining tickets.
 - [ ] **The diagram sits left at 1440 with space to its right.** Deliberate: label legibility at
       375 sets its max-width, and the asymmetry is on-direction. One line if it should be bigger.
 
+## The editorial pass, ticket 08
+
+- [ ] **Two rewrites the agent flagged for a second read.** In `quote-generator.md`, "Their job is
+      to check a document and make the calls that need judgment, not to assemble one" became "...
+      that need judgment. Assembling one is no longer part of the job." The contrast survives but
+      lands slower. And "That habit, treating 'we have not actually confirmed this' as a fact worth
+      writing down, is the thing I would bring to a team" was reordered to "Treating 'we have not
+      actually confirmed this' as a fact worth writing down is the habit I would bring to a team".
+- [ ] **`about.astro` lost a line to the no-career-change rule.** "The strange part of the shift is
+      that skiing was legible to anyone watching and programming is not" is now "Skiing was legible
+      to anyone watching. Programming is not." Read it in place; it sets up the Cunningham quote.
+- [ ] **`rental-pipeline` has no before/after block.** Deliberate: it is the case that proves the
+      `Outcome` component is data driven rather than always drawn. Its tagline carries the outcome
+      instead. Say if you want the block there.
+
 ## Known gaps, owned by later tickets
 
 - [ ] **No `og:image`.** Astro's output does not include the Jekyll `assets/` tree during the
       overlap, so any URL would 404. Ticket 07 or 10. Social shares are text-only until then.
-- [ ] **Em-dashes still in ported copy**, roughly 19 across the case studies plus the prose pages.
-      Ticket 08 removes them and flips the gate advisory to a failure.
 - [ ] **Screenshots are the old shoots at two different widths** (1366 and 1800). They read at 1440
       and are small at 375. Ticket 07 re-shoots at one width.
 
