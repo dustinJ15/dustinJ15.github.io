@@ -5,10 +5,6 @@ the publish ticket. Nothing here blocks the remaining tickets.
 
 ## Design calls to look at
 
-- [ ] **`/about/` H1 is entirely acid lime.** `PageTitle` accents the last line; a one-line title
-      makes that unconditional. One line to make it ink if it is too loud for a prose page.
-- [ ] **The portrait's accent wash gives skin an olive cast.** Grayscale plus accent wash stops the
-      photo reading as a hole punched in the page, but it is a taste call.
 - [ ] **The base layout added a site header** (wordmark plus Work / Process / About). Ticket 02
       named only a skip link and a footer. Without it there is no way back from `/about/`.
 - [ ] **The work rail's `Scroll →` hint shows at every width**, not just desktop, because narrow
@@ -19,6 +15,9 @@ the publish ticket. Nothing here blocks the remaining tickets.
 - [ ] **Pull quotes are lightly trimmed rather than strictly verbatim**, so they carry no em-dashes.
 - [ ] **Dark mode has never been reviewed on a real screen.** Screenshots are light-background
       images sitting on a near-black page. Check the figures especially.
+
+Ticket 11 now owns the acid-lime `/about/` H1, the portrait's olive cast, the dead vertical space
+above the contact block and the hero's scale at 375.
 
 ## Content and correctness
 
