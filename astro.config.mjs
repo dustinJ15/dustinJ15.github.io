@@ -19,6 +19,17 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
+  image: {
+    // Markdown images are the case-study screenshots, and they were shipping a
+    // single 2400px master with an empty srcset: a phone downloaded the full
+    // file to paint it in a ~335px column. `constrained` makes Astro generate
+    // srcset and sizes for every optimised image, markdown ones included, and
+    // never upscales past the source. The styles that go with it are left off
+    // because the two places an image renders already size it in CSS, and the
+    // injected `:where()` rules would be one more thing to reason about.
+    layout: 'constrained',
+    responsiveStyles: false,
+  },
   build: {
     inlineStylesheets: 'auto',
   },

@@ -44,8 +44,8 @@ sees, and releases it to a specialist.
 
 <figure>
   <img src="{{ '/assets/img/quote-intake-form.png' | relative_url }}"
-       alt="A seven-section web intake form covering contact details, study details, per-region site counts, sample types, laboratory testing, optional services and attachments.">
-  <figcaption>The client-facing intake. Seven sections, one single-use link, and it cannot be submitted half-finished. Top of the form; it continues for three more sections. Screenshot from a demo instance seeded with invented data.</figcaption>
+       alt="A seven-section web intake form covering contact details, study details, per-region site counts, sample types, laboratory testing, optional services and additional information.">
+  <figcaption>The client-facing intake. Seven sections, one single-use link, and it cannot be submitted half-finished. Top of the form; the remaining four sections continue below it. Screenshot from a demo instance seeded with invented data.</figcaption>
 </figure>
 
 What the specialist opens is not a summary of a conversation. It's a **draft quote**. The line
@@ -55,7 +55,7 @@ judgment — not to assemble one.
 
 <figure>
   <img src="{{ '/assets/img/quote-builder-draft.png' | relative_url }}"
-       alt="The quote builder: study information at the top, read-only derived kit and sample calculations, collapsible line-item groups, editable legal notes, and a running total in a sidebar.">
+       alt="The quote builder: study information at the top, read-only derived kit and sample calculations, twelve collapsible line-item groups, and a running total in a sidebar.">
   <figcaption>What the specialist opens is a draft, not a summary. The kit and sample arithmetic above the line items is derived from the intake, and the line-item groups below it expand in place. Screenshot from a demo instance seeded with invented data.</figcaption>
 </figure>
 

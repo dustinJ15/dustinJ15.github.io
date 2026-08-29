@@ -61,7 +61,7 @@ week. Seven sections, and it can't be submitted half-finished. It lands on the b
 development lead's dashboard, who reviews it, fills in the internal fields the client never
 sees, and releases it to a specialist.
 
-![A seven-section web intake form covering contact details, study details, per-region site counts, sample types, laboratory testing, optional services and attachments.](../../../assets/img/quote-intake-form.png "The client-facing intake. Seven sections, one single-use link, and it cannot be submitted half-finished. Top of the form; the remaining four sections continue below it. Screenshot from a demo instance seeded with invented data.")
+![A seven-section web intake form covering contact details, study details, per-region site counts, sample types, laboratory testing, optional services and additional information.](../../../assets/img/quote-intake-form.png "The client-facing intake. Seven sections, one single-use link, and it cannot be submitted half-finished. Top of the form; the remaining four sections continue below it. Screenshot from a demo instance seeded with invented data.")
 
 > The failure was not that the handoff was slow. It was that the handoff was incomplete.
 
