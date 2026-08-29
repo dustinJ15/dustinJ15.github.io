@@ -1,16 +1,12 @@
 # Build and deploy the Astro site to GitHub Pages.
 #
-# DELIBERATELY manual-only for now. The Jekyll site is still the source of truth
-# for the live pages, and a push-triggered run would replace it the first time
-# anything lands on main. Ticket 10 (delete Jekyll) is what adds:
+# Runs on every push to main, and can also be started by hand from the Actions tab.
 #
-#   push:
-#     branches: [main]
-#
-# Nothing here runs until someone explicitly starts it from the Actions tab.
 name: Deploy site
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:

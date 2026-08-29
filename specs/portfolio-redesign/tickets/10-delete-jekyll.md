@@ -24,18 +24,18 @@ file change; it is not a deploy.
 
 **Blocked by:** 01, 02, 03, 04, 05, 06, 07, 08, 09.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] All Jekyll files are removed: layouts, includes, config, Gemfiles, page sources and build
+- [x] All Jekyll files are removed: layouts, includes, config, Gemfiles, page sources and build
       output, plus the Jekyll-only entries in the ignore file.
-- [ ] Images live under the Astro source tree and every page still renders them. No image exists
+- [x] Images live under the Astro source tree and every page still renders them. No image exists
       in two places.
-- [ ] The site builds clean and the gate passes on every route.
-- [ ] The gate's not-yet-migrated route list is empty.
-- [ ] The deploy workflow builds on push to the default branch, and the comment explaining why it
+- [x] The site builds clean and the gate passes on every route.
+- [x] The gate's not-yet-migrated route list is empty.
+- [x] The deploy workflow builds on push to the default branch, and the comment explaining why it
       was manual-only is gone.
-- [ ] CLAUDE.md describes the site that exists: token contract, direction and references, motion
+- [x] CLAUDE.md describes the site that exists: token contract, direction and references, motion
       policy, content collection as the single source of truth, and the verification gate. No
       section is left marked superseded.
-- [ ] TODO.md reflects the finished migration and the remaining publish steps.
-- [ ] Nothing was pushed, no repo was created and Pages was not enabled.
+- [x] TODO.md reflects the finished migration and the remaining publish steps.
+- [x] Nothing was pushed, no repo was created and Pages was not enabled.

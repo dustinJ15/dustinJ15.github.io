@@ -37,7 +37,7 @@ month, by year, or by section and everything scopes to the selection.
 Like the [label maker](/projects/label-maker/), it's one self-contained
 HTML file that runs offline. Nothing is uploaded.
 
-![A dashboard header showing a project code, two years of monthly bars, an invoice count, and a row of summary tiles for total billed, kits built, items to sites, labels billed, sample shipments, other billables and active sites.](../../../assets/img/billing-masthead.png "Two years of trackers, dropped in together. Every tile and chart below rescopes to the year, month and section filters. Screenshots on this page come from a demo run against generated workbooks; every figure in them is invented.")
+![A dashboard header showing a project code, two years of monthly bars, an invoice count, and a row of summary tiles for total billed, kits built, items to sites, labels billed, sample shipments, other billables and active sites.](../../assets/img/billing-masthead.png "Two years of trackers, dropped in together. Every tile and chart below rescopes to the year, month and section filters. Screenshots on this page come from a demo run against generated workbooks; every figure in them is invented.")
 
 ## Parsing a spreadsheet a human maintains
 
@@ -62,13 +62,13 @@ came from, so the sheet's own SUM rows still reconcile and the year total doesn'
 prefix-based matches are heuristic, so they're flagged as **assumed** in the ledger and the
 data-quality panel, so someone can spot-check exactly the rows the computer guessed at.
 
-![Two year-long grids, one row per month and one cell per day, shaded by how much was billed that day.](../../../assets/img/billing-calendar.png "One calendar per year, shaded by daily billed total. It is the fastest way to see when a study was actually busy.")
+![Two year-long grids, one row per month and one cell per day, shaded by how much was billed that day.](../../assets/img/billing-calendar.png "One calendar per year, shaded by daily billed total. It is the fastest way to see when a study was actually busy.")
 
 **Supersede rather than accumulate.** Load a revised copy of a year and it replaces the older one
 automatically, so totals never double-count. Both stay listed, and you can reactivate the older
 copy.
 
-![A horizontal stacked bar chart ranking six sites by total billed, each bar split into the five spending categories, with totals labelled at the end.](../../../assets/img/billing-sites.png "Where the money went, by site and by category. Site names are normalised on their trailing code, so a long site name and its bare code fold into one row.")
+![A horizontal stacked bar chart ranking six sites by total billed, each bar split into the five spending categories, with totals labelled at the end.](../../assets/img/billing-sites.png "Where the money went, by site and by category. Site names are normalised on their trailing code, so a long site name and its bare code fold into one row.")
 
 > Indexing by column position on a human-maintained file is a bug with a delay on it.
 
@@ -79,7 +79,7 @@ pure, with no DOM anywhere in either. That's what makes them testable with zero 
 dependencies, and it's why the charts are hand-built SVG rather than a charting library: the
 output is a string, and a string is easy to assert against.
 
-![A stacked column chart of billing by month across two years, split into five coloured categories, with the two peak months labelled.](../../../assets/img/billing-by-month.png "Every chart on the page is SVG built by hand from a pure function. No charting library, and the output is a string, which is what makes it straightforward to assert against.")
+![A stacked column chart of billing by month across two years, split into five coloured categories, with the two peak months labelled.](../../assets/img/billing-by-month.png "Every chart on the page is SVG built by hand from a pure function. No charting library, and the output is a string, which is what makes it straightforward to assert against.")
 
 `build/` holds the real source; the shipped `.html` is a generated artifact with the vendored
 parser and the fonts base64-embedded. The footer stamps a version and build date, so a copy

@@ -1,4 +1,4 @@
-# CLAUDE.md — working notes for this repo
+# CLAUDE.md: working notes for this repo
 
 **This file is public.** So is everything else here, the moment the repo goes up. Never write
 employer internals, screening patterns, or personal detail into this repo. The private context
@@ -8,17 +8,21 @@ lives next door in `../career-hub/` (local-only git, no remote, ever) and is rea
 
 ## What this is
 
-Dustin Jones's portfolio. Jekyll, hand-written CSS, **no theme, no framework, no build step
-beyond Jekyll itself.** Seven pages: home, process, about, and four case studies.
+Dustin Jones's portfolio. **Astro 7, static output, Tailwind v4 through `@tailwindcss/vite`,
+TypeScript, no React.** Eight routes: home, process, about, four case studies and a 404.
 
-The site's differentiator is the writing. The case studies argue rather than list — the
-quote-generator page admits an approach that failed and explains why the dumber fix was right.
-**Every design and content decision protects the reading experience.** That is the whole brief.
+Two things carry the site. The writing is the differentiator: the case studies argue rather than
+list, and the quote-generator page admits an approach that failed and explains why the dumber fix
+was right. The design is what buys the writing a reader: near-black ground, one acid-lime accent,
+oversized display type and real scroll choreography. Impact goes where it is free. Restraint goes
+where it would cost reading, so case-study prose stays calm and set at a measure.
+
+The Jekyll site this replaced was deleted in ticket 10. Nothing here builds with Ruby any more.
 
 ## Hard rules
 
 1. **Never push, create a repo, change visibility, or enable Pages without asking Dustin first,
-   per action.** Not "once at the start" — each time.
+   per action.** Not "once at the start". Each time.
 2. **Never publish employer internals.** Naming Frontage Laboratories is fine and deliberate.
    Describing how their systems work internally, or reproducing anything specific to their
    business or their clients, is not. Same rule for `rental-pipeline`, which is separate work
@@ -47,11 +51,6 @@ npm run dev                  # dev server
 npm run build                # build to dist/
 npm run verify               # THE GATE: astro check, then build, then the sweep
 npm run verify -- /about/    # same, swept against one route for a fast loop
-
-# The Jekyll site, until ticket 10 deletes it. Ruby 4.0 cannot install Jekyll
-# locally (http_parser.rb won't compile), so use podman:
-podman run --rm -v "$PWD":/srv/jekyll:Z -w /srv/jekyll docker.io/jekyll/jekyll:4 jekyll build
-cd _site && python3 -m http.server 8899
 
 # Screen. From the repo root, on tracked plus untracked-not-ignored files only:
 # node_modules matches a screened token hundreds of times and is noise.
@@ -109,45 +108,69 @@ wants them back.
 
 ## Design decisions, and why
 
-> **SUPERSEDED as of the 2026-08-28 redesign.** Everything in this section describes the old
-> Jekyll site and its "protect the reading experience above all" brief. That brief was
-> deliberately inverted: the site is moving to Astro + Tailwind v4, dark only, with heavy
-> scroll choreography. Cards, shadows, gradients, scroll animation and Tailwind are all now
-> allowed. The `--measure` rule is loosened. See the section above for the real direction.
-> This section is kept only until the migration lands, and is rewritten then.
+Chosen 2026-08-28 and landed over tickets 02 to 11. Do not undo these casually.
 
-Chosen 2026-08-28 from three working directions. Do not undo these casually.
+**The token contract, and where a colour belongs.** Every colour, font and measure is a custom
+property on `:root` in `src/styles/global.css`, mapped into Tailwind through `@theme inline` so
+the generated utility keeps the `var()` reference instead of baking a resolved value. **A new
+colour is added there and nowhere else.** Components read token names; they never hard-code a hex
+value and never branch on theme. `--ink-faint` carries all the mono metadata and sits at the WCAG
+AA floor: it must not be darkened, and the gate will catch you if it is.
 
-- **Fraunces** (Google Fonts) for the wordmark, `h1`/`h2`/`h3` and the intro line. **Charter**
-  carries every word of body text. This is the site's only external dependency; it had none
-  before, and adding a second one needs a reason.
-- **`--measure: 36rem`**, about 70 characters. This is a legibility constant, not a style
-  preference. Past ~75 characters the eye loses the line return. **The text column is narrow on
-  purpose. Do not widen it because a page "looks empty".**
-- **Figures break out to 52rem**, centred on the measure, collapsing back on narrow screens. A
-  1366px screenshot rendered at 544px is unreadable, which is the only reason the breakout
-  exists. Wide content escapes the measure; prose never does.
-- **One accent** (`--accent`, a burnt orange). Dark mode is a full token swap in
-  `assets/css/main.css`; anything new needs a value in both palettes.
-- **No cards, no shadows, no gradients, no scroll-triggered animation.** Dustin flagged the
-  AI-portfolio tells directly: gradient hero, emoji section headings, `rounded-2xl shadow-lg`
-  card grids, fake stat counters, centered everything, "passionate developer" copy, bullet soup.
-  Scroll fade-ins belong on that list too — they read as template and they delay content.
-- **Tailwind is not an upgrade here.** It is the shortest path to exactly the card-grid look
-  above. The hand-written CSS is an asset. Astro over Jekyll is a real improvement, but only
-  worth the migration if this grows a blog or many more pages.
+**Dark only.** There is no light palette and no theme toggle. The acid-on-black is the identity
+and a light variant dilutes it. A `dark:` variant exists as an escape hatch, but the semantic
+tokens are the intended mechanism.
+
+**Type.** Bricolage Grotesque Variable for display, Inter Variable for body, JetBrains Mono
+Variable for metadata, all self-hosted through Fontsource, which is why the site has no
+third-party network dependency at all. Bricolage carries both a width and a weight axis, and that
+is what makes the hero settle from condensed to full width on load. Swapping it for a static face
+removes the animation. The scale is fluid and clamp-based throughout.
+
+**Measure.** The old site's 36rem column is no longer a site-wide constant: sections opt into
+`--measure`. Heroes, work rails and figures use the full viewport. Case-study body copy keeps a
+comfortable measure, because reading is what those pages are for.
+
+**Motion policy**, in `src/scripts/motion.ts`, in order of importance:
+
+1. Reduced motion wins. Nothing is hidden and nothing is scroll-jacked.
+2. Content is never hidden before JavaScript has confirmed it can animate it back. The
+   `data-motion="on"` flag is what arms the CSS that hides `[data-reveal]`, and it is set from
+   JS, so a no-JS visitor sees the whole page. **Do not hide anything in static CSS.**
+3. Everything is torn down on `astro:before-swap`, so a view transition cannot leak a
+   ScrollTrigger or stack a second Lenis instance. Anything that scrolls the page
+   programmatically goes through `scrollWindowTo`, or Lenis snaps it back.
+
+Nothing scroll-triggered gates the first paint of body text.
+
+**The content collection is the single source of truth for project metadata.**
+`src/content/projects/*.md` with the zod schema in `src/content.config.ts`. The home page work
+list, the case-study header and the `<head>` description all read from it, so `stack` cannot
+disagree with itself the way the old front matter did against the hand-written list on the home
+page. `metrics` values must be traceable to a sentence in the case study. Nothing invented.
+
+**Case-study markdown stays plain markdown.** An image with a title becomes a captioned figure in
+dark browser chrome, via the rehype plugin in `src/plugins/case-study-markdown.mjs`. Do not write
+raw `<figure>` HTML into a case study; that is what the old site did and it could not be
+optimised.
+
+**The AI-portfolio tells are still banned.** Dustin named them: gradient hero, emoji section
+headings, `rounded-2xl shadow-lg` card grids, fake stat counters, centred everything, "passionate
+developer" copy, bullet soup. Scroll choreography is now the direction, but a generic fade-up on
+every block is the template look and is not.
 
 ## Screenshots
 
-`assets/img/` is synthetic-data-only, without exception. The three tools are employer work and
+`src/assets/img/` is synthetic-data-only, without exception. Astro's image pipeline optimises
+everything there to lazy, responsive WebP; nothing is served from `public/`. The three tools are employer work and
 their real inputs are real client data.
 
 The pipeline lives in career-hub because it depends on private repos:
 
-- `../career-hub/scripts/shoot_clean.py` — the quoting app. Wraps its shoot tool and rewrites
+- `../career-hub/scripts/shoot_clean.py`, the quoting app. Wraps its shoot tool and rewrites
   every fee, legal note and item name to invented values first. **A naive shoot leaks real
   pricing**; read the 2026-08-28 entry in `../career-hub/workflow/LOG.md` before touching it.
-- `../career-hub/scripts/shoot-offline-tools.py` and `gen-billing-demo.js` — the label maker and
+- `../career-hub/scripts/shoot-offline-tools.py` and `gen-billing-demo.js`, the label maker and
   the billing analyzer. Generates synthetic workbooks and drives the real apps.
   **It blanks every `<img>` before shooting**, because the label preview renders the employer
   logo. Keep that step.
@@ -157,14 +180,21 @@ invented, but a stranger reading a picture cannot tell an invented rate from a r
 
 ## Adding a project
 
-Drop a `.md` in `projects/`. Front matter: `title`, `year`, `role`, `stack`, `code`, `summary`.
-The `project` layout applies automatically via `_config.yml`. Add an entry to the work list in
-`index.md`. Prose in Markdown; `<figure>` blocks in raw HTML with a real `alt` and a
-`figcaption`. Alt text is published text, so the editorial rules apply to it too.
+Drop a `.md` in `src/content/projects/`. The schema in `src/content.config.ts` is the contract and
+the build fails on a malformed front matter: `title`, `order`, `year`, `role`, `stack` (array),
+`code` (label plus optional href), `summary`, `tagline`, optional `outcome` (before and after) and
+optional `metrics`. Nothing else needs touching: the home page work list and `/projects/[id]/`
+both read the collection.
+
+Prose in plain Markdown. A screenshot is an image with a title, `![alt](../../assets/img/x.png
+"The caption.")`, which the rehype plugin turns into a captioned figure in browser chrome. Alt
+text and captions are published text, so the editorial rules apply to them, em-dashes included.
+
+Then add the route's row to `EXPECTATIONS` in `scripts/verify.py` and run the gate.
 
 ## Where the private context lives
 
-`../career-hub/` — read on demand, do not load it all:
+`../career-hub/`, read on demand. Do not load it all:
 
 | Need | Read |
 | --- | --- |

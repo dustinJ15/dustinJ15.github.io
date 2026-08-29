@@ -46,14 +46,14 @@ That last part is the design decision I'd defend hardest. A web app would have n
 an approval process, and a login. That is three places for adoption to die. A file you can email
 is a tool people can start using the same afternoon.
 
-![The tool's opening screen: four cards, one per label type, each with a title and a one-line description.](../../../assets/img/label-maker-makers.png "The whole tool is this one file. Four makers, no install, no login, nothing uploaded. Screenshots on this page are from a demo run with an invented study.")
+![The tool's opening screen: four cards, one per label type, each with a title and a one-line description.](../../assets/img/label-maker-makers.png "The whole tool is this one file. Four makers, no install, no login, nothing uploaded. Screenshots on this page are from a demo run with an invented study.")
 
 ## Rewriting Excel and Word without breaking them
 
 `.xlsx` and `.docx` are zipped XML, which means a browser can read and write them directly with
 no server round-trip.
 
-![An envelope label form with fields for label text, study ID, description and a packet number range, beside a live preview of one rendered label.](../../../assets/img/label-maker-envelope.png "The Word makers preview the label as you type. The approved template underneath is never regenerated, only filled in. The employer logo is blanked out in this screenshot.")
+![An envelope label form with fields for label text, study ID, description and a packet number range, beside a live preview of one rendered label.](../../assets/img/label-maker-envelope.png "The Word makers preview the label as you type. The approved template underneath is never regenerated, only filled in. The employer logo is blanked out in this screenshot.")
 
 - **Excel sheets** go through [ExcelJS](https://github.com/exceljs/exceljs), which copies the
   template's styles, number formats, and column widths, and shifts formula row-references as it
@@ -79,7 +79,7 @@ the thing that ships has no dependencies at all.
 - **Files name themselves** from the inputs, so what lands in Downloads is already the name it
   needs on the shared drive.
 
-![A barcode label sheet form with a drop area for an .xlsx template, a patient packet prefix, starting number and count, and a barcode prefix and starting number.](../../../assets/img/label-maker-barcode.png "The Excel maker takes the QC'd single-patient template as its input. Rows per patient are read from the file rather than configured, and the leading zeros you type set the number width.")
+![A barcode label sheet form with a drop area for an .xlsx template, a patient packet prefix, starting number and count, and a barcode prefix and starting number.](../../assets/img/label-maker-barcode.png "The Excel maker takes the QC'd single-patient template as its input. Rows per patient are read from the file rather than configured, and the leading zeros you type set the number width.")
 
 > The paperwork is unfamiliar. The idea that a claim needs evidence behind it is not.
 

@@ -196,13 +196,6 @@ CONTRAST_SWEEP = r"""
 }
 """
 
-# Routes that exist in the Jekyll site but have not been migrated to Astro yet.
-# A 404 on one of these is a "not built yet", not a broken link. Empty as of
-# tickets 04 and 05: every page the Jekyll site serves now has an Astro route,
-# so from here a 404 on an internal link is a real failure.
-PENDING: set[str] = set()
-
-
 # --------------------------------------------------------------------------
 # Per-route expectations.
 #
@@ -222,7 +215,7 @@ PENDING: set[str] = set()
 #                              an accessible name, unless it is explicitly
 #                              decorative (aria-hidden or role="presentation")
 #   links      ["/about/"]     internal links that must be present on the page,
-#                              and must resolve unless still listed in PENDING
+#                              and must resolve
 #   text       ["substring"]   copy that must appear in the rendered text, matched
 #                              case- and whitespace-insensitively so that a
 #                              text-transform or a reflow is not a copy regression
@@ -999,7 +992,6 @@ def main(paths: list[str]) -> int:
     base = f"http://127.0.0.1:{PORT}"
     failures: list[str] = []
     checked_links: set[str] = set()
-    pending_hits: set[str] = set()
     resolved: dict[str, int] = {}
 
     try:
@@ -1078,12 +1070,9 @@ def main(paths: list[str]) -> int:
                                 checked_links.add(href)
                                 resp = ctx.request.get(base + href)
                                 if resp.status >= 400:
-                                    if href in PENDING:
-                                        pending_hits.add(href)
-                                    else:
-                                        failures.append(
-                                            f"[link] {path} -> {href}: HTTP {resp.status}"
-                                        )
+                                    failures.append(
+                                        f"[link] {path} -> {href}: HTTP {resp.status}"
+                                    )
 
                         # Drive the page through a full scroll so every ScrollTrigger
                         # fires. Without this a full-page screenshot captures the
@@ -1236,13 +1225,10 @@ def main(paths: list[str]) -> int:
                     if href not in resolved:
                         resolved[href] = ctx.request.get(base + href).status
                     if resolved[href] >= 400:
-                        if href in PENDING:
-                            pending_hits.add(href)
-                        else:
-                            failures.append(
-                                f"[expect] {path}: link to \"{href}\": expected to resolve, "
-                                f"found HTTP {resolved[href]}"
-                            )
+                        failures.append(
+                            f"[expect] {path}: link to \"{href}\": expected to resolve, "
+                            f"found HTTP {resolved[href]}"
+                        )
                 # Metadata first, body text last. The quote list is capped, and a
                 # page with a cap's worth of em-dashes in its prose would
                 # otherwise report none of its alt text or meta descriptions,
@@ -1273,10 +1259,6 @@ def main(paths: list[str]) -> int:
         httpd.shutdown()
 
     print(f"\nscreenshots -> {OUT}")
-    if pending_hits:
-        print("\nnot yet migrated (expected during the Jekyll overlap):")
-        for h in sorted(pending_hits):
-            print("  " + h)
     if failures:
         print(f"\nFAIL ({len(failures)}):")
         for f in failures:

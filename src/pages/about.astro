@@ -15,9 +15,7 @@ import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageTitle from '../components/PageTitle.astro';
 import { site } from '../data/site';
-// Still under the Jekyll asset directory during the overlap. Astro's pipeline
-// resolves and optimises it from there; it moves under src when Jekyll goes.
-import portrait from '../../assets/img/dustin-jones.jpg';
+import portrait from '../assets/img/dustin-jones.jpg';
 ---
 
 <BaseLayout

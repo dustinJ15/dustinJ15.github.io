@@ -4,7 +4,7 @@
  * Authoring stays plain markdown, which is the point of the ticket: adding a
  * case study is dropping one `.md` in. A screenshot is written as
  *
- *     ![alt text](../../../assets/img/thing.png "The caption.")
+ *     ![alt text](../../assets/img/thing.png "The caption.")
  *
  * so the file goes through Astro's own image pipeline (a relative path in a
  * content-collection markdown file is resolved and optimised by it) instead of

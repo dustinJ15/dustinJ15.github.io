@@ -1,4 +1,4 @@
-# Human-eye checklist — the redesign
+# Human-eye checklist: the redesign
 
 Things the gate cannot judge and agents deliberately left for Dustin. Work through this before
 the publish ticket. Nothing here blocks the remaining tickets.
@@ -79,12 +79,11 @@ above the contact block and the hero's scale at 375.
       scroller and Chrome only scrolls a newly focused card part of the way on screen. Every card
       is reachable and focusable; one may sit partly off screen. Accept or reject knowingly.
 
-## Known gaps, owned by later tickets
+## Known gaps
 
-- [ ] **No `og:image`.** Astro's output does not include the Jekyll `assets/` tree during the
-      overlap, so any URL would 404. Ticket 07 or 10. Social shares are text-only until then.
-- [ ] **Screenshots are the old shoots at two different widths** (1366 and 1800). They read at 1440
-      and are small at 375. Ticket 07 re-shoots at one width.
+- [ ] **No `og:image`.** Ticket 10 moved the images under `src/assets/img/`, where Astro
+      fingerprints them, so there is still no stable URL to point at. Social shares are text-only.
+      Tracked in `TODO.md` as backlog, not a blocker.
 
 ## Live, after publish
 
