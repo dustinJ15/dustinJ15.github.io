@@ -188,7 +188,9 @@ const marquee = [...new Set(projects.flatMap((p) => p.data.stack))];
   if (scroller && railTrack) {
     const onFocusIn = (e: FocusEvent) => {
       const card = (e.target as HTMLElement | null)?.closest<HTMLElement>('#rail-track > a');
-      if (!card) return;
+      // Keyboard only. `focusin` also fires on a click, and moving the rail out
+      // from under a pointer mid-click is the opposite of helpful.
+      if (!card || !card.matches(':focus-visible')) return;
       // Measured against the track rather than read off offsetLeft, so the
       // scrub's own transform cancels out: both rects move together.
       const offset = card.getBoundingClientRect().left - railTrack.getBoundingClientRect().left;

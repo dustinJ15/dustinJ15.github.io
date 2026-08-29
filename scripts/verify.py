@@ -574,6 +574,12 @@ FOCUS_STEP = r"""
 () => {
   const el = document.activeElement;
   if (!el || el === document.body || el === document.documentElement) return null;
+  // Read the walk's state, then write it, rather than doing both inside the
+  // object literal below, where the answers would depend on property order.
+  const prev = window.__vPrev || null;
+  const first = window.__vFirst || null;
+  if (!window.__vFirst) window.__vFirst = el;
+  window.__vPrev = el;
   const cs = getComputedStyle(el);
   const r = el.getBoundingClientRect();
   const w = Math.max(0, Math.min(r.right, innerWidth) - Math.max(r.left, 0));
@@ -582,30 +588,37 @@ FOCUS_STEP = r"""
   // the screen is judged on how much of it COULD be shown, not on its own size.
   const area = Math.max(1, Math.min(r.width, innerWidth) * Math.min(r.height, innerHeight));
   const ringWidth = parseFloat(cs.outlineWidth) || 0;
+  // `outline: 2px solid transparent` is a real pattern (it preserves a ring in
+  // forced-colors mode) and it is not a focus ring anybody can see, so the
+  // colour has to be read as well as the width.
+  const ringAlpha = (() => {
+    const c = cs.outlineColor;
+    if (!c || c === 'transparent') return 0;
+    const m = c.match(/-?[\d.]+/g);
+    if (!m) return 1;
+    if (/^rgba?\(/.test(c) && m.length > 3) return Number(m[3]);
+    if (/^(oklab|oklch|color|hsla?|lab|lch)\(/.test(c) && /\//.test(c)) {
+      return Number(c.split('/').pop().match(/-?[\d.]+/)?.[0] ?? 1);
+    }
+    return 1;
+  })();
   return {
     tag: el.tagName.toLowerCase(),
     href: el.getAttribute('href'),
     label: (el.innerText || el.getAttribute('aria-label') || '').trim().replace(/\s+/g, ' ').slice(0, 40),
-    ring: cs.outlineStyle !== 'none' && ringWidth >= 1,
-    ringDesc: cs.outlineStyle + ' ' + cs.outlineWidth,
+    ring: cs.outlineStyle !== 'none' && ringWidth >= 1 && ringAlpha > 0,
+    ringDesc: cs.outlineStyle + ' ' + cs.outlineWidth + ' ' + cs.outlineColor,
     frac: Math.round((w * h / area) * 100) / 100,
     ariaHidden: !!el.closest('[aria-hidden="true"]'),
     // Document order, so "focus order follows reading order" is a measurement
     // rather than a reading of the source, and survives any redesign that moves
     // an element without moving its markup.
-    afterPrevious:
-      !window.__vPrev ||
-      !!(window.__vPrev.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING),
+    afterPrevious: !prev || !!(prev.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING),
     // Tab that did not move focus: the definition of a trap.
-    stuck: window.__vPrev === el,
+    stuck: prev === el,
     // Back to where the sweep started, so the tab ring closed and the page has
     // no more focusable elements to visit.
-    wrapped: !!window.__vFirst && window.__vFirst === el,
-    _keep: (() => {
-      if (!window.__vFirst) window.__vFirst = el;
-      window.__vPrev = el;
-      return true;
-    })(),
+    wrapped: !!first && first === el,
   };
 }
 """
@@ -647,10 +660,22 @@ A11Y_SWEEP = r"""
   });
 
   // 3. Landmarks. A page a screen reader can navigate has all three.
+  // A <header> or <footer> is only banner or contentinfo when it is NOT inside
+  // sectioning content; inside an <article> it is that article's header and
+  // carries no landmark role at all. Counting the tags alone would call a page
+  // with a per-card header compliant while a screen reader finds no banner.
+  // One comma selector per landmark, never a sum: a <header role="banner"> is one
+  // landmark and matches both halves. <main> is deliberately absent from the
+  // ancestor list, because it is neither sectioning content nor a sectioning
+  // root, so a footer that is a child of main still carries contentinfo.
+  const topLevel = (sel) =>
+    [...document.querySelectorAll(sel)].filter(
+      (el) => !el.parentElement?.closest('article, aside, nav, section'),
+    ).length;
   const landmarks = {
-    banner: document.querySelectorAll('header:not([hidden])').length,
-    main: document.querySelectorAll('main').length,
-    contentinfo: document.querySelectorAll('footer').length,
+    banner: topLevel('header:not([hidden]), [role="banner"]'),
+    main: document.querySelectorAll('main, [role="main"]').length,
+    contentinfo: topLevel('footer:not([hidden]), [role="contentinfo"]'),
   };
 
   return {
@@ -710,6 +735,21 @@ FOCUS_VISIBLE = 0.5
 # A page with more focusable elements than this is either enormous or trapping.
 MAX_TABS = 80
 
+# What the walk below should visit. Anything natively focusable that is rendered
+# and not disabled, plus anything opted in with a non-negative tabindex.
+FOCUSABLE_COUNT = r"""
+() => [...document.querySelectorAll(
+    'a[href], button, input, select, textarea, summary, [tabindex]:not([tabindex^="-"])'
+  )]
+  .filter((el) => {
+    if (el.hasAttribute('disabled') || el.closest('[inert]')) return false;
+    const cs = getComputedStyle(el);
+    if (cs.display === 'none' || cs.visibility === 'hidden') return false;
+    const r = el.getBoundingClientRect();
+    return r.width > 0 || r.height > 0;
+  }).length
+"""
+
 
 def keyboard_sweep(page, tag: str, shot: Path) -> list[str]:
     """Tab through one rendered page and report what a keyboard visitor meets.
@@ -720,6 +760,16 @@ def keyboard_sweep(page, tag: str, shot: Path) -> list[str]:
     """
     bad: list[str] = []
     worst = (2.0, "")
+    # How many stops a complete walk should have. Focus returning to the first
+    # element is what a finished tab ring looks like AND what the canonical
+    # modal trap looks like; the only thing that separates them is whether the
+    # rest of the page was visited on the way round.
+    expected_stops = page.evaluate(FOCUSABLE_COUNT)
+    # Moving focus runs handlers the scroll-through never touches, so this page
+    # gets its own console watch rather than trusting the one on the page above.
+    errs: list[str] = []
+    page.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
+    page.on("requestfailed", lambda r: errs.append(f"requestfailed {r.url}"))
 
     # The skip link is the first thing a keyboard visitor meets on every route,
     # and the only way past a header they have already read.
@@ -745,13 +795,26 @@ def keyboard_sweep(page, tag: str, shot: Path) -> list[str]:
 
     # Restart the walk from the top of the document so the run below is the tab
     # order a visitor actually gets, not whatever is left after the skip link.
+    #
+    # blur() alone is NOT enough, and getting this wrong is silent: it clears
+    # focus but leaves Chrome's sequential focus navigation starting point where
+    # the skip link put it, on <main>. The walk then began at the first link
+    # INSIDE main and the header, the skip link and every primary nav link went
+    # unchecked on every route. Focusing the body moves the starting point back
+    # to the top of the document; the temporary tabindex is what makes the body
+    # focusable enough to accept it, and is removed again so it never appears as
+    # a tab stop of its own.
     page.evaluate(
         "() => { window.__vPrev = null; window.__vFirst = null;"
-        " document.activeElement?.blur?.(); window.scrollTo(0, 0); }"
+        " document.activeElement?.blur?.();"
+        " document.body.setAttribute('tabindex', '-1');"
+        " document.body.focus();"
+        " document.body.removeAttribute('tabindex');"
+        " window.scrollTo(0, 0); }"
     )
     page.wait_for_timeout(200)
 
-    for i in range(MAX_TABS):
+    for i in range(MAX_TABS + 1):
         page.keyboard.press("Tab")
         page.wait_for_timeout(90)
         # A scrubbed section eases into position, so a single read right after
@@ -766,7 +829,14 @@ def keyboard_sweep(page, tag: str, shot: Path) -> list[str]:
         if step is None:
             break                       # out of the document, into browser chrome
         if step["wrapped"]:
-            break                       # the ring closed
+            # Back at the start. A complete ring, unless most of the page was
+            # never reached, which is a trap that cycles rather than sticks.
+            if i < expected_stops:
+                bad.append(
+                    f"[focus-trap] {tag}: focus returned to the first element after {i} "
+                    f"stop(s), with {expected_stops} focusable element(s) on the page"
+                )
+            break
         if step["stuck"]:
             bad.append(
                 f"[focus-trap] {tag}: Tab did not move focus off "
@@ -790,6 +860,7 @@ def keyboard_sweep(page, tag: str, shot: Path) -> list[str]:
     else:
         bad.append(f"[focus-trap] {tag}: still tabbing after {MAX_TABS} stops; focus never wrapped")
 
+    bad.extend(f"[console] {tag} (keyboard): {e}" for e in errs)
     return bad
 
 
@@ -1039,12 +1110,15 @@ def main(paths: list[str]) -> int:
                 # one: the scroll choreography is off, so a section that scrolls
                 # or pins behaves differently and the keyboard has to be swept
                 # again rather than assumed from the run above.
-                rm_tag = f"{path.strip('/').replace('/','_') or 'index'}-reducedmotion"
-                kb = ctx.new_page()
-                kb.goto(base + path, wait_until="load")
-                kb.wait_for_timeout(900)
-                failures.extend(keyboard_sweep(kb, rm_tag, OUT / f"{rm_tag}-focus.png"))
-                kb.close()
+                rm_base = f"{path.strip('/').replace('/','_') or 'index'}-reducedmotion"
+                for vp_name, (w, h) in VIEWPORTS.items():
+                    rm_tag = f"{rm_base}-{vp_name}"
+                    kb = ctx.new_page()
+                    kb.set_viewport_size({"width": w, "height": h})
+                    kb.goto(base + path, wait_until="load")
+                    kb.wait_for_timeout(900)
+                    failures.extend(keyboard_sweep(kb, rm_tag, OUT / f"{rm_tag}-focus.png"))
+                    kb.close()
                 page.screenshot(path=str(OUT / f"{path.strip('/').replace('/','_') or 'index'}-reducedmotion.png"), full_page=True)
                 ctx.close()
 
