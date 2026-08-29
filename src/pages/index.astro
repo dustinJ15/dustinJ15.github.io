@@ -150,8 +150,58 @@ const marquee = [...new Set(projects.flatMap((p) => p.data.stack))];
 </BaseLayout>
 
 <script>
-  import { withMotion, onTeardown, revealDisplayTitle, revealOnScroll } from '../scripts/motion';
+  import {
+    withMotion,
+    onTeardown,
+    revealDisplayTitle,
+    revealOnScroll,
+    scrollWindowTo,
+  } from '../scripts/motion';
   import gsap from 'gsap';
+
+  const rail = document.getElementById('rail');
+  const scroller = document.getElementById('rail-scroller');
+  const railTrack = document.getElementById('rail-track');
+
+  // How far the track overhangs its scroller. Never negative: above roughly
+  // 1915px the track is narrower than the viewport, and a negative distance
+  // hands ScrollTrigger an end before its start on a pinned section.
+  const railDistance = () =>
+    rail && scroller && railTrack ? Math.max(0, railTrack.scrollWidth - scroller.clientWidth) : 0;
+
+  // Set while the pinned lane owns the horizontal axis; null in the native one.
+  let scrubStart: (() => number) | null = null;
+
+  // ── the rail with a keyboard ──────────────────────────────────────────
+  //
+  // Registered outside `withMotion`, because neither lane can be trusted to the
+  // browser and both of them exist under reduced motion too.
+  //
+  // In the native lane Chrome scrolls a horizontal scroller only part of the way
+  // towards a newly focused card: at 375 the second and fourth cards land 13%
+  // and 6% on screen, which is a focus ring the person who moved focus there
+  // cannot see. In the pinned lane it is worse, because the rail's horizontal
+  // position is a function of the PAGE scroll: scrolling the card into view does
+  // nothing at all, and the last card sits off the right edge.
+  //
+  // So put the card on screen ourselves, through whichever axis is live.
+  if (scroller && railTrack) {
+    const onFocusIn = (e: FocusEvent) => {
+      const card = (e.target as HTMLElement | null)?.closest<HTMLElement>('#rail-track > a');
+      if (!card) return;
+      // Measured against the track rather than read off offsetLeft, so the
+      // scrub's own transform cancels out: both rects move together.
+      const offset = card.getBoundingClientRect().left - railTrack.getBoundingClientRect().left;
+      const centred = offset - (scroller.clientWidth - card.offsetWidth) / 2;
+      if (scrubStart) {
+        scrollWindowTo(scrubStart() + Math.min(Math.max(centred, 0), railDistance()));
+      } else {
+        scroller.scrollLeft = centred; // the scroller clamps it for us
+      }
+    };
+    scroller.addEventListener('focusin', onFocusIn);
+    onTeardown(() => scroller.removeEventListener('focusin', onFocusIn));
+  }
 
   withMotion(() => {
     // Hero: per-line rise, plus a width-axis settle only Bricolage's wdth axis
@@ -174,19 +224,12 @@ const marquee = [...new Set(projects.flatMap((p) => p.data.stack))];
     // matchMedia rather than a one-shot innerWidth read, so resizing across the
     // breakpoint sets the rail up or tears it down instead of stranding it in
     // whichever state the page happened to load in.
-    const rail = document.getElementById('rail');
-    const scroller = document.getElementById('rail-scroller');
-    const railTrack = document.getElementById('rail-track');
     if (rail && scroller && railTrack) {
       const mm = gsap.matchMedia();
       onTeardown(() => mm.revert());
 
       mm.add('(min-width: 1024px)', () => {
-        // Never negative. Above roughly 1915px the track is narrower than the
-        // viewport, and a negative distance hands ScrollTrigger an end before
-        // its start on a pinned section.
-        const distance = () => Math.max(0, railTrack.scrollWidth - scroller.clientWidth);
-        if (distance() === 0) return;
+        if (railDistance() === 0) return;
 
         // The native scrollbar would fight the transform. gsap.set inside the
         // matchMedia scope, so reverting restores the scrollable fallback.
@@ -203,14 +246,14 @@ const marquee = [...new Set(projects.flatMap((p) => p.data.stack))];
         };
         scroller.addEventListener('scroll', hold);
 
-        gsap.to(railTrack, {
-          x: () => -distance(),
+        const scrub = gsap.to(railTrack, {
+          x: () => -railDistance(),
           ease: 'none',
           scrollTrigger: {
             trigger: rail,
             start: 'top top',
             // Clamped to a positive length: `+=0` is a degenerate pin.
-            end: () => `+=${Math.max(1, distance())}`,
+            end: () => `+=${Math.max(1, railDistance())}`,
             pin: true,
             scrub: 0.6,
             invalidateOnRefresh: true,
@@ -218,7 +261,15 @@ const marquee = [...new Set(projects.flatMap((p) => p.data.stack))];
           },
         });
 
-        return () => scroller.removeEventListener('scroll', hold);
+        // Hand the focus handler above the live scrub, so it drives the page
+        // scroll rather than a scrollLeft the `hold` listener would undo.
+        const st = scrub.scrollTrigger;
+        if (st) scrubStart = () => st.start;
+
+        return () => {
+          scrubStart = null;
+          scroller.removeEventListener('scroll', hold);
+        };
       });
     }
   });

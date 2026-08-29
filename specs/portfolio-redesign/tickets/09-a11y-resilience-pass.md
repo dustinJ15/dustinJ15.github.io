@@ -25,21 +25,21 @@ here.
 
 **Blocked by:** 03, 04, 05, 06, 07.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Every interactive element on every route has a visible focus ring, verified by tabbing
+- [x] Every interactive element on every route has a visible focus ring, verified by tabbing
       through each page.
-- [ ] Focus order follows reading order and no element traps focus, including inside the pinned
+- [x] Focus order follows reading order and no element traps focus, including inside the pinned
       work rail.
-- [ ] The skip link works on every route and moves focus to the main content.
-- [ ] Decorative elements, including the custom cursor and the duplicated marquee content, are
+- [x] The skip link works on every route and moves focus to the main content.
+- [x] Decorative elements, including the custom cursor and the duplicated marquee content, are
       hidden from assistive technology.
-- [ ] Each page reads coherently through a screen reader, with landmarks present and every
+- [x] Each page reads coherently through a screen reader, with landmarks present and every
       figure carrying real alt text.
-- [ ] All text meets WCAG AA at its rendered size and weight on every route at every viewport,
+- [x] All text meets WCAG AA at its rendered size and weight on every route at every viewport,
       with `--ink-faint` unchanged.
-- [ ] With reduced motion forced, every route shows all its content and nothing is stuck
+- [x] With reduced motion forced, every route shows all its content and nothing is stuck
       invisible.
-- [ ] With JavaScript disabled, every route renders its content.
-- [ ] No route scrolls horizontally at 375, 768 or 1440.
-- [ ] The gate passes with every route in the table.
+- [x] With JavaScript disabled, every route renders its content.
+- [x] No route scrolls horizontally at 375, 768 or 1440.
+- [x] The gate passes with every route in the table.

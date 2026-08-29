@@ -48,6 +48,19 @@ export function startSmoothScroll() {
 }
 
 /**
+ * Jump the page to an exact scroll position.
+ *
+ * Setting `window.scrollTo` behind Lenis's back leaves Lenis's own idea of the
+ * scroll position stale, and the next wheel event snaps the page back to where
+ * it thought it was. Anything that moves the page programmatically has to go
+ * through here.
+ */
+export function scrollWindowTo(y: number) {
+  if (lenis) lenis.scrollTo(y, { immediate: true, force: true });
+  else window.scrollTo(0, y);
+}
+
+/**
  * Arms the reveal CSS and runs `build` inside a GSAP context.
  * If motion is off, `build` never runs and the page renders in its end state.
  */

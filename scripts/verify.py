@@ -17,6 +17,13 @@ Universal checks, per route x viewport x theme:
      some point during the scroll-through, at every viewport. A link can be in
      the DOM, resolve, and still be clipped out of reach; that is a real bug the
      link crawl cannot see.
+  8. Keyboard: tabbing through the page, every stop shows a visible focus ring,
+     is at least half on screen, is not inside an aria-hidden subtree, and comes
+     after the previous stop in the document. The skip link is the first stop and
+     moves focus to its target. Focus wraps out of the page rather than trapping.
+  9. What the page hands assistive technology: no sibling content announced
+     twice, no aria-hidden thrown over a heading or a landmark, and exactly one
+     banner, main and contentinfo.
 Plus a link crawl from the entry pages.
 
 Per-route checks come from EXPECTATIONS below: each route declares what must be
@@ -556,6 +563,104 @@ STRUCTURE_SWEEP = r"""
 }
 """
 
+# One Tab's worth of state. Everything the keyboard sweep needs to judge the
+# element that now has focus, read in one round trip.
+#
+# `frac` is the share of the focused element's own box that is actually inside
+# the viewport. A focus ring on a card sitting off the right edge of a pinned,
+# scrubbed rail is a ring nobody can see, and it has a perfectly good bounding
+# box, so measuring the rect alone would call it fine.
+FOCUS_STEP = r"""
+() => {
+  const el = document.activeElement;
+  if (!el || el === document.body || el === document.documentElement) return null;
+  const cs = getComputedStyle(el);
+  const r = el.getBoundingClientRect();
+  const w = Math.max(0, Math.min(r.right, innerWidth) - Math.max(r.left, 0));
+  const h = Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, 0));
+  // Against the box clipped to the viewport, so an element taller or wider than
+  // the screen is judged on how much of it COULD be shown, not on its own size.
+  const area = Math.max(1, Math.min(r.width, innerWidth) * Math.min(r.height, innerHeight));
+  const ringWidth = parseFloat(cs.outlineWidth) || 0;
+  return {
+    tag: el.tagName.toLowerCase(),
+    href: el.getAttribute('href'),
+    label: (el.innerText || el.getAttribute('aria-label') || '').trim().replace(/\s+/g, ' ').slice(0, 40),
+    ring: cs.outlineStyle !== 'none' && ringWidth >= 1,
+    ringDesc: cs.outlineStyle + ' ' + cs.outlineWidth,
+    frac: Math.round((w * h / area) * 100) / 100,
+    ariaHidden: !!el.closest('[aria-hidden="true"]'),
+    // Document order, so "focus order follows reading order" is a measurement
+    // rather than a reading of the source, and survives any redesign that moves
+    // an element without moving its markup.
+    afterPrevious:
+      !window.__vPrev ||
+      !!(window.__vPrev.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING),
+    // Tab that did not move focus: the definition of a trap.
+    stuck: window.__vPrev === el,
+    // Back to where the sweep started, so the tab ring closed and the page has
+    // no more focusable elements to visit.
+    wrapped: !!window.__vFirst && window.__vFirst === el,
+    _keep: (() => {
+      if (!window.__vFirst) window.__vFirst = el;
+      window.__vPrev = el;
+      return true;
+    })(),
+  };
+}
+"""
+
+# Decorative structure. Two things the accessibility tree gets wrong in opposite
+# directions, both invisible to a screenshot and to a per-route row.
+A11Y_SWEEP = r"""
+() => {
+  const norm = (t) => (t || '').replace(/\s+/g, ' ').trim();
+
+  // 1. A strip of content duplicated to make a seamless loop is read out twice
+  //    unless the copy is hidden. Siblings with identical text are the shape of
+  //    that bug wherever it appears, so this looks for the shape rather than for
+  //    a named marquee.
+  const announcedTwice = [];
+  document.querySelectorAll('*').forEach((parent) => {
+    const kids = [...parent.children].filter(
+      (k) => !k.closest('[aria-hidden="true"]') && norm(k.textContent).length >= 20,
+    );
+    const seen = new Map();
+    for (const k of kids) {
+      const t = norm(k.textContent);
+      if (seen.has(t)) announcedTwice.push(t.slice(0, 48));
+      else seen.set(t, k);
+    }
+  });
+
+  // 2. The opposite mistake: aria-hidden thrown over a subtree that carries real
+  //    structure, which deletes it from the page a screen reader is given while
+  //    leaving it on the screen.
+  const hiddenContent = [];
+  document.querySelectorAll('[aria-hidden="true"]').forEach((el) => {
+    el.querySelectorAll('h1, h2, h3, h4, h5, h6, main, nav, [role="heading"]').forEach((inner) => {
+      hiddenContent.push(inner.tagName.toLowerCase() + ' "' + norm(inner.textContent).slice(0, 40) + '"');
+    });
+    if (el.matches('h1, h2, h3, h4, h5, h6, main, nav')) {
+      hiddenContent.push(el.tagName.toLowerCase() + ' "' + norm(el.textContent).slice(0, 40) + '"');
+    }
+  });
+
+  // 3. Landmarks. A page a screen reader can navigate has all three.
+  const landmarks = {
+    banner: document.querySelectorAll('header:not([hidden])').length,
+    main: document.querySelectorAll('main').length,
+    contentinfo: document.querySelectorAll('footer').length,
+  };
+
+  return {
+    announcedTwice: [...new Set(announcedTwice)].slice(0, 6),
+    hiddenContent: [...new Set(hiddenContent)].slice(0, 6),
+    landmarks,
+  };
+}
+"""
+
 # Runs in a context with JavaScript disabled. Playwright's own evaluation still
 # works there; the page's scripts do not, which is the point.
 NOJS_SWEEP = r"""
@@ -582,6 +687,110 @@ NOJS_SWEEP = r"""
   return { text: document.body.innerText, invisible: invisible.slice(0, 6) };
 }
 """
+
+
+# The share of the focused element's box that is on screen, read on its own so
+# the settle poll below can ask again without disturbing the sweep's own state.
+FOCUS_FRAC = r"""
+() => {
+  const el = document.activeElement;
+  if (!el || el === document.body) return 1;
+  const r = el.getBoundingClientRect();
+  const w = Math.max(0, Math.min(r.right, innerWidth) - Math.max(r.left, 0));
+  const h = Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, 0));
+  const area = Math.max(1, Math.min(r.width, innerWidth) * Math.min(r.height, innerHeight));
+  return Math.round((w * h / area) * 100) / 100;
+}
+"""
+
+# How much of a focused element has to be on screen. Half its own box: a focus
+# ring on a card that is 15% visible off the right edge of a pinned rail is a
+# ring the person who moved focus there cannot see.
+FOCUS_VISIBLE = 0.5
+# A page with more focusable elements than this is either enormous or trapping.
+MAX_TABS = 80
+
+
+def keyboard_sweep(page, tag: str, shot: Path) -> list[str]:
+    """Tab through one rendered page and report what a keyboard visitor meets.
+
+    This is the half of the accessibility floor a screenshot and a per-route row
+    cannot see: whether focus is visible, whether it is ON SCREEN, whether it
+    walks the page in reading order, and whether it ever comes back out.
+    """
+    bad: list[str] = []
+    worst = (2.0, "")
+
+    # The skip link is the first thing a keyboard visitor meets on every route,
+    # and the only way past a header they have already read.
+    page.keyboard.press("Tab")
+    page.wait_for_timeout(120)
+    skip = page.evaluate(
+        "() => ({ href: document.activeElement.getAttribute('href'),"
+        " tag: document.activeElement.tagName.toLowerCase() })"
+    )
+    if skip.get("tag") != "a" or (skip.get("href") or "")[:1] != "#":
+        bad.append(f"[skip-link] {tag}: the first Tab landed on {skip}, not on a skip link")
+    else:
+        page.screenshot(path=str(shot.with_name(shot.stem + "-skip.png")))
+        page.keyboard.press("Enter")
+        page.wait_for_timeout(400)
+        landed = page.evaluate("() => document.activeElement.id || document.activeElement.tagName")
+        target = skip["href"].lstrip("#")
+        if landed.lower() not in (target.lower(), "main"):
+            bad.append(
+                f"[skip-link] {tag}: activating it left focus on \"{landed}\", "
+                f"not on \"{target}\""
+            )
+
+    # Restart the walk from the top of the document so the run below is the tab
+    # order a visitor actually gets, not whatever is left after the skip link.
+    page.evaluate(
+        "() => { window.__vPrev = null; window.__vFirst = null;"
+        " document.activeElement?.blur?.(); window.scrollTo(0, 0); }"
+    )
+    page.wait_for_timeout(200)
+
+    for i in range(MAX_TABS):
+        page.keyboard.press("Tab")
+        page.wait_for_timeout(90)
+        # A scrubbed section eases into position, so a single read right after
+        # the Tab reports a card mid-flight as off screen. Poll until it settles.
+        frac = page.evaluate(FOCUS_FRAC)
+        waited = 0
+        while frac < FOCUS_VISIBLE and waited < 1400:
+            page.wait_for_timeout(120)
+            waited += 120
+            frac = page.evaluate(FOCUS_FRAC)
+        step = page.evaluate(FOCUS_STEP)
+        if step is None:
+            break                       # out of the document, into browser chrome
+        if step["wrapped"]:
+            break                       # the ring closed
+        if step["stuck"]:
+            bad.append(
+                f"[focus-trap] {tag}: Tab did not move focus off "
+                f"{step['tag']} \"{step['label']}\""
+            )
+            break
+        where = f"{step['tag']} {step['href'] or step['label']!r}"
+        if not step["ring"]:
+            bad.append(f"[focus] {tag}: no visible focus ring on {where} ({step['ringDesc']})")
+        if frac < FOCUS_VISIBLE:
+            bad.append(
+                f"[focus] {tag}: focusing {where} left only {int(frac * 100)}% of it on screen"
+            )
+        if step["ariaHidden"]:
+            bad.append(f"[focus] {tag}: {where} is focusable but hidden from assistive technology")
+        if not step["afterPrevious"]:
+            bad.append(f"[focus-order] {tag}: focus jumped backwards in the document to {where}")
+        if frac < worst[0]:
+            worst = (frac, where)
+            page.screenshot(path=str(shot))
+    else:
+        bad.append(f"[focus-trap] {tag}: still tabbing after {MAX_TABS} stops; focus never wrapped")
+
+    return bad
 
 
 def em_dashes(published: list[dict], limit: int = 8) -> list[str]:
@@ -800,6 +1009,17 @@ def main(paths: list[str]) -> int:
                         )
                         page.wait_for_timeout(250)
                         page.screenshot(path=str(OUT / f"{tag}.png"), full_page=True)
+
+                        # 8. Keyboard. A fresh page in the same context: the sweep
+                        #    has to start from a page as a visitor first meets it,
+                        #    and the one above has been scrolled end to end.
+                        kb = ctx.new_page()
+                        kb.goto(base + path, wait_until="load")
+                        kb.wait_for_timeout(1400)
+                        failures.extend(
+                            keyboard_sweep(kb, tag, OUT / f"{tag}-focus.png")
+                        )
+                        kb.close()
                         ctx.close()
 
                 # 5. reduced motion: content must still be visible
@@ -815,6 +1035,16 @@ def main(paths: list[str]) -> int:
                 )
                 if hidden:
                     failures.append(f"[reduced-motion] {path}: {hidden} element(s) stuck invisible")
+                # Reduced motion is its own lane, not a subset of the animated
+                # one: the scroll choreography is off, so a section that scrolls
+                # or pins behaves differently and the keyboard has to be swept
+                # again rather than assumed from the run above.
+                rm_tag = f"{path.strip('/').replace('/','_') or 'index'}-reducedmotion"
+                kb = ctx.new_page()
+                kb.goto(base + path, wait_until="load")
+                kb.wait_for_timeout(900)
+                failures.extend(keyboard_sweep(kb, rm_tag, OUT / f"{rm_tag}-focus.png"))
+                kb.close()
                 page.screenshot(path=str(OUT / f"{path.strip('/').replace('/','_') or 'index'}-reducedmotion.png"), full_page=True)
                 ctx.close()
 
@@ -829,6 +1059,26 @@ def main(paths: list[str]) -> int:
                 page.wait_for_timeout(1400)
                 got = page.evaluate(STRUCTURE_SWEEP)
                 failures.extend(check_structure(path, spec, got))
+
+                # What the page hands assistive technology, in both directions:
+                # nothing read out twice, nothing hidden that carries structure,
+                # and the three landmarks a screen reader navigates by.
+                a11y = page.evaluate(A11Y_SWEEP)
+                for t in a11y["announcedTwice"]:
+                    failures.append(
+                        f"[a11y] {path}: duplicated sibling content is announced twice; "
+                        f"the decorative copy needs aria-hidden: \"{t}\""
+                    )
+                for t in a11y["hiddenContent"]:
+                    failures.append(
+                        f"[a11y] {path}: aria-hidden is hiding real structure from "
+                        f"assistive technology: {t}"
+                    )
+                for name, n in a11y["landmarks"].items():
+                    if n != 1:
+                        failures.append(
+                            f"[a11y] {path}: expected exactly one {name} landmark, found {n}"
+                        )
                 for href in spec.get("links") or []:
                     if href not in resolved:
                         resolved[href] = ctx.request.get(base + href).status
