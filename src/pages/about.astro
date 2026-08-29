@@ -28,11 +28,15 @@ import portrait from '../../assets/img/dustin-jones.jpg';
 
   <section class="grid gap-10 border-t border-line px-(--gutter) pb-16 pt-10 lg:grid-cols-12 lg:gap-14">
     <div class="portrait max-w-[18rem] lg:col-span-4 lg:max-w-none">
+      {/* The slot is a fraction of a full-bleed grid, not a fixed 24rem: at lg it
+          is four of twelve columns gutter to gutter, so it keeps growing past
+          1440. `sizes` describes that, and the candidates run far enough up that
+          a wide or HiDPI screen is not handed an upscaled 640px source. */}
       <Image
         src={portrait}
         alt="Dustin Jones"
-        widths={[320, 480, 640]}
-        sizes="(min-width: 1024px) 24rem, 18rem"
+        widths={[320, 480, 640, 960, 1280]}
+        sizes="(min-width: 1024px) 33vw, 18rem"
         loading="eager"
       />
     </div>
@@ -66,18 +70,17 @@ import portrait from '../../assets/img/dustin-jones.jpg';
       is not.
     </p>
 
-    {/* A sourced claim, so it is marked up as one: a blockquote with a cite URL,
-        and a visible attribution naming the book. The line is Dustin's summary of
-        the book's opening rather than its words, and the attribution says so. */}
+    {/* A sourced claim, so it is marked up as one: a blockquote with a cite URL
+        and a visible attribution. The wording is verbatim and the attribution is
+        to Ward Cunningham, who wrote the foreword; it is not Hunt and Thomas's
+        line, and the cite points at the foreword itself rather than at the
+        publisher's page for the book. */}
     <figure class="pullquote" data-reveal>
-      <blockquote
-        cite="https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/"
-      >
-        <p>Most programmers have trouble explaining what they do.</p>
+      <blockquote cite="https://c2.com/doc/pragmatic.html">
+        <p>Most programmers would have trouble explaining what they do.</p>
       </blockquote>
       <figcaption>
-        Andrew Hunt and David Thomas, <cite>The Pragmatic Programmer</cite>, paraphrased from its
-        opening pages
+        Ward Cunningham, foreword to <cite>The Pragmatic Programmer</cite>
       </figcaption>
     </figure>
 

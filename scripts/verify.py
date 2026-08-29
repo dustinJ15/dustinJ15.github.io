@@ -286,7 +286,8 @@ EXPECTATIONS: dict[str, dict] = {
             "Its six roles are a model of the organization",
             # The sourced claim and its attribution have to travel together, or
             # the page is back to an uncited line mid-paragraph.
-            "Most programmers have trouble explaining what they do",
+            "Most programmers would have trouble explaining what they do",
+            "Ward Cunningham",
             "The Pragmatic Programmer",
             "Available now",
         ],

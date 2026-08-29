@@ -83,12 +83,18 @@ export function revealDisplayTitle(stagger = 0.02) {
     });
   });
 
-  // The heading itself, not `h1` by tag: a page may have display lines that are
-  // not in the h1, and tweening every h1 on the page would catch them all.
-  const heading = lines[0].closest('h1, h2') ?? lines[0].parentElement;
-  if (heading) {
+  // Every heading that owns one of those lines, not `h1` by tag: a page may have
+  // display lines outside the h1, and tweening the tag would settle headings
+  // with no lines in them while leaving a second display block rising without
+  // its settle. Deduped, because the lines of one heading share it.
+  const headings = new Set<Element>();
+  for (const line of lines) {
+    const owner = line.closest('h1, h2, h3') ?? line.parentElement;
+    if (owner) headings.add(owner);
+  }
+  if (headings.size) {
     gsap.fromTo(
-      heading,
+      [...headings],
       { fontStretch: '75%' },
       { fontStretch: '100%', duration: 1.6, ease: 'expo.out' },
     );

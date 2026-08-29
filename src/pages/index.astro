@@ -158,6 +158,9 @@ const marquee = [...new Set(projects.flatMap((p) => p.data.stack))];
     // allows. The hero has five lines rather than a title's two, so it takes a
     // slightly tighter stagger to finish in the same beat.
     revealDisplayTitle(0.018);
+    // The shared entrance rises 28px over 0.9s where this page used to rise 40
+    // over 1.0. Deliberate: one entrance across the site is worth more than the
+    // twelve pixels, and nothing on the page was tuned against the old figure.
     revealOnScroll('[data-reveal]');
 
     // Marquee.

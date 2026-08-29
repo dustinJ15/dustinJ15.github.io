@@ -20,7 +20,10 @@ interface Props {
 }
 
 const { label, lines } = Astro.props;
-const chars = Math.max(...lines.map((l) => l.length));
+// Floored at 1. Math.max() of nothing is -Infinity, which makes the calc() in
+// .display-title invalid, drops the whole font-size declaration, and silently
+// sets the title at body size with nothing to see in the console.
+const chars = Math.max(1, ...lines.map((l) => l.length));
 ---
 
 <section class="px-(--gutter) pb-14 pt-6">
