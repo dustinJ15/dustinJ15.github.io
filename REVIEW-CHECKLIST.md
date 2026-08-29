@@ -27,8 +27,14 @@ the publish ticket. Nothing here blocks the remaining tickets.
 - [ ] **The Pragmatic Programmer quote on `/about/`.** An agent first misattributed it to Hunt and
       Thomas; it is Ward Cunningham's, from the foreword, and is now quoted verbatim and cited.
       Worth confirming by eye since it names real people.
+- [ ] **The rental-pipeline prose names four vendor products** (Yardi, ResMan, Entrata, RealPage).
+      Pre-existing published copy, not added by any agent, and they are commercial products rather
+      than clients. Still worth a deliberate yes or no before publish.
 - [ ] **The rental-pipeline diagram discloses nothing.** Sixteen inputs, one schema, no client, no
       source system, no field names.
+
+- [ ] **The diagram sits left at 1440 with space to its right.** Deliberate: label legibility at
+      375 sets its max-width, and the asymmetry is on-direction. One line if it should be bigger.
 
 ## Known gaps, owned by later tickets
 
