@@ -170,7 +170,7 @@ CONTRAST_SWEEP = r"""
 
 # Routes that exist in the Jekyll site but have not been migrated to Astro yet.
 # Emptied as tickets land; a 404 here is a "not built yet", not a broken link.
-PENDING = {"/process/", "/about/"}
+PENDING = {"/about/"}
 
 
 # --------------------------------------------------------------------------
@@ -245,6 +245,28 @@ EXPECTATIONS: dict[str, dict] = {
         "text": ["Page not found"],
     },
 
+    # ── prose pages ───────────────────────────────────────────────────────
+    "/process/": {
+        # One display title, one h2 per section of the argument.
+        "headings": {"h1": 1, "h2": 4, "h3": 0},
+        "ids": ["main"],
+        "figures": 0,
+        "alt": True,
+        "links": ["/", "/about/", "/projects/quote-generator/"],
+        "reachable": ["/projects/quote-generator/"],
+        "text": [
+            "How I work",
+            "Most of the lines in my recent projects were not typed by me",
+            # The whole chain has to survive as rows a visitor can read, not as a
+            # table that collapsed to nothing at 375.
+            "A design interview",
+            "The spec becomes tracer-bullet tickets",
+            "The loop, unattended, against the remaining tickets",
+            "A completion claim is not evidence",
+            "Planning and doing should not share a session",
+            "If an agent writes the code, what exactly do you do?",
+        ],
+    },
     # ── case studies ──────────────────────────────────────────────────────
     # Each row is the same shape: the project title as the one h1, one h2 per
     # section of the argument, the figure count, the before/after a skimmer is

@@ -176,13 +176,13 @@
 }
 
 /* ---------------------------------------------------------------------------
-   CASE-STUDY PROSE
+   PROSE
 
-   The argument on a case study is the only part of the site whose job is to be
-   read, so it gets a measure back and nothing else does. The full-bleed grid is
-   what lets a screenshot escape that measure without the prose being wrapped in
-   a container it has to break out of: prose sits in `content`, screenshots and
-   the display headings span `wide`.
+   The argument on a case study, and the two prose pages, are the parts of the
+   site whose job is to be read, so they get a measure back and nothing else
+   does. The full-bleed grid is what lets a screenshot escape that measure
+   without the prose being wrapped in a container it has to break out of: prose
+   sits in `content`, screenshots and the display headings span `wide`.
 
    The fr tracks matter. Fixed maxes on the inner columns would be honoured at
    768 and push the row past the viewport; fr tracks only ever take space that
@@ -286,6 +286,45 @@
   letter-spacing: -0.02em;
   text-wrap: balance;
   color: var(--ink);
+}
+
+/* The step list on the process page. Ruled rows, the command in mono against
+   the accent, the description beside it on a wide screen and under it on a
+   narrow one. Nothing here scrolls sideways and nothing clips: a reader at 375
+   gets every row in full. */
+.prose > dl.chain {
+  grid-column: wide;
+  margin-block: 2.4em;
+  border-block-start: 1px solid var(--line);
+}
+
+.prose > dl.chain > div {
+  display: grid;
+  gap: 0.3rem 2rem;
+  padding-block: 0.9rem;
+  border-block-end: 1px solid var(--line);
+}
+
+@media (min-width: 40rem) {
+  .prose > dl.chain > div {
+    grid-template-columns: 11rem 1fr;
+    align-items: baseline;
+  }
+}
+
+.prose dl.chain dt code {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: 0.92em;
+  color: var(--accent);
+}
+
+.prose dl.chain dd {
+  margin: 0;
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: var(--ink-soft);
 }
 
 /* Screenshots break out of the measure and sit in dark browser chrome, so a

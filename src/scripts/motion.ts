@@ -11,9 +11,10 @@
  */
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SplitText } from 'gsap/SplitText';
 import Lenis from 'lenis';
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, SplitText);
 
 export const prefersReducedMotion = () =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -54,6 +55,44 @@ export function withMotion(build: (self: gsap.Context) => void) {
   if (prefersReducedMotion()) return;
   document.documentElement.dataset.motion = 'on';
   contexts.push(gsap.context(build));
+}
+
+/**
+ * The display-title entrance, shared by the home hero, the case studies and the
+ * prose pages: every `[data-line]` rises character by character out of the mask
+ * it sits in, and the heading settles from condensed to full width along
+ * Bricolage's wdth axis. Swapping the face for a static one removes that settle.
+ *
+ * Arriving anywhere on the site should feel like the same site, so this lives in
+ * one place rather than being retyped per page.
+ */
+export function revealDisplayTitle(stagger = 0.02) {
+  const lines = gsap.utils.toArray<HTMLElement>('[data-line]');
+  if (!lines.length) return;
+
+  const splits = lines.map((l) => new SplitText(l, { type: 'words,chars' }));
+  gsap.set(lines, { opacity: 1 });
+  splits.forEach((s, i) => {
+    gsap.from(s.chars, {
+      yPercent: 115,
+      opacity: 0,
+      duration: 1.1,
+      ease: 'expo.out',
+      stagger,
+      delay: 0.1 + i * 0.09,
+    });
+  });
+
+  // The heading itself, not `h1` by tag: a page may have display lines that are
+  // not in the h1, and tweening every h1 on the page would catch them all.
+  const heading = lines[0].closest('h1, h2') ?? lines[0].parentElement;
+  if (heading) {
+    gsap.fromTo(
+      heading,
+      { fontStretch: '75%' },
+      { fontStretch: '100%', duration: 1.6, ease: 'expo.out' },
+    );
+  }
 }
 
 /** Standard entrance: fade + rise, staggered, triggered on scroll. */

@@ -1,0 +1,51 @@
+---
+/**
+ * The display title block for a prose page (`/process/`, `/about/`).
+ *
+ * It is the same moment as a case-study title, minus the metadata rail: a mono
+ * label, then an oversized heading whose lines rise out of their own masks and
+ * settle along Bricolage's width axis.
+ *
+ * Each line is authored as ONE line and is never allowed to wrap, so the type is
+ * sized against the longest LINE rather than against a fixed fraction of the
+ * viewport. That is what lets "About" set as large as its line allows without
+ * "How I work" reflowing at 375. `display-title` in global.css does the sizing;
+ * the gate's wrap check is what keeps the constant in it honest.
+ */
+interface Props {
+  /** Mono kicker above the heading. */
+  label: string;
+  /** One string per rendered line. Lines stack; they never reflow into each other. */
+  lines: string[];
+}
+
+const { label, lines } = Astro.props;
+const chars = Math.max(...lines.map((l) => l.length));
+---
+
+<section class="px-(--gutter) pb-14 pt-6">
+  <p class="label">{label}</p>
+
+  <h1
+    class="display-title mt-10 font-display font-extrabold uppercase leading-[0.82] tracking-[-0.035em]"
+    style={`--title-chars: ${chars}`}
+  >
+    {
+      lines.map((line, i) => (
+        <Fragment>
+          {/* The lines are separate block elements, so without this the heading's
+              textContent runs the lines together when it is copied out. */}
+          {i > 0 && ' '}
+          {/* overflow-clip with a margin rather than overflow-hidden: the mask has
+              to sit near the baseline, and Bricolage's uppercase descenders hang
+              below it. */}
+          <span class="block overflow-clip [overflow-clip-margin:0.34em]">
+            <span data-line class:list={['block', i === lines.length - 1 && 'text-accent']}>
+              {line}
+            </span>
+          </span>
+        </Fragment>
+      ))
+    }
+  </h1>
+</section>

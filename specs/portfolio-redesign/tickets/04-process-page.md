@@ -11,11 +11,11 @@ Copy is the ported Jekyll copy; the editorial pass is ticket 08.
 
 **Blocked by:** 02.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] `/process/` renders the full content of the existing process page in the new chrome.
-- [ ] It is reachable from the site navigation and from the home page, and links back out.
-- [ ] Body copy sets at a readable measure and is visible before any scroll-triggered animation.
-- [ ] Tables and lists are legible at 375 with no horizontal scroll on the page itself.
-- [ ] The Jekyll process page still builds and is untouched.
-- [ ] The gate passes with a row for `/process/`.
+- [x] `/process/` renders the full content of the existing process page in the new chrome.
+- [x] It is reachable from the site navigation and from the home page, and links back out.
+- [x] Body copy sets at a readable measure and is visible before any scroll-triggered animation.
+- [x] Tables and lists are legible at 375 with no horizontal scroll on the page itself.
+- [x] The Jekyll process page still builds and is untouched.
+- [x] The gate passes with a row for `/process/`.
