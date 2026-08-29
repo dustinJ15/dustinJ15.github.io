@@ -26,6 +26,7 @@ and approval is per action, not once.
       language, no health detail, no em-dashes.
 - [x] **Screenshots, all four case studies.** Quote generator (4), billing analyzer (4),
       label maker (3). All synthetic data, all opened and read individually before placing.
+      Re-shot in ticket 07 at one viewport, 1500 by 950 at 2x, and served as lazy WebP.
 - [x] **QA.** Screen passes, Jekyll builds clean, seven pages, every link resolves, no horizontal
       scroll at 375px or 1440px.
 - [x] **Home page opening rewritten.** The spreadsheet motif is dead site-wide, including the
