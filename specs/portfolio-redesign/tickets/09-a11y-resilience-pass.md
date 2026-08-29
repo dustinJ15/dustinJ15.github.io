@@ -7,7 +7,7 @@ ticket covers what a per-route gate row cannot see, and sweeps the finished site
 What the gate cannot see, and this ticket has to check by hand:
 
 - **Focus and hover states.** Every interactive element shows a visible focus ring, including
-  the ones the design leans on: the magnetic contact button, the work rail cards, the marquee if
+  the ones the design leans on: the contact affordances, the work rail cards, the marquee if
   anything in it is focusable. Focus order follows reading order. Nothing traps focus.
 - **How it actually reads aloud.** The custom cursor and the decorative half of the duplicated
   marquee are hidden from assistive technology so nothing is announced twice or announced at all

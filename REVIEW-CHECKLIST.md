@@ -50,6 +50,17 @@ above the contact block and the hero's scale at 375.
       `Outcome` component is data driven rather than always drawn. Its tagline carries the outcome
       instead. Say if you want the block there.
 
+## Accessibility, ticket 09
+
+- [ ] **A real screen-reader test, which only a person can do.** Playwright reads Chrome's
+      accessibility tree, which is not the same as NVDA, JAWS or VoiceOver speaking the page. Ten
+      minutes with VoiceOver on the home page and one case study. Listen to the work-rail cards
+      especially, since each announces as one long link (number, year, title, tagline, stack), and
+      to the pipeline diagram's accessible name.
+- [ ] **No-JS keyboard is imperfect and cannot be fixed.** With JavaScript off the rail is a plain
+      scroller and Chrome only scrolls a newly focused card part of the way on screen. Every card
+      is reachable and focusable; one may sit partly off screen. Accept or reject knowingly.
+
 ## Known gaps, owned by later tickets
 
 - [ ] **No `og:image`.** Astro's output does not include the Jekyll `assets/` tree during the
