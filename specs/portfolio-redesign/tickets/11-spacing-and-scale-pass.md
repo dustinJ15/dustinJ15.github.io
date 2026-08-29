@@ -32,13 +32,38 @@ pinned rail.
 
 **Blocked by:** 07, 09.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] The gap between the work rail and the contact block is deliberate at 1440, 768 and 375, and
-      is the scrub distance rather than an accident.
-- [ ] The hero fills the viewport at 375 the way it does at 1440, with no display line wrapping.
-- [ ] The about portrait no longer reads as small and stranded at 1440.
-- [ ] The one-line display title has a stated rule for where the accent falls, applied site wide.
-- [ ] The portrait's accent wash is kept or dropped as a decision, not by default.
-- [ ] The gate passes, and gained whatever coverage of empty trailing space it can hold without
-      false positives.
+- [x] The gap between the work rail and the contact block is deliberate at 1440, 768 and 375, and
+      is the scrub distance rather than an accident. At 1440 the pin spacer was already exactly
+      the scrub distance (1311 - 900 = 411px = track overhang); what was not deliberate was the
+      rail filling only 590px of a 900px viewport while pinned, leaving 310px of empty page under
+      it for the whole of that scroll, and 176px of stacked padding between the last card and the
+      word "Contact" at every width. The rail now fills the viewport at lg and centres in it, and
+      the two paddings no longer stack: 176px of unmarked ground becomes 105px with a rule
+      through it.
+- [x] The hero fills the viewport at 375 the way it does at 1440, with no display line wrapping.
+      Below lg the five rows break into seven lines, which changes the line the size is bound by
+      from "and the pipelines" to "applications" and takes the type from 35px to 50px: the display
+      block goes from 224px of a 716px hero to 345px, and the dead space around it from 382px to
+      220px. The gate checks the wrap at 375, 768 and 1440; both lanes were also swept by hand from
+      320px to 2200px, including either side of the 1024px switch.
+- [x] The about portrait no longer reads as small and stranded at 1440. It goes from four
+      columns to five and runs out through the left gutter to the page edge, 404 x 481 to
+      577 x 687, and the paragraph beside it lands on its foot instead of stopping a third of the
+      way down.
+- [x] The one-line display title has a stated rule for where the accent falls, applied site wide.
+      The accent marks the END of a title, and only where there is an end to mark: the last line
+      of a title that has more than one, and nothing on a title that has one. It is a rule about
+      line count, not about which page, so `/about/` is not special-cased and a title that grows
+      a second line picks the accent up on its own. Stated in full on `PageTitle` and applied
+      there and on the case-study title.
+- [x] The portrait's accent wash is kept or dropped as a decision, not by default. Dropped,
+      after looking at it: on a grayscale, darkened photograph the desaturation and the dissolve
+      at the foot already stop it reading as a hole punched in the page, and the wash's only
+      remaining visible effect was an olive cast on skin.
+- [x] The gate passes, and gained whatever coverage of empty trailing space it can hold without
+      false positives. `MAX_TRAILING_EMPTY` caps the gap between the last painted thing in `main`
+      and the footer. Trailing, not biggest-anywhere, which is what keeps the pinned rail's spacer
+      out of it. Real gaps across eight routes at three viewports run 64px to 187px; the budget
+      is 260px.

@@ -67,6 +67,10 @@ three stages fails. It runs, per route:
   threshold for its size and weight. Internal links resolve. Reduced motion leaves nothing
   invisible. After a full scroll-through every reveal has fired and no display line has wrapped.
   The page renders with JavaScript disabled: text present, nothing stuck at opacity 0.
+  The route does not END on a screenful of nothing: the gap between the last painted thing in
+  `main` and the footer is capped. That one is deliberately a *trailing* measurement, because
+  the mid-page void a pinned section leaves in a full-page screenshot is the pin spacer holding
+  the scrub distance, and is not empty to anyone who scrolls.
 - The per-route expectations, from the `EXPECTATIONS` table at the top of `scripts/verify.py`.
   A row states what must be true of the page a visitor receives: heading counts, named sections,
   figure count, non-empty alt text, links that must be present, links that must be *reachable*

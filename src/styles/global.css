@@ -355,9 +355,15 @@
 /* The portrait.
 
    A light photograph dropped straight onto a near-black page reads as a hole
-   punched in it. Three things stop that: it is desaturated so the page keeps one
-   accent, a thin wash of that accent puts it in the site's own light, and the
-   foot of the frame dissolves into the ground rather than ending on an edge. */
+   punched in it. Two things stop that: it is desaturated and darkened so the page
+   keeps one accent and the photo keeps the page's value range, and the foot of
+   the frame dissolves into the ground rather than ending on an edge.
+
+   There used to be a third: a flat 10% wash of the accent over the whole frame,
+   to put the photograph in the site's own light. It was looked at in ticket 11
+   and dropped. On a grayscale, darkened photograph the first two do the work on
+   their own, and the wash's only visible effect at that point was an olive cast
+   on skin, which is the one thing a portrait cannot afford. */
 .portrait {
   position: relative;
   isolation: isolate;
@@ -374,14 +380,12 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background:
-    linear-gradient(
-      to top,
-      var(--bg) 0%,
-      color-mix(in srgb, var(--bg) 55%, transparent) 18%,
-      transparent 52%
-    ),
-    color-mix(in srgb, var(--accent) 10%, transparent);
+  background: linear-gradient(
+    to top,
+    var(--bg) 0%,
+    color-mix(in srgb, var(--bg) 55%, transparent) 18%,
+    transparent 52%
+  );
 }
 
 /* Screenshots break out of the measure and sit in dark browser chrome, so a
@@ -443,6 +447,44 @@
     calc((100vw - 2 * var(--gutter)) / (var(--title-chars) * 0.62)),
     8.5rem
   );
+}
+
+/* The home hero, in two lanes.
+
+   Same words, same order, broken differently: below lg every phrase takes its
+   own line, and from lg up the phrases in a row sit side by side. That is not a
+   stylistic difference, it is what lets the type own a phone screen. The size is
+   bound by the WIDEST line, so five wide rows are sized against "and the
+   pipelines" while seven narrow lines are sized against "applications", which is
+   a quarter narrower and so sets half again as large.
+
+   The divisors are the widest line's width in em AS THE PAGE ACTUALLY SETS IT,
+   found by bisecting the size at which the gate's wrap check starts failing, not
+   by measuring the string. Those are not the same number: the reveal splits every
+   line into per-character inline-blocks, which drops the kerning between them and
+   makes the same word about 6% wider than the browser sets it unsplit. Size
+   against the unsplit width and the hero wraps the moment the animation runs.
+
+   The narrow cap is 6rem rather than the wide lane's 7.5rem because seven lines
+   of it have to leave the availability line inside the first screenful at 768,
+   where the hero is only 928px tall. */
+.hero-title {
+  font-size: clamp(1.9rem, calc((100vw - 2 * var(--gutter)) / 6.75), 6rem);
+  line-height: 0.9;
+}
+
+@media (min-width: 64rem) {
+  .hero-title {
+    font-size: clamp(1.9rem, calc((100vw - 2 * var(--gutter)) / 8.9), 7.5rem);
+    line-height: 0.82;
+  }
+
+  /* 0.2em is the word space the pair needs: "and the pipelines" measures 8.385em
+     set as one string and 8.193em as two, so the join is 0.19em, rounded up. */
+  .hero-row {
+    display: flex;
+    gap: 0.2em;
+  }
 }
 
 /* ---------------------------------------------------------------------------

@@ -6,6 +6,15 @@
  * label, then an oversized heading whose lines rise out of their own masks and
  * settle along Bricolage's width axis.
  *
+ * THE ACCENT RULE, and it is the same one on a case-study title and on the home
+ * hero: the accent marks the END of the title, and only where there is an end to
+ * mark. On a title of more than one line it is the last line, which reads as a
+ * landing because the lines above it are in ink. On a ONE-line title there is
+ * nothing to land against, and accenting it just recolours the whole heading, so
+ * a one-line title sets in ink. That is a rule about line count rather than about
+ * which page it is, so `/about/` is not a special case, and a title that grows a
+ * second line picks the accent up on its own.
+ *
  * Each line is authored as ONE line and is never allowed to wrap, so the type is
  * sized against the longest LINE rather than against a fixed fraction of the
  * viewport. That is what lets "About" set as large as its line allows without
@@ -43,7 +52,10 @@ const chars = Math.max(1, ...lines.map((l) => l.length));
               to sit near the baseline, and Bricolage's uppercase descenders hang
               below it. */}
           <span class="block overflow-clip [overflow-clip-margin:0.34em]">
-            <span data-line class:list={['block', i === lines.length - 1 && 'text-accent']}>
+            <span
+              data-line
+              class:list={['block', lines.length > 1 && i === lines.length - 1 && 'text-accent']}
+            >
               {line}
             </span>
           </span>

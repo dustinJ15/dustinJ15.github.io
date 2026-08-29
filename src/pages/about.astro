@@ -27,23 +27,33 @@ import portrait from '../../assets/img/dustin-jones.jpg';
   <PageTitle label={`${site.role}, ${site.location}`} lines={['About']} />
 
   <section class="grid gap-10 border-t border-line px-(--gutter) pb-16 pt-10 lg:grid-cols-12 lg:gap-14">
-    <div class="portrait max-w-[18rem] lg:col-span-4 lg:max-w-none">
-      {/* The slot is a fraction of a full-bleed grid, not a fixed 24rem: at lg it
-          is four of twelve columns gutter to gutter, so it keeps growing past
-          1440. `sizes` describes that, and the candidates run far enough up that
-          a wide or HiDPI screen is not handed an upscaled 640px source. */}
+    {/* At lg the portrait is five of twelve columns AND runs off the left edge of
+        the page, out through the gutter. Four columns inside the gutter left it a
+        modest rectangle with empty ground on three sides; at this size and this
+        position it is the thing the page opens with rather than an illustration
+        beside the opening. The slot is still a fraction of the grid, not a fixed
+        width, so it keeps growing past 1440, and `sizes` describes that. */}
+    <div
+      class="portrait max-w-[18rem] lg:col-span-5 lg:-ml-(--gutter) lg:max-w-none"
+    >
       <Image
         src={portrait}
         alt="Dustin Jones"
-        widths={[320, 480, 640, 960, 1280]}
-        sizes="(min-width: 1024px) 33vw, 18rem"
+        widths={[320, 480, 640, 960, 1280, 1600]}
+        sizes="(min-width: 1024px) 42vw, 18rem"
         loading="eager"
       />
     </div>
 
     {/* Not a [data-reveal]: it is the first thing anyone reads on the page and
-        it sits inside the first screenful. */}
-    <p class="font-display text-3xl font-medium leading-[1.15] text-ink lg:col-span-7 lg:col-start-6">
+        it sits inside the first screenful.
+        `self-end` lands it on the portrait's foot. Aligned to the top it stopped
+        a third of the way down and left a tall empty block beside the rest of
+        the photograph; at the foot the two blocks finish together and the space
+        that is left is above the paragraph, where the heading already is. */}
+    <p
+      class="font-display text-3xl font-medium leading-[1.15] text-ink lg:col-span-6 lg:col-start-7 lg:self-end"
+    >
       I'm a software engineer in Denver, finishing a B.S. in Computer Science at MSU Denver with a
       4.0 GPA and a minor in mathematics, graduating December 2027. I started this degree years
       ago, stopped, and came back to it.

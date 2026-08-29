@@ -235,6 +235,14 @@ PENDING: set[str] = set()
 #   min_text   int             floor on rendered text length, used by the no-JS
 #                              check (default MIN_TEXT)
 MIN_TEXT = 200
+# The trailing-empty budget, in CSS pixels.
+#
+# Measured, not picked: across the eight routes at three viewports the real
+# trailing gaps run 64px (a section ending on its pb-16 rule) to 187px, which is
+# /404.html at 768, where a deliberately centred short page leaves its own slack
+# under the last link. 260 clears that with room for a viewport the table does
+# not cover, and still fails on anything approaching half a screen.
+MAX_TRAILING_EMPTY = 260
 
 EXPECTATIONS: dict[str, dict] = {
     "/": {
@@ -620,6 +628,47 @@ FOCUS_STEP = r"""
     // no more focusable elements to visit.
     wrapped: !!first && first === el,
   };
+}
+"""
+
+# How much unmarked ground a route ends on.
+#
+# Ticket 11's four faults were all found by a human reading these screenshots,
+# and this is the one of them a machine can hold: a page whose last painted thing
+# sits a screenful above its footer has almost always lost a section's padding
+# argument rather than composed a rest. It is measured as a TRAILING gap on
+# purpose. The mid-page void a pinned section leaves in a full-page screenshot is
+# the pin spacer holding the scrub distance, which is real page and not empty to
+# anyone who scrolls, so anything that looks for the biggest empty band anywhere
+# on the page fails the home route at 1440 for doing exactly what it should.
+#
+# "Painted" means a text leaf, a replaced element, or a rule. A section's own
+# bottom padding is legitimately part of the gap, which is why the threshold sits
+# well above the largest one on the site rather than at zero.
+TRAILING_EMPTY = r"""
+() => {
+  const main = document.querySelector('main');
+  const footer = document.querySelector('footer');
+  if (!main || !footer) return null;
+  const sy = window.scrollY;
+  let bottom = 0;
+  let who = '';
+  for (const el of main.querySelectorAll('*')) {
+    const cs = getComputedStyle(el);
+    if (cs.display === 'none' || cs.visibility === 'hidden') continue;
+    const paints =
+      (el.children.length === 0 && (el.textContent || '').trim().length > 0) ||
+      ['IMG', 'SVG', 'VIDEO', 'CANVAS', 'HR'].includes(el.tagName.toUpperCase()) ||
+      parseFloat(cs.borderBottomWidth) > 0;
+    if (!paints) continue;
+    const r = el.getBoundingClientRect();
+    if (!r.width && !r.height) continue;
+    if (r.bottom + sy > bottom) {
+      bottom = r.bottom + sy;
+      who = el.tagName.toLowerCase() + ' "' + (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 32) + '"';
+    }
+  }
+  return { gap: Math.round(footer.getBoundingClientRect().top + sy - bottom), last: who };
 }
 """
 
@@ -1079,6 +1128,17 @@ def main(paths: list[str]) -> int:
                             }"""
                         )
                         page.wait_for_timeout(250)
+
+                        # How much unmarked ground the route ends on. See
+                        # TRAILING_EMPTY: a trailing gap, not the biggest gap.
+                        trailing = page.evaluate(TRAILING_EMPTY)
+                        if trailing and trailing["gap"] > MAX_TRAILING_EMPTY:
+                            failures.append(
+                                f"[trailing] {tag}: {trailing['gap']}px of empty page between "
+                                f"the last painted thing ({trailing['last']}) and the footer, "
+                                f"over a {MAX_TRAILING_EMPTY}px budget"
+                            )
+
                         page.screenshot(path=str(OUT / f"{tag}.png"), full_page=True)
 
                         # 8. Keyboard. A fresh page in the same context: the sweep

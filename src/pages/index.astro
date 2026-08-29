@@ -16,21 +16,31 @@ const marquee = [...new Set(projects.flatMap((p) => p.data.stack))];
   >
     <p class="label">{site.role}, {site.location}</p>
 
-    <h1 class="my-auto py-10 font-display font-extrabold uppercase leading-[0.82] tracking-[-0.03em]">
+    {/* Rows, not lines. A row is one visual line from lg up; below lg each phrase
+        in it takes its own line, so the size is bound by "applications" rather
+        than by "and the pipelines" and the type sets half again as large on a
+        phone. `.hero-title` in global.css owns both sizes; the gate's wrap check
+        is what keeps their constants honest. */}
+    <h1
+      class="hero-title my-auto py-4 font-display font-extrabold uppercase tracking-[-0.03em] sm:py-10"
+    >
       {
-        hero.displayLines.map((line, i) => (
-          <span class="block overflow-hidden">
-            <span
-              data-line
-              class:list={[
-                'block text-[clamp(1.9rem,9.4vw,7.5rem)]',
-                i === 2 && 'text-accent',
-                i % 2 === 1 && 'lg:pl-[8vw]',
-                i === 4 && 'lg:pl-[20vw]',
-              ]}
-            >
-              {line}
-            </span>
+        hero.displayRows.map((row, i) => (
+          <span
+            class:list={[
+              'hero-row',
+              i === 2 && 'text-accent',
+              i % 2 === 1 && 'lg:pl-[8vw]',
+              i === 4 && 'lg:pl-[20vw]',
+            ]}
+          >
+            {row.map((phrase) => (
+              <span class="block overflow-hidden">
+                <span data-line class="block">
+                  {phrase}
+                </span>
+              </span>
+            ))}
           </span>
         ))
       }
@@ -88,13 +98,21 @@ const marquee = [...new Set(projects.flatMap((p) => p.data.stack))];
       for a pinned, scrub-driven translation and hides the scroller's own
       overflow; both are reverted on teardown. */}
   <!-- ── work rail ─────────────────────────────────────────────────────── -->
-  <section id="rail" class="relative border-t border-line">
+  {/* `lg:min-h-svh` is what makes the pin honest. The section is pinned for
+      exactly the scrub distance, and a 590px section pinned inside a 900px
+      viewport leaves 310px of empty page under it for the whole of that scroll.
+      At full height the pinned moment owns the screen and there is nothing
+      below it to be empty. Below lg nothing is pinned, so nothing is stretched. */}
+  <section
+    id="rail"
+    class="relative border-t border-line lg:flex lg:min-h-svh lg:flex-col lg:justify-center"
+  >
     <div class="flex items-center justify-between px-(--gutter) py-6">
       <h2 class="label">Selected work</h2>
       <span class="label" aria-hidden="true">Scroll →</span>
     </div>
     <div id="rail-scroller" class="overflow-x-auto overscroll-x-contain">
-      <div id="rail-track" class="flex w-max gap-6 px-(--gutter) pb-16">
+      <div id="rail-track" class="flex w-max gap-6 px-(--gutter) pb-10">
         {
           projects.map((p, i) => (
             <a
@@ -128,7 +146,11 @@ const marquee = [...new Set(projects.flatMap((p) => p.data.stack))];
   </section>
 
   <!-- ── contact ───────────────────────────────────────────────────────── -->
-  <section class="px-(--gutter) py-28">
+  {/* Ruled, and with a leading padding that does not stack with the rail's
+      trailing one. The two used to add up to 176px of unmarked ground between
+      the last card and the word "Contact", which at 375 is a fifth of the
+      screen and reads as the page having run out rather than having moved on. */}
+  <section class="border-t border-line px-(--gutter) pb-28 pt-16">
     <h2 class="label">Contact</h2>
     <p class="measure-wide mt-6 text-lg leading-relaxed text-ink-soft" data-reveal>
       {elsewhere.code}

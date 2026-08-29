@@ -21,8 +21,25 @@ export const site = {
 export const hero = {
   intro: 'I build full-stack applications and the pipelines that keep them reliable.',
   availability: 'Available now for part-time and contract work, Denver or remote.',
-  /** Split for lanes that animate the display line word by word or line by line. */
-  displayLines: ['Full-stack', 'applications', 'and the pipelines', 'that keep them', 'reliable.'],
+  /**
+   * The hero display type, as ROWS of PHRASES.
+   *
+   * A row is one visual line from `lg` up, where a phrase pair sits side by side.
+   * Below `lg` every phrase takes its own line, which is what lets the type set
+   * more than half again as large on a phone: the size is bound by the widest
+   * line, and "and the pipelines" is a third wider than "applications".
+   *
+   * Same words, same order, both ways round. Changing a phrase changes the size
+   * of the whole hero, because the widest one sets it; the gate's wrap check is
+   * what says whether the new one still fits.
+   */
+  displayRows: [
+    ['Full-stack'],
+    ['applications'],
+    ['and the', 'pipelines'],
+    ['that keep', 'them'],
+    ['reliable.'],
+  ],
 } as const;
 
 export const bio = [

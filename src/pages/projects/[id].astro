@@ -71,7 +71,11 @@ const longest = Math.max(...words.map((w) => w.length));
                 data-line
                 class:list={[
                   'block',
-                  i === words.length - 1 && 'text-accent',
+                  // The site-wide accent rule, stated in full on PageTitle: the
+                  // accent marks the last line of a title that HAS more than
+                  // one. A one-word title would set in ink rather than come out
+                  // entirely in the accent.
+                  words.length > 1 && i === words.length - 1 && 'text-accent',
                   i % 2 === 1 && 'lg:pl-[10vw]',
                 ]}
               >
