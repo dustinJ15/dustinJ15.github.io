@@ -7,7 +7,8 @@ import { glob } from 'astro/loaders';
 // the way the old front matter did against a hand-written list on the home page.
 const projects = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/projects' }),
-  schema: z.object({
+  schema: ({ image }) =>
+    z.object({
     title: z.string(),
     /** Display order on the home page. Lower is higher. */
     order: z.number().int(),
@@ -27,11 +28,23 @@ const projects = defineCollection({
     outcome: z
       .object({ before: z.string(), after: z.string() })
       .optional(),
+    /**
+     * Render a chapter rail under the outcome band: one card per `##`, carrying
+     * that section's first screenshot, or its pull quote where it has none.
+     * Opt-in, for a study long enough to need a way in.
+     */
+    chapters: z.boolean().default(false),
+    /**
+     * The picture on the home page card. Optional: a study with nothing to
+     * screenshot (a pipeline) sets the card as type alone. Synthetic data only,
+     * like everything else under src/assets/img.
+     */
+    thumb: image().optional(),
     /** Small, verifiable figures. Never invented, always traceable to the case study text. */
     metrics: z
       .array(z.object({ value: z.string(), label: z.string() }))
       .default([]),
-  }),
+    }),
 });
 
 export const collections = { projects };

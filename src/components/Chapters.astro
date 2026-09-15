@@ -1,0 +1,50 @@
+---
+/**
+ * The chapter list beside a reading page's argument.
+ *
+ * In flow, ruled, under whatever precedes it on a narrow screen; from `xl` the
+ * page puts it in a second grid column and `position: sticky` keeps it in view
+ * while the argument scrolls past. Nothing here is fixed and nothing floats over
+ * the prose, which is what let the first version run under the figures.
+ *
+ * The page's script marks the chapter being read with `aria-current`; this
+ * component only draws the list. A rule in front of each entry lengthens on the
+ * current one, so the marker reads without colour as well as with it.
+ */
+interface Props {
+  chapters: readonly { title: string; id: string }[];
+  /** A way out, under the list. */
+  back?: { label: string; href: string };
+  class?: string;
+}
+
+const { chapters, back, class: className } = Astro.props;
+---
+
+<nav id="chapters" aria-label="Chapters" class:list={['border-t border-line px-(--gutter) py-10 xl:border-0 xl:px-0', className]}>
+  <p class="label">Chapters</p>
+  <ol class="mt-5 space-y-3">
+    {
+      chapters.map((c, i) => (
+        <li>
+          <a
+            href={`#${c.id}`}
+            class="group relative flex items-baseline gap-3 pl-6 text-base leading-snug text-ink-soft transition-colors before:absolute before:left-0 before:top-[0.7em] before:h-px before:w-3 before:bg-line-strong before:transition-[width,background-color] before:duration-300 hover:text-ink aria-[current=true]:text-accent aria-[current=true]:before:w-5 aria-[current=true]:before:bg-accent"
+          >
+            <span class="font-mono text-xs text-ink-faint transition-colors group-hover:text-ink group-aria-[current=true]:text-accent">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            {c.title}
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+  {
+    back && (
+      <a class="label mt-8 inline-block transition-colors hover:text-accent" href={back.href}>
+        {back.label}
+      </a>
+    )
+  }
+</nav>

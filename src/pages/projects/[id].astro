@@ -18,6 +18,8 @@ import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Outcome from '../../components/Outcome.astro';
 import Metrics from '../../components/Metrics.astro';
+import Chapters from '../../components/Chapters.astro';
+import { slug } from '../../plugins/slug.mjs';
 
 export const getStaticPaths = (async () => {
   const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
@@ -32,6 +34,16 @@ export const getStaticPaths = (async () => {
 const { project, next } = Astro.props;
 const { title, year, role, stack, code, summary, outcome, metrics } = project.data;
 const { Content } = await render(project);
+
+// Chapters, read off the markdown source: one per `##`. The id is the same
+// slug the markdown plugin stamps on the h2, so the link and the heading agree.
+const chapters = project.data.chapters
+  ? (project.body ?? '')
+      .split(/^## /m)
+      .slice(1)
+      .map((section) => section.split('\n')[0].trim())
+      .map((heading) => ({ title: heading, id: slug(heading) }))
+  : [];
 
 // One <span data-line> per word. The gate fails a display line that wraps, and a
 // word is the only unit that cannot: the words stack instead of reflowing, and
@@ -88,10 +100,17 @@ const longest = Math.max(...words.map((w) => w.length));
     </h1>
 
     <div class="grid gap-8 border-t border-line pt-6 lg:grid-cols-12">
-      {/* Deliberately not revealed on scroll: the lede is the first thing a
-          skimmer reads and it sits inside the first screenful. */}
-      <p class="measure text-lg leading-relaxed text-ink lg:col-span-7">{summary}</p>
-      <dl class="grid gap-6 self-start sm:grid-cols-2 lg:col-span-4 lg:col-start-9">
+      {/* The summary is the meta description. On the page it is the lede only
+          when a study has no outcome pair to open with; otherwise the outcome
+          band below says the same thing louder and the lede would say it twice.
+          Not revealed on scroll: it sits inside the first screenful. */}
+      {!outcome && <p class="measure text-lg leading-relaxed text-ink lg:col-span-7">{summary}</p>}
+      <dl
+        class:list={[
+          'grid gap-6 self-start sm:grid-cols-2',
+          outcome ? 'lg:col-span-12 lg:grid-cols-4' : 'lg:col-span-4 lg:col-start-9',
+        ]}
+      >
         <div>
           <dt class="label">Role</dt>
           <dd class="mt-2 text-base text-ink-soft">{role}</dd>
@@ -105,7 +124,15 @@ const longest = Math.max(...words.map((w) => w.length));
                   {code.label}
                 </a>
               ) : (
-                code.label
+                <Fragment>
+                  {code.label}
+                  {/* Three of four studies cannot show their code. The Process
+                      page is what stands in for it, so it is linked from the line
+                      that says the code is private rather than only from the nav. */}
+                  <a class="label mt-2 block transition-colors hover:text-accent" href="/process/">
+                    How it was built →
+                  </a>
+                </Fragment>
               )
             }
           </dd>
@@ -143,9 +170,26 @@ const longest = Math.max(...words.map((w) => w.length));
     )
   }
 
-  <!-- ── the argument ──────────────────────────────────────────────────── -->
-  <div class="prose pb-24">
-    <Content />
+  {/* The chapter list and the argument. On a narrow screen the list is in
+      flow, ruled, under the metrics band. From xl the two share a grid: the
+      argument in the first column, the list sticky in a 16rem second column of
+      its own. The prose grid's fr tracks collapse to whatever the first column
+      leaves, so a figure spanning `wide` ends before the list by construction.
+      Nothing is fixed and nothing floats over the prose. */}
+  <!-- ── chapters and the argument ─────────────────────────────────────── -->
+  <div class:list={[chapters.length > 0 && 'xl:grid xl:grid-cols-[minmax(0,1fr)_16rem] xl:gap-x-8 xl:pr-(--gutter)']}>
+    {
+      chapters.length > 0 && (
+        <Chapters
+          chapters={chapters}
+          back={{ label: 'All work', href: '/' }}
+          class="xl:sticky xl:top-24 xl:order-last xl:self-start xl:pt-2"
+        />
+      )
+    }
+    <div class="prose pb-24">
+      <Content />
+    </div>
   </div>
 
   <!-- ── next ──────────────────────────────────────────────────────────── -->
@@ -170,7 +214,36 @@ const longest = Math.max(...words.map((w) => w.length));
 </BaseLayout>
 
 <script>
-  import { withMotion, revealDisplayTitle, revealOnScroll } from '../../scripts/motion';
+  import {
+    withMotion,
+    revealDisplayTitle,
+    revealOnScroll,
+    chapterNav,
+    onTeardown,
+  } from '../../scripts/motion';
+
+  // The chapter list, where a study has one.
+  const nav = document.getElementById('chapters');
+  if (nav) chapterNav(nav);
+
+  // Which captures are taller than their window. Measured after the images
+  // have their layout size, so the hint is only drawn on a frame that scrolls.
+  // The same pass hands a tall frame's wheel to its own scroller: Lenis reads
+  // `data-lenis-prevent` off the event path, and Lenis only exists with JS, so
+  // the attribute is set here rather than baked into the markup.
+  const markTall = () => {
+    document.querySelectorAll<HTMLElement>('.shot-frame').forEach((frame) => {
+      const body = frame.querySelector<HTMLElement>('.shot-body');
+      if (!body) return;
+      const tall = body.scrollHeight > body.clientHeight + 1;
+      frame.toggleAttribute('data-tall', tall);
+      body.toggleAttribute('data-lenis-prevent', tall);
+    });
+  };
+  markTall();
+  const ro = new ResizeObserver(markTall);
+  document.querySelectorAll('.shot-body img').forEach((img) => ro.observe(img));
+  onTeardown(() => ro.disconnect());
 
   withMotion(() => {
     // Title: the same per-character rise and width-axis settle as the home hero,

@@ -85,7 +85,8 @@ script cannot read a PNG, so the screenshots it writes to `.verify/` still have 
 looked at.
 
 Playwright lives in `~/sync/code/work/quote-generator/.venv/bin/python`; `npm run verify` calls
-it by that path. Nothing is installed system-wide.
+it by that path unless `VERIFY_PYTHON` points at another interpreter with Playwright installed
+(`VERIFY_PYTHON=/path/to/venv/bin/python npm run verify`). Nothing is installed system-wide.
 
 ## Design direction: the reference sites
 
@@ -164,6 +165,10 @@ every block is the template look and is not.
 `src/assets/img/` is synthetic-data-only, without exception. Astro's image pipeline optimises
 everything there to lazy, responsive WebP; nothing is served from `public/`. The three tools are employer work and
 their real inputs are real client data.
+
+`public/` holds exactly two files and both are binaries the screen cannot read: the resume PDF
+(built in career-hub with `build_resume.py general --no-phone`, no phone number) and `og.png`.
+Open both before every publish.
 
 The pipeline lives in career-hub because it depends on private repos:
 

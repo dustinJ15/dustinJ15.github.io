@@ -269,6 +269,14 @@
   font-weight: 700;
 }
 
+/* A ruled h3: one row per rule on the process page, each opening on a line. */
+.prose > h3.rule {
+  margin-block-start: 2.2em;
+  padding-block-start: 0.9em;
+  border-block-start: 1px solid var(--line);
+}
+.prose > h3.rule + p { margin-block-start: 0.9em; }
+
 /* A pull quote, in two shapes against the same accent rule.
    `blockquote` on its own is a restatement of copy already on the page, so it
    carries no citation. `figure.pullquote` is somebody else's idea, so it is
@@ -320,9 +328,23 @@
 
 @media (min-width: 40rem) {
   .prose > dl.chain > div {
-    grid-template-columns: 11rem 1fr;
+    grid-template-columns: 14rem 1fr;
     align-items: baseline;
   }
+}
+
+/* The step number, in the work rail's mono, in front of the command. */
+.prose dl.chain dt {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  align-items: baseline;
+}
+.prose dl.chain .chain-n {
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ink-faint);
 }
 
 .prose dl.chain dt code {
@@ -339,18 +361,6 @@
   line-height: 1.6;
   color: var(--ink-soft);
 }
-
-/* The standing availability line. Ruled in the accent above and below, which is
-   the one place on a prose page that shouts without being display type. */
-.prose > p.availability {
-  grid-column: content;
-  margin-block: 3em;
-  padding-block: 1.1rem;
-  border-block: 1px solid var(--accent);
-  font-size: var(--text-base);
-  line-height: 1.6;
-}
-.prose > p.availability strong { color: var(--accent); }
 
 /* The portrait.
 
@@ -414,7 +424,51 @@
     radial-gradient(circle at 3.75rem 50%, var(--line-strong) 0.3125rem, transparent 0.3125rem);
 }
 
-.shot-body img { width: 100%; height: auto; }
+/* The mat, and the window.
+
+   A white capture dropped straight onto #121212 reads as a hole. Two things
+   stop that: a one-pixel mid-tone ring between the picture and the frame, and
+   the picture itself set a notch under --ink so the page keeps the brightest
+   white for its own type.
+
+   A tall capture scrolls INSIDE its frame rather than running three screens
+   down the page. The frame is drawn as a browser window, so it behaves like
+   one. `data-lenis-prevent` (set by the markdown plugin) hands the wheel to
+   this scroller while the pointer is over it, and back to the page at either
+   end. With no JS it is an ordinary scrollable box. */
+.shot-body {
+  padding: 1px;
+  background: var(--line-strong);
+  max-height: 80svh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.shot-body img {
+  width: 100%;
+  height: auto;
+  filter: brightness(0.94);
+}
+
+/* A mono hint at the right of the chrome, only where the page's script has
+   found the capture taller than its window. Drawn, not marked up: it is a
+   decoration on a window that already scrolls with no JavaScript at all. */
+.shot-frame[data-tall] .shot-chrome {
+  position: relative;
+}
+.shot-frame[data-tall] .shot-chrome::after {
+  content: "scrolls \2193";
+  position: absolute;
+  inset-inline-end: 1rem;
+  top: 50%;
+  translate: 0 -50%;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
 
 .prose figcaption {
   margin-block-start: 1rem;
@@ -424,14 +478,28 @@
   color: var(--ink-faint);
 }
 
-/* The standing disclaimer at the foot of every study. */
-.prose > p.note {
-  margin-block-start: 3em;
-  padding-block-start: 1.2em;
-  border-block-start: 1px solid var(--line);
-  font-size: var(--text-sm);
-  line-height: 1.7;
-  color: var(--ink-faint);
+/* The experience list on /about/: one ruled row per entry, organisation in ink,
+   role and dates beneath it, side by side from 40rem. */
+.experience > div {
+  display: grid;
+  gap: 0.3rem 2rem;
+  padding-block: 0.9rem;
+  border-block-end: 1px solid var(--line);
+}
+.experience > div:first-child { border-block-start: 1px solid var(--line); }
+.experience dt { font-size: var(--text-base); color: var(--ink); }
+.experience dd {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1.5rem;
+  align-items: baseline;
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+@media (min-width: 40rem) {
+  .experience > div { grid-template-columns: 1fr 1fr; align-items: baseline; }
 }
 
 /* The case-study title. Sized against the longest WORD in it, not against a
@@ -465,11 +533,12 @@
    makes the same word about 6% wider than the browser sets it unsplit. Size
    against the unsplit width and the hero wraps the moment the animation runs.
 
-   The narrow cap is 6rem rather than the wide lane's 7.5rem because seven lines
-   of it have to leave the availability line inside the first screenful at 768,
-   where the hero is only 928px tall. */
+   The narrow cap used to be held down so that seven lines of it left the hero
+   foot inside the first screenful at 768. The hero is two words now, and at the
+   old cap they sat in the top half of a 928px hero over 450px of nothing. 12rem
+   lets the pair fill a tablet; the gate's wrap check is what says it still fits. */
 .hero-title {
-  font-size: clamp(1.9rem, calc((100vw - 2 * var(--gutter)) / 6.75), 6rem);
+  font-size: clamp(1.9rem, calc((100vw - 2 * var(--gutter)) / 3.6), 12rem);
   line-height: 0.9;
 }
 
@@ -482,7 +551,7 @@
 
 @media (min-width: 64rem) {
   .hero-title {
-    font-size: clamp(1.9rem, calc((100vw - 2 * var(--gutter)) / 8.9), 7.5rem);
+    font-size: clamp(1.9rem, calc((100vw - 2 * var(--gutter)) / 5.2), 13rem);
     line-height: 0.82;
   }
 

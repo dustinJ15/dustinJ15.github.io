@@ -8,7 +8,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "verify": "astro check && astro build && $HOME/sync/code/work/quote-generator/.venv/bin/python scripts/verify.py"
+    "verify": "astro check && astro build && ${VERIFY_PYTHON:-$HOME/sync/code/work/quote-generator/.venv/bin/python} scripts/verify.py"
   },
   "dependencies": {
     "astro": "^7.2.9"

@@ -12,6 +12,8 @@
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageTitle from '../components/PageTitle.astro';
+import Chapters from '../components/Chapters.astro';
+import { slug } from '../plugins/slug.mjs';
 
 // The chain: each step of the workflow and what that step does. A description
 // list rather than a table, because at 375 a two-column table either clips its
@@ -28,11 +30,17 @@ const chain = [
   { step: 'ralph-once.sh', what: 'The loop, supervised. One ticket at a time, watched.' },
   { step: 'afk-ralph.sh', what: 'The loop, unattended, against the remaining tickets.' },
 ];
+
+// The three sections of the argument. The h2s below take their ids from the
+// same slug the case studies use, so the chapter list and the headings agree.
+const sections = ['The chain', 'Four rules, each from a failure', 'The division of labour'];
+const chapters = sections.map((title) => ({ title, id: slug(title) }));
+const [chainCh, rules, labour] = chapters;
 ---
 
 <BaseLayout
   title="Process"
-  description="How I work with agentic coding tools: the plan and execute split, claim files, and the verification gate that makes machine-written code safe to merge."
+  description="How the work gets made with agentic coding tools: the plan and execute split, claim files, and the verification gate that makes machine-written code safe to merge."
 >
   <PageTitle label="Process" lines={['How I', 'work']} />
 
@@ -44,29 +52,36 @@ const chain = [
       by me.
     </p>
     <p class="measure text-lg leading-relaxed text-ink-soft lg:col-span-4 lg:col-start-9">
-      I think the honest version of that is more interesting than either of the dishonest ones.
+      The work is the harness around that: specs, a gate, isolation, and rules about what counts
+      as done.
     </p>
   </section>
 
+  {/* Same two lanes as a case study: the argument in the first column and the
+      chapter list sticky in the second from xl, in flow under it below that. */}
+  <div class="xl:grid xl:grid-cols-[minmax(0,1fr)_16rem] xl:gap-x-8 xl:pr-(--gutter)">
+  <Chapters chapters={chapters} back={{ label: 'All work', href: '/' }} class="xl:sticky xl:top-24 xl:order-last xl:self-start xl:pt-2" />
   <div class="prose pb-24">
     <p>
-      The work I actually do is designing the harness that makes what a machine writes safe to
-      merge: the specs, the gate, the isolation, the honesty rules. The bottleneck stopped
-      being how fast code gets written a while ago. It's whether you can trust it.
+      The bottleneck stopped being how fast code gets written. It is whether the result can be
+      trusted.
     </p>
 
-    <h2 data-reveal>The chain</h2>
+    <h2 id={chainCh.id} data-reveal>{chainCh.title}</h2>
 
     <p>
-      I adapted this from <a href="https://github.com/mattpocock/skills">Matt Pocock's skills</a>,
-      and it's a sequence of separate sessions rather than one long conversation:
+      I adapted this from <a href="https://github.com/mattpocock/skills">Matt Pocock's skills</a>;
+      the skills themselves are in{' '}
+      <a href="https://github.com/dustinJ15/claude-dotfiles">claude-dotfiles</a>. It's a sequence
+      of separate sessions rather than one long conversation:
     </p>
 
     <dl class="chain">
       {
-        chain.map((row) => (
+        chain.map((row, i) => (
           <div>
             <dt>
+              <span class="chain-n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
               <code>{row.step}</code>
             </dt>
             <dd>{row.what}</dd>
@@ -82,15 +97,14 @@ const chain = [
     </p>
 
     <p>
-      The grilling step is the one I'd keep if I could only keep one. Most bad output traces back
-      to a plan that was vague in a way nobody noticed, and being asked eighty questions is an
-      efficient way to find out you don't actually know what you want.
+      The interview step carries the most weight. Most bad output traces back to a plan that was
+      vague in a way nobody noticed, and eighty questions is a cheap way to find that out.
     </p>
 
-    <h2 data-reveal>What I learned by it going wrong</h2>
+    <h2 id={rules.id} data-reveal>{rules.title}</h2>
 
-    <p>
-      <strong>A completion claim is not evidence.</strong> An agent will report a task as done,
+    <h3 class="rule">A completion claim is not evidence</h3>
+    <p> An agent will report a task as done,
       sincerely, and be wrong. So the rule in my repos is that a claim of completion without the
       command output behind it doesn't count. That's why there's one command that runs the whole
       gate: tests, linting, type checking, security scan. Not because a human couldn't run four
@@ -98,65 +112,39 @@ const chain = [
       machine can reach.
     </p>
 
-    <p>
-      <strong>Two sessions will collide.</strong> On one project, two sessions worked the same
+    <h3 class="rule">Two sessions will collide</h3>
+    <p> On one project, two sessions worked the same
       checkout for twenty minutes before either noticed. Plans are now claimed atomically before
       any work starts, with <code>( set -o noclobber; : &gt; &lt;plan&gt;.claim )</code>, which
       either succeeds or fails and cannot do both. Execution happens in a git worktree, so two
       sessions can't share a working tree at all.
     </p>
 
-    <p>
-      <strong>Planning and doing should not share a session.</strong> A session that has been
+    <h3 class="rule">Planning and doing should not share a session</h3>
+    <p> A session that has been
       writing code is invested in the code it wrote. So planning happens in one session that
       writes only a plan file and touches nothing else, then the context is cleared, and a
       different session executes it. The plan has to be good enough to hand to a stranger, because
       it is being handed to one.
     </p>
 
-    <p>
-      <strong>Be honest about what you actually verified.</strong> The defect backlog on my
+    <h3 class="rule">Record what was verified, and how</h3>
+    <p> The defect backlog on my
       largest project grades every entry: <strong>CONFIRMED</strong> (a human saw it),{' '}
       <strong>AGENT-VERIFIED</strong> (a machine reproduced it), or <strong>REPORTED</strong>{' '}
       (someone said so). Without that, a plausible-sounding report and a reproduced bug look
       identical three weeks later.
     </p>
 
-    <h2 data-reveal>Where it's been used</h2>
+    <h2 id={labour.id} data-reveal>{labour.title}</h2>
 
     <p>
-      <strong><a href="https://github.com/dustinJ15/claude-dotfiles">claude-dotfiles</a></strong> is
-      the skills themselves, installable and synced across machines.
+      The agent writes the code. The spec that makes a vague idea buildable, the tests that define
+      correct, the gate that makes the answer unambiguous, and the review of every diff before it
+      merges are done by hand. When the merge queue stalled for a reason nothing reported, it was
+      found by reading the run, not by an agent.
     </p>
-
-    <p>
-      <strong>Label Maker</strong> was the first real use. <code>specs/</code> and eleven
-      tickets, and the commit log reads "Ticket 01" through "Ticket 11." The workflow leaves
-      fingerprints in git, which is a nice property when someone asks how something was built.
-    </p>
-
-    <p>
-      <strong><a href="/projects/quote-generator/">Quote Generator</a></strong> is where it had to
-      hold up under production pressure: 537 commits and 155 merged pull requests in eight weeks,
-      every one through the gate, behind a merge queue, with a test suite larger than the
-      application.
-    </p>
-
-    <h2 data-reveal>The obvious objection</h2>
-
-    <p><em>If an agent writes the code, what exactly do you do?</em></p>
-
-    <p>
-      I decide what to build and why, and that turns out to be most of it. I write the spec that
-      makes a vague idea buildable, design the tests that define correct, build the gate that makes
-      the answer unambiguous, and review every diff before it merges. When the merge queue stalled
-      for a reason nothing reported, no agent found that. I did.
-    </p>
-
-    <p>
-      I can also write the code. I've done it the other way, on a multiplayer game engine in C with
-      hand-rolled netcode, and I'd rather have both skills than pick a side.
-    </p>
+  </div>
   </div>
 
   <section class="border-t border-line px-(--gutter) py-16">
@@ -169,7 +157,7 @@ const chain = [
         class="font-display text-[clamp(2rem,9vw,5.5rem)] font-extrabold uppercase leading-none tracking-tight text-ink transition-colors duration-300 group-hover:text-accent"
         >Quote Generator</span
       >
-      <span class="label transition-colors group-hover:text-accent">The process under pressure</span
+      <span class="label transition-colors group-hover:text-accent">Case study</span
       >
     </a>
     <div class="mt-12 flex flex-wrap gap-6 border-t border-line pt-6">
@@ -180,7 +168,10 @@ const chain = [
 </BaseLayout>
 
 <script>
-  import { withMotion, revealDisplayTitle, revealOnScroll } from '../scripts/motion';
+  import { withMotion, revealDisplayTitle, revealOnScroll, chapterNav } from '../scripts/motion';
+
+  const nav = document.getElementById('chapters');
+  if (nav) chapterNav(nav);
 
   withMotion(() => {
     revealDisplayTitle();

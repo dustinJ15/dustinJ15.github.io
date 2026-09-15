@@ -59,7 +59,12 @@ const year = new Date().getFullYear();
     <meta property="og:description" content={description} />
     {canonical && <meta property="og:url" content={canonical} />}
 
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content={new URL('/og.png', Astro.site).href} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Dustin Jones, software engineer, Denver" />
+
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={description} />
   </head>
@@ -79,11 +84,20 @@ const year = new Date().getFullYear();
     </div>
 
     <header class="flex items-start justify-between gap-6 px-(--gutter) pb-6 pt-8">
-      <a
-        href="/"
-        class="font-mono text-xs uppercase tracking-[0.14em] text-ink transition-colors hover:text-accent"
-        >{site.name}</a
-      >
+      {/* No wordmark on the home page: the hero there IS the name, and the two
+          stacked read as a stutter. Every other page keeps it as the way home. */}
+      {
+        Astro.url.pathname === '/' ? (
+          <span aria-hidden="true" />
+        ) : (
+          <a
+            href="/"
+            class="font-mono text-xs uppercase tracking-[0.14em] text-ink transition-colors hover:text-accent"
+          >
+            {site.name}
+          </a>
+        )
+      }
       <nav aria-label="Primary" class="flex flex-wrap justify-end gap-x-5 gap-y-1">
         {
           nav.map((item) => (
@@ -107,6 +121,7 @@ const year = new Date().getFullYear();
       <p class="label">© {year} {site.name}</p>
       <nav aria-label="Elsewhere" class="flex flex-wrap gap-x-5 gap-y-1">
         <a class="label transition-colors hover:text-accent" href={`mailto:${site.email}`}>Email</a>
+        <a class="label transition-colors hover:text-accent" href={site.resume}>Resume</a>
         <a class="label transition-colors hover:text-accent" href={site.github}>GitHub</a>
         <a class="label transition-colors hover:text-accent" href={site.linkedin}>LinkedIn</a>
       </nav>

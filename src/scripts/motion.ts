@@ -61,6 +61,141 @@ export function scrollWindowTo(y: number) {
 }
 
 /**
+ * A horizontal rail of cards: native horizontal scroll everywhere, and from
+ * `lg` up a pinned, scrub-driven translation of the track by its overflow.
+ * Shared by the home work rail and a case study's chapter rail.
+ *
+ * Registered partly OUTSIDE `withMotion`, because the keyboard handling below
+ * is needed in the native lane too, and that lane exists under reduced motion.
+ *
+ * Keyboard: Chrome scrolls a horizontal scroller only part of the way towards a
+ * newly focused card, and in the pinned lane the rail's position is a function
+ * of PAGE scroll, so scrolling the card into view does nothing at all. So the
+ * card is put on screen here, through whichever axis is live.
+ */
+export function horizontalRail(rail: HTMLElement, scroller: HTMLElement, track: HTMLElement) {
+  // Never negative: on a very wide screen the track is narrower than the
+  // viewport, and a negative distance hands ScrollTrigger an end before its start.
+  const distance = () => Math.max(0, track.scrollWidth - scroller.clientWidth);
+  // Set while the pinned lane owns the horizontal axis; null in the native one.
+  let scrubStart: (() => number) | null = null;
+
+  const onFocusIn = (e: FocusEvent) => {
+    const card = (e.target as HTMLElement | null)?.closest<HTMLElement>('a');
+    // Keyboard only. `focusin` also fires on a click, and moving the rail out
+    // from under a pointer mid-click is the opposite of helpful.
+    if (!card || !track.contains(card) || !card.matches(':focus-visible')) return;
+    // Measured against the track rather than read off offsetLeft, so the
+    // scrub's own transform cancels out: both rects move together.
+    const offset = card.getBoundingClientRect().left - track.getBoundingClientRect().left;
+    const centred = offset - (scroller.clientWidth - card.offsetWidth) / 2;
+    if (scrubStart) scrollWindowTo(scrubStart() + Math.min(Math.max(centred, 0), distance()));
+    else scroller.scrollLeft = centred; // the scroller clamps it for us
+  };
+  scroller.addEventListener('focusin', onFocusIn);
+  onTeardown(() => scroller.removeEventListener('focusin', onFocusIn));
+
+  withMotion(() => {
+    // matchMedia rather than a one-shot innerWidth read, so resizing across the
+    // breakpoint sets the rail up or tears it down instead of stranding it.
+    const mm = gsap.matchMedia();
+    onTeardown(() => mm.revert());
+
+    mm.add('(min-width: 1024px)', () => {
+      if (distance() === 0) return;
+
+      // The native scrollbar would fight the transform. gsap.set inside the
+      // matchMedia scope, so reverting restores the scrollable fallback.
+      gsap.set(scroller, { overflowX: 'hidden' });
+
+      // Hidden overflow is still scrollable by script and by focus. Any
+      // leftover scrollLeft stacks on the scrub transform and offsets the rail
+      // for good, so hold it at zero while the scrub owns the axis.
+      scroller.scrollLeft = 0;
+      const hold = () => {
+        if (scroller.scrollLeft !== 0) scroller.scrollLeft = 0;
+      };
+      scroller.addEventListener('scroll', hold);
+
+      const scrub = gsap.to(track, {
+        x: () => -distance(),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: rail,
+          start: 'top top',
+          // Clamped to a positive length: `+=0` is a degenerate pin.
+          end: () => `+=${Math.max(1, distance())}`,
+          pin: true,
+          scrub: 0.6,
+          invalidateOnRefresh: true,
+          anticipatePin: 1,
+        },
+      });
+      const st = scrub.scrollTrigger;
+      if (st) scrubStart = () => st.start;
+
+      return () => {
+        scrubStart = null;
+        scroller.removeEventListener('scroll', hold);
+      };
+    });
+  });
+}
+
+/**
+ * Scroll to an in-page anchor through the smooth scroller.
+ *
+ * A native `#fragment` jump moves the window behind Lenis's back and the next
+ * wheel event snaps it home again, so anchor links inside `root` are routed
+ * through `scrollWindowTo`. Under reduced motion there is no Lenis and the
+ * fallback is a plain jump, which is what the browser would have done.
+ */
+export function routeAnchors(root: HTMLElement, offset = 24) {
+  const onClick = (e: MouseEvent) => {
+    const a = (e.target as HTMLElement | null)?.closest<HTMLAnchorElement>('a[href^="#"]');
+    if (!a) return;
+    const target = document.getElementById(decodeURIComponent(a.hash.slice(1)));
+    if (!target) return;
+    e.preventDefault();
+    history.replaceState(null, '', a.hash);
+    scrollWindowTo(target.getBoundingClientRect().top + window.scrollY - offset);
+    target.setAttribute('tabindex', '-1');
+    target.focus({ preventScroll: true });
+  };
+  root.addEventListener('click', onClick);
+  onTeardown(() => root.removeEventListener('click', onClick));
+}
+
+/**
+ * A chapter list beside an argument. Anchors go through the smooth scroller,
+ * and the browser's IntersectionObserver marks the chapter being read.
+ * Registered outside `withMotion`: the list exists under reduced motion too.
+ *
+ * The current chapter is the last heading above a line 40% down the viewport.
+ * The observer fires whenever a heading crosses that line (`rootMargin` trims
+ * the root to it); the decision is then made from every heading's position, so
+ * a fast scroll that skips a callback cannot leave a stale one marked.
+ */
+export function chapterNav(nav: HTMLElement) {
+  routeAnchors(nav);
+  const links = [...nav.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')];
+  const headings = links
+    .map((a) => document.getElementById(a.hash.slice(1)))
+    .filter((h): h is HTMLElement => h !== null);
+  const LINE = 0.4;
+  const mark = () => {
+    const current = headings.filter((h) => h.getBoundingClientRect().top <= innerHeight * LINE).at(-1);
+    links.forEach((a) => {
+      if (a.hash.slice(1) === current?.id) a.setAttribute('aria-current', 'true');
+      else a.removeAttribute('aria-current');
+    });
+  };
+  const spy = new IntersectionObserver(mark, { rootMargin: `0px 0px -${100 - LINE * 100}% 0px` });
+  headings.forEach((h) => spy.observe(h));
+  onTeardown(() => spy.disconnect());
+}
+
+/**
  * Arms the reveal CSS and runs `build` inside a GSAP context.
  * If motion is off, `build` never runs and the page renders in its end state.
  */

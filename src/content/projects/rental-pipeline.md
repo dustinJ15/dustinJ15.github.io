@@ -81,7 +81,7 @@ I built a Dockerized Python ETL pipeline: sixteen parsers, one normalized schema
 <figcaption>The shape of the job. Every input arrives in its own format and everything downstream reads one.</figcaption>
 </figure>
 
-## What the files actually were
+## What the files were
 
 The interesting part of an ETL job is never the transformation. It's what arrives.
 
@@ -106,9 +106,3 @@ A pipeline that runs unattended has to be able to say whether it worked:
 
 Computed KPI fields such as days-to-complete, AR aging buckets and days vacant are derived in the
 pipeline rather than in each dashboard, so every consumer gets the same definition.
-
-<p class="note">
-The working repo contains real client data and stays private.
-<a href="https://github.com/dustinJ15/rental-pipeline-public">rental-pipeline-public</a> is the
-sanitized version, with synthetic sample data.
-</p>

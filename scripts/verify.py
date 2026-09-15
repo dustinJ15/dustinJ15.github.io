@@ -49,7 +49,7 @@ from playwright.sync_api import sync_playwright
 ROOT = Path(__file__).resolve().parent.parent
 DIST = ROOT / "dist"
 OUT = ROOT / ".verify"
-PORT = 4321
+PORT = 4390   # not 4321: the dev server lives there, and the gate must not evict it
 
 VIEWPORTS = {"375": (375, 812), "768": (768, 1024), "1440": (1440, 900)}
 THEMES = ("dark",)   # dark-only site by decision; see CLAUDE.md
@@ -240,9 +240,9 @@ MAX_TRAILING_EMPTY = 260
 
 EXPECTATIONS: dict[str, dict] = {
     "/": {
-        # One hero h1; About, Selected work and Contact; one h3 per project.
-        "headings": {"h1": 1, "h2": 3, "h3": 4},
-        "ids": ["main", "marquee", "rail"],
+        # One hero h1; Work and Contact; one h3 per project.
+        "headings": {"h1": 1, "h2": 2, "h3": 4},
+        "ids": ["main", "rail"],
         "figures": 0,
         "alt": True,
         "links": [
@@ -267,8 +267,7 @@ EXPECTATIONS: dict[str, dict] = {
             # rows at 1440 and seven lines at 375, and the words have to still be
             # words to a copy-paste and to the computed accessible name whichever
             # way it broke.
-            "full-stack applications and the pipelines that keep them reliable.",
-            "Available now for part-time and contract work",
+            "Four case studies",
             "Sixteen parsers into one schema",
         ],
     },
@@ -286,8 +285,8 @@ EXPECTATIONS: dict[str, dict] = {
     # ── prose pages ───────────────────────────────────────────────────────
     "/process/": {
         # One display title, one h2 per section of the argument.
-        "headings": {"h1": 1, "h2": 4, "h3": 0},
-        "ids": ["main"],
+        "headings": {"h1": 1, "h2": 3, "h3": 4},
+        "ids": ["main", "chapters"],
         "figures": 0,
         "alt": True,
         "links": ["/", "/about/", "/projects/quote-generator/"],
@@ -302,11 +301,11 @@ EXPECTATIONS: dict[str, dict] = {
             "The loop, unattended, against the remaining tickets",
             "A completion claim is not evidence",
             "Planning and doing should not share a session",
-            "If an agent writes the code, what exactly do you do?",
+            "The agent writes the code",
         ],
     },
     "/about/": {
-        "headings": {"h1": 1, "h2": 0, "h3": 0},
+        "headings": {"h1": 1, "h2": 1, "h3": 0},
         "ids": ["main"],
         # The portrait is a bare image; the one figure is the pull quote, which is
         # a figure because it has an attribution to caption it with.
@@ -325,7 +324,10 @@ EXPECTATIONS: dict[str, dict] = {
             "Most programmers would have trouble explaining what they do",
             "Ward Cunningham",
             "The Pragmatic Programmer",
-            "Available now",
+            "That is the adjustment",
+            "Open to part-time and contract work",
+            "Software Engineering Intern",
+            "Ski Instructor",
         ],
     },
 
@@ -336,11 +338,11 @@ EXPECTATIONS: dict[str, dict] = {
     # label, so a value that stops being traceable to the prose cannot be
     # quietly swapped for a rounder one without this row noticing.
     "/projects/quote-generator/": {
-        "headings": {"h1": 1, "h2": 6, "h3": 0},
-        "ids": ["main"],
+        "headings": {"h1": 1, "h2": 4, "h3": 0},
+        "ids": ["main", "chapters"],
         "figures": 4,
         "alt": True,
-        "links": ["/", "/projects/label-maker/"],
+        "links": ["/", "/process/", "/projects/label-maker/"],
         "reachable": ["/projects/label-maker/"],
         "text": [
             "Quote Generator",
@@ -358,7 +360,7 @@ EXPECTATIONS: dict[str, dict] = {
         "ids": ["main"],
         "figures": 3,
         "alt": True,
-        "links": ["/", "/projects/billing-analyzer/"],
+        "links": ["/", "/process/", "/projects/billing-analyzer/"],
         "reachable": ["/projects/billing-analyzer/"],
         "text": [
             "Label Maker",
@@ -372,9 +374,9 @@ EXPECTATIONS: dict[str, dict] = {
     "/projects/billing-analyzer/": {
         "headings": {"h1": 1, "h2": 2, "h3": 0},
         "ids": ["main"],
-        "figures": 4,
+        "figures": 1,
         "alt": True,
-        "links": ["/", "/projects/label-maker/", "/projects/rental-pipeline/"],
+        "links": ["/", "/process/", "/projects/label-maker/", "/projects/rental-pipeline/"],
         "reachable": ["/projects/rental-pipeline/"],
         "text": [
             "Billing Analyzer",

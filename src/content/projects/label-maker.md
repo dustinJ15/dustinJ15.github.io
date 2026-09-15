@@ -16,6 +16,7 @@ summary: >-
 tagline: >-
   Barcode and aliquot label sheets, expanded by hand patient by patient. Now it is a short form
   and a download, from a single HTML file that runs offline.
+thumb: ../../assets/img/label-maker-envelope.png
 outcome:
   before: Copy rows, increment barcodes, repeat per patient
   after: Fill in a short form. Download the sheet.
@@ -42,7 +43,7 @@ The whole product is a single `.html` file. You double-click it, or a coworker s
 Teams and *they* double-click it. It runs offline, uploads nothing, and needs no server, no
 install, and no IT ticket.
 
-That last part is the design decision I'd defend hardest. A web app would have needed hosting,
+A web app would have needed hosting,
 an approval process, and a login. That is three places for adoption to die. A file you can email
 is a tool people can start using the same afternoon.
 
@@ -83,7 +84,7 @@ the thing that ships has no dependencies at all.
 
 > The paperwork is unfamiliar. The idea that a claim needs evidence behind it is not.
 
-## The part I didn't expect to be doing
+## Validation under 21 CFR Part 11
 
 The tool is used in a regulated environment, which means it needed a formal computer-system
 validation package under **21 CFR Part 11** before anyone could rely on it. I wrote and executed
@@ -91,12 +92,6 @@ it: validation plan, user requirement specification, system risk assessment and 
 test-script specification, incident log and incident report forms, validation report, release
 memo, bi-annual review, and a use-and-QC SOP.
 
-I had no regulatory background going in. The useful surprise was how much of it is just
-engineering discipline written in a different dialect: a requirement you can test, a risk you
-can name, and evidence that the test actually ran. The paperwork is unfamiliar. The idea that a
+Most of it is engineering discipline in a different dialect: a requirement you can test, a risk you
+can name, and evidence that the test ran. The paperwork is unfamiliar. The idea that a
 claim needs evidence behind it is not.
-
-<p class="note">
-Built for an employer, so the code and the templates stay private. Everything here describes
-the engineering, not the client's data.
-</p>

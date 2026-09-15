@@ -31,14 +31,38 @@ and approval is per action, not once.
 
 ## Backlog, not blocking
 
-- [ ] **No `og:image`.** Social shares are text-only. Adding one means a real image at a stable
-      URL and an absolute `og:image` in `BaseLayout`.
-- [ ] **A second design pass.** Dustin: "we are going to spend some time in the future making
-      this better." The Obys direction landed; the next pass is refinement rather than a
-      redirection.
+- [ ] Nothing queued. The next pass is whatever the review checklist turns up.
 
 ## Done
 
+- [x] **Pre-publish trims, 2026-09-15.** Quote generator study cut by a fifth: the three
+      build-process sections are one, "How it was built", and the defect ledger lives on Process
+      alone. Third metric is `1.5` with the unit in the label, so the tiles share a baseline. Stack
+      marquee removed from the home page. Every private-code study links Process from its Code line.
+- [x] **Second design pass, 2026-09-14.** Chapter list is a sticky second column from xl
+      (`Chapters.astro`), shared by the case studies and Process; About keeps its availability in
+      the same lane. Hero cap at 12rem below lg so the name fills a tablet. Case-study figures
+      matted and capped at 80svh with in-frame scrolling. Process chain numbered, its four rules
+      set as ruled h3s. Home cards carry a thumbnail from an existing capture (`thumb` in front
+      matter, optional). `VERIFY_PYTHON` overrides the gate's interpreter.
+- [x] **Portfolio conventions pass, 2026-09-12.** Hero is the name. Resume PDF at
+      `public/Dustin-Jones-Resume.pdf`, built in career-hub with `build_resume.py general
+      --no-phone` and copied over by hand; after any resume change, rebuild with the flag and
+      re-copy it. Experience list on About (titles and dates only). Share image at
+      `public/og.png`. Six verbosity cuts: home bio and private-code paragraph gone, case
+      studies open on the outcome pair, quote generator trimmed by a third, Process lost
+      "Used on", footer notes gone from every study.
+- [x] **Billing analyzer is one capture** (2026-09-14), header through the activity calendar,
+      cropped above the tables that carry per-item totals. `shoot-offline-tools.py` in
+      career-hub produces the same file. The quote generator has a chapter list, fixed beside
+      the prose from xl and in flow below it, opted in with `chapters: true` in front matter.
+- [x] **The portfolio prose pass, 2026-09-12.** The work is the subject and the author is the
+      byline. Self-evaluation ("I'd defend hardest", "proud of", "the habit I'd bring to a team"),
+      interview framing ("The obvious objection"), the second GPA mention, the senior
+      vice-president name-drop and eleven rhetorical "actually"s are gone. Headings name a
+      problem or a mechanism. Availability is one plain line at the end of About; the hero
+      button now points at the work. New hero: "Tools for a clinical lab, a property firm, and
+      the people who run them." Gate rows updated to match.
 - [x] **The redesign, tickets 01 to 11.** The site is Astro 7, Tailwind v4, dark only, in the
       Obys direction. Eight routes: home, process, about, four case studies and a 404. See
       `specs/portfolio-redesign/`.

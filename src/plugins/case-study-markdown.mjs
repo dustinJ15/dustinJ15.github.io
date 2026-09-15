@@ -22,6 +22,7 @@
  * `src` written below is still picked up and optimised.
  */
 import { defineHastPlugin } from 'satteri';
+import { slug } from './slug.mjs';
 
 const isBlank = (node) => node.type === 'text' && !node.value.trim();
 
@@ -88,6 +89,12 @@ function figureFor(img) {
  */
 const REVEALS = ['h2', 'h3', 'blockquote'];
 
+/** The heading's visible text, for its id. */
+const textOf = (node) =>
+  (node.children ?? [])
+    .map((c) => (c.type === 'text' ? c.value : c.type === 'element' ? textOf(c) : ''))
+    .join('');
+
 const plugin = defineHastPlugin({
   name: 'case-study',
   element: [
@@ -102,6 +109,9 @@ const plugin = defineHastPlugin({
       filter: REVEALS,
       visit(node, ctx) {
         ctx.setProperty(node, 'data-reveal', '');
+        // Chapter cards on the study page link to `#<slug>`; the slug is shared
+        // so the two cannot drift.
+        if (node.tagName === 'h2') ctx.setProperty(node, 'id', slug(textOf(node)));
       },
     },
   ],

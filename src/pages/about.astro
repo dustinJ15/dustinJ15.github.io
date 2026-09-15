@@ -16,6 +16,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageTitle from '../components/PageTitle.astro';
 import { site } from '../data/site';
 import portrait from '../assets/img/dustin-jones.jpg';
+
+// Titles and dates only, as they stand on the resume. The case studies are the
+// descriptions, so none are repeated here. Ranges use "to": the gate fails on a dash.
+const experience = [
+  { org: 'Frontage Laboratories, Exton PA', role: 'Software Engineering Intern', when: 'Jun to Aug 2026' },
+  { org: 'MSU Denver Honors Program', role: 'Student Assistant', when: 'Jan 2026 to present' },
+  { org: 'Ember Capital Partners, Denver', role: 'Software Engineering Intern', when: 'Nov 2025 to Mar 2026' },
+  { org: 'Vail Resorts, Colorado and Australia', role: 'Ski Instructor', when: '2020 to 2025' },
+  { org: 'MSU Denver', role: 'B.S. Computer Science, Mathematics minor', when: 'Expected Dec 2027' },
+];
 ---
 
 <BaseLayout
@@ -66,6 +76,7 @@ import portrait from '../assets/img/dustin-jones.jpg';
     </p>
   </section>
 
+  <div class="xl:grid xl:grid-cols-[minmax(0,1fr)_16rem] xl:gap-x-8 xl:pr-(--gutter)">
   <div class="prose pb-24">
     <p>
       In between I taught skiing professionally for Vail Resorts for five seasons, in Colorado and
@@ -74,11 +85,10 @@ import portrait from '../assets/img/dustin-jones.jpg';
 
     <p>
       Ski school runs on requests, priority lists, and who is visible to the people handing out
-      work, so I turned up to my first software job already able to read an office. When I built
-      the quoting system at Frontage Laboratories last summer, I modeled it on the office politics
-      as much as on the requirements: who got to see what, how a task arrived on someone's screen,
-      what people did and did not know about what other people were doing. Its six roles are a
-      model of the organization more than they are a security feature.
+      work. That is the model the quoting system at Frontage Laboratories was built on: who got
+      to see what, how a task arrived on someone's screen, what people did and did not know about
+      each other's work. Its six roles are a model of the organization more than they are a
+      security feature.
     </p>
 
     {/* Deliberately not "the shift", "the switch" or anything else that reads as a
@@ -101,16 +111,44 @@ import portrait from '../assets/img/dustin-jones.jpg';
     </figure>
 
     <p>
-      That has been the real adjustment. What I want is to keep building things that make other
-      people's days easier, and to end up a senior developer running the kind of large projects
-      people depend on daily.
+      That is the adjustment. The case studies here are the attempt at an explanation.
     </p>
 
-    <p class="availability">
-      <strong>Available now</strong> for part-time and contract work, Denver or remote.{' '}
-      <a href={`mailto:${site.email}`}>{site.email}</a>
-    </p>
   </div>
+
+  {/* The second lane. A case study keeps its chapters here; this page has one
+      section and keeps its availability instead, sticky beside the prose from
+      xl and in flow under it below that. The line appears once on the page. */}
+  <aside class="border-t border-line px-(--gutter) py-10 xl:sticky xl:top-24 xl:self-start xl:border-0 xl:px-0 xl:pt-2">
+    <p class="label">Availability</p>
+    <p class="mt-5 max-w-56 text-base leading-snug text-ink">
+      Open to part-time and contract work, Denver or remote.
+    </p>
+    <ul class="mt-6 space-y-2">
+      <li><a class="label transition-colors hover:text-accent" href={`mailto:${site.email}`}>{site.email}</a></li>
+      <li><a class="label transition-colors hover:text-accent" href={site.resume}>Resume, PDF</a></li>
+      <li><a class="label transition-colors hover:text-accent" href={site.github}>GitHub</a></li>
+      <li><a class="label transition-colors hover:text-accent" href={site.linkedin}>LinkedIn</a></li>
+    </ul>
+  </aside>
+  </div>
+
+  <section class="border-t border-line px-(--gutter) py-16">
+    <h2 class="label">Experience</h2>
+    <dl class="experience mt-8">
+      {
+        experience.map((e) => (
+          <div>
+            <dt>{e.org}</dt>
+            <dd>
+              <span>{e.role}</span>
+              <span class="label">{e.when}</span>
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
 
   <section class="border-t border-line px-(--gutter) py-16">
     <p class="label">Read next</p>

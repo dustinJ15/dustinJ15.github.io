@@ -26,9 +26,11 @@ the publish ticket. Nothing here blocks the remaining tickets.
 - [ ] **The pinned rail centres its cards in a full-height section**, so about 200px sits above the
       label and 200px below the cards, and the lower band shows for a moment as the pin releases.
       Symmetric and deliberate, but a composition choice rather than a forced one.
-- [ ] **The quote-builder screenshot is nearly two viewport-heights** inside its frame at 1440, so
-      the pictured browser window is never seen whole. Cropping shorter costs the line-item groups
-      the alt text and the argument both lean on.
+- [ ] **Tall captures now scroll inside their frame** (capped at 80svh, a "scrolls" hint in the
+      chrome). Nothing was cropped. Scroll the quote builder with a real wheel and a trackpad and
+      say whether the handoff between page and window feels right.
+- [ ] **Home cards carry a thumbnail** cropped from the top of an existing synthetic capture.
+      Open the rail at 375 and say whether the crops read.
 - [ ] **Seven of the eleven re-shot screenshots have not been opened by the supervising session.**
       The implementing agent and its reviewer both opened all eleven. The four highest-risk ones
       were independently checked. The other seven are the three billing shots, two label-maker
@@ -58,9 +60,8 @@ above the contact block and the hero's scale at 375.
 - [ ] **Two rewrites the agent flagged for a second read.** In `quote-generator.md`, "Their job is
       to check a document and make the calls that need judgment, not to assemble one" became "...
       that need judgment. Assembling one is no longer part of the job." The contrast survives but
-      lands slower. And "That habit, treating 'we have not actually confirmed this' as a fact worth
-      writing down, is the thing I would bring to a team" was reordered to "Treating 'we have not
-      actually confirmed this' as a fact worth writing down is the habit I would bring to a team".
+      lands slower. The second flagged sentence ("the habit I would bring to a team") was cut
+      entirely in the 2026-09-12 prose pass, so only the first still needs a read.
 - [ ] **`about.astro` lost a line to the no-career-change rule.** "The strange part of the shift is
       that skiing was legible to anyone watching and programming is not" is now "Skiing was legible
       to anyone watching. Programming is not." Read it in place; it sets up the Cunningham quote.
@@ -78,12 +79,6 @@ above the contact block and the hero's scale at 375.
 - [ ] **No-JS keyboard is imperfect and cannot be fixed.** With JavaScript off the rail is a plain
       scroller and Chrome only scrolls a newly focused card part of the way on screen. Every card
       is reachable and focusable; one may sit partly off screen. Accept or reject knowingly.
-
-## Known gaps
-
-- [ ] **No `og:image`.** Ticket 10 moved the images under `src/assets/img/`, where Astro
-      fingerprints them, so there is still no stable URL to point at. Social shares are text-only.
-      Tracked in `TODO.md` as backlog, not a blocker.
 
 ## Live, after publish
 

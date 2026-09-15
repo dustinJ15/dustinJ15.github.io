@@ -1,12 +1,12 @@
 ---
 import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { site, hero, bio, elsewhere } from '../data/site';
+import { site, hero } from '../data/site';
 
 // The work list reads the collection, so the home page and a case study cannot
 // disagree about a project's year, stack or tagline.
 const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
-const marquee = [...new Set(projects.flatMap((p) => p.data.stack))];
 ---
 
 <BaseLayout title="Work" description={site.description}>
@@ -38,15 +38,18 @@ const marquee = [...new Set(projects.flatMap((p) => p.data.stack))];
             <span
               class:list={[
                 'hero-row',
-                i === 2 && 'text-accent',
+                i === hero.displayRows.length - 1 && 'text-accent',
                 i % 2 === 1 && 'lg:pl-[8vw]',
-                i === 4 && 'lg:pl-[20vw]',
               ]}
             >
               {row.map((phrase, j) => (
                 <Fragment>
                   {j > 0 && ' '}
-                  <span class="block overflow-hidden">
+                  {/* overflow-clip with a margin rather than overflow-hidden: the
+                      tracking is negative, so the last glyph in a word overhangs
+                      its box and a hard clip takes the edge off the S. Same fix as
+                      the case-study title. */}
+                  <span class="block overflow-clip [overflow-clip-margin:0.15em]">
                     <span data-line class="block">
                       {phrase}
                     </span>
@@ -61,55 +64,26 @@ const marquee = [...new Set(projects.flatMap((p) => p.data.stack))];
 
     <div class="flex flex-wrap items-end justify-between gap-6 border-t border-line pt-5">
       {/* Deliberately not a [data-reveal]. It sits at the very bottom of the
-          hero, so a scroll-triggered fade leaves the one line that says he is
-          available missing from the first screenful. */}
+          hero, so a scroll-triggered fade would leave the first screenful
+          without the one line that says what the page holds. */}
       <p class="max-w-md text-base leading-relaxed text-ink-soft">
-        {hero.availability}
+        Four case studies. Three built for a clinical lab, one for a property firm.
       </p>
       <a
-        href={`mailto:${site.email}`}
+        href="#rail"
         class="group inline-flex items-center gap-3 border border-accent px-6 py-3 font-mono text-xs uppercase tracking-[0.18em] text-accent transition-colors duration-300 hover:bg-accent hover:text-accent-contrast"
       >
-        Available now
-        <span class="inline-block transition-transform duration-300 group-hover:translate-x-1"
-          >→</span
+        See the work
+        <span class="inline-block transition-transform duration-300 group-hover:translate-y-1"
+          >↓</span
         >
       </a>
     </div>
   </section>
 
-  <!-- ── marquee ───────────────────────────────────────────────────────── -->
-  <div class="overflow-hidden border-y border-line py-4">
-    <div id="marquee" class="flex w-max gap-8 whitespace-nowrap will-change-transform">
-      {
-        [0, 1].map(() => (
-          <div class="flex shrink-0 gap-8" aria-hidden="true">
-            {marquee.map((t) => (
-              <span class="font-mono text-xs uppercase tracking-[0.18em] text-ink-faint">
-                {t} <span class="text-accent">/</span>
-              </span>
-            ))}
-          </div>
-        ))
-      }
-    </div>
-  </div>
-
-  <!-- ── about, asymmetric ─────────────────────────────────────────────── -->
-  <section class="grid gap-10 px-(--gutter) py-28 lg:grid-cols-12">
-    <h2 class="label lg:col-span-3">About</h2>
-    <div class="space-y-8 lg:col-span-8 lg:col-start-5">
-      <p class="font-display text-3xl font-medium leading-[1.15] text-ink" data-reveal>
-        {bio[0]}
-      </p>
-      <p class="measure text-lg leading-relaxed text-ink-soft" data-reveal>{bio[1]}</p>
-    </div>
-  </section>
-
   {/* Native horizontal scroll by default, so every card is reachable at any
-      width with no JavaScript at all. On a wide screen the script swaps that
-      for a pinned, scrub-driven translation and hides the scroller's own
-      overflow; both are reverted on teardown. */}
+      width with no JavaScript at all. On a wide screen `horizontalRail` swaps
+      that for a pinned, scrub-driven translation; reverted on teardown. */}
   <!-- ── work rail ─────────────────────────────────────────────────────── -->
   {/* `lg:min-h-svh` is what makes the pin honest. The section is pinned for
       exactly the scrub distance, and a 590px section pinned inside a 900px
@@ -121,7 +95,7 @@ const marquee = [...new Set(projects.flatMap((p) => p.data.stack))];
     class="relative border-t border-line lg:flex lg:min-h-svh lg:flex-col lg:justify-center"
   >
     <div class="flex items-center justify-between px-(--gutter) py-6">
-      <h2 class="label">Selected work</h2>
+      <h2 class="label">Work</h2>
       <span class="label" aria-hidden="true">Scroll →</span>
     </div>
     <div id="rail-scroller" class="overflow-x-auto overscroll-x-contain">
@@ -133,6 +107,21 @@ const marquee = [...new Set(projects.flatMap((p) => p.data.stack))];
               class="group flex w-[min(78vw,26rem)] shrink-0 flex-col justify-between border border-line bg-surface p-7 transition-colors duration-500 hover:border-accent hover:bg-surface-2"
             >
               <div>
+                {/* The top of the tool, matted the way a case-study figure is.
+                    Decorative: the card already says what the project is, and
+                    the picture is a hint of it rather than information. */}
+                {p.data.thumb && (
+                  <div class="mb-7 border border-line-strong bg-line-strong p-px">
+                    <Image
+                      src={p.data.thumb}
+                      alt=""
+                      aria-hidden="true"
+                      widths={[420, 840]}
+                      sizes="(min-width: 640px) 26rem, 78vw"
+                      class="aspect-[16/10] w-full object-cover object-top brightness-[0.94]"
+                    />
+                  </div>
+                )}
                 <div class="flex items-baseline justify-between">
                   <span class="font-mono text-5xl font-bold leading-none text-ink-faint transition-colors duration-500 group-hover:text-accent">
                     {String(i + 1).padStart(2, '0')}
@@ -165,9 +154,6 @@ const marquee = [...new Set(projects.flatMap((p) => p.data.stack))];
       screen and reads as the page having run out rather than having moved on. */}
   <section class="border-t border-line px-(--gutter) pb-28 pt-16">
     <h2 class="label">Contact</h2>
-    <p class="measure-wide mt-6 text-lg leading-relaxed text-ink-soft" data-reveal>
-      {elsewhere.code}
-    </p>
     <a
       href={`mailto:${site.email}`}
       class="mt-10 block font-display text-[clamp(1.5rem,8.5vw,4.5rem)] font-extrabold uppercase leading-none tracking-tight text-ink transition-colors duration-300 hover:text-accent"
@@ -178,6 +164,7 @@ const marquee = [...new Set(projects.flatMap((p) => p.data.stack))];
     <div class="mt-12 flex flex-wrap gap-6 border-t border-line pt-6">
       <a class="label transition-colors hover:text-accent" href="/process/">Process</a>
       <a class="label transition-colors hover:text-accent" href="/about/">About</a>
+      <a class="label transition-colors hover:text-accent" href={site.resume}>Resume</a>
       <a class="label transition-colors hover:text-accent" href={site.github}>GitHub</a>
       <a class="label transition-colors hover:text-accent" href={site.linkedin}>LinkedIn</a>
     </div>
@@ -185,129 +172,20 @@ const marquee = [...new Set(projects.flatMap((p) => p.data.stack))];
 </BaseLayout>
 
 <script>
-  import {
-    withMotion,
-    onTeardown,
-    revealDisplayTitle,
-    revealOnScroll,
-    scrollWindowTo,
-  } from '../scripts/motion';
-  import gsap from 'gsap';
+  import { withMotion, revealDisplayTitle, revealOnScroll, horizontalRail } from '../scripts/motion';
 
   const rail = document.getElementById('rail');
   const scroller = document.getElementById('rail-scroller');
   const railTrack = document.getElementById('rail-track');
 
-  // How far the track overhangs its scroller. Never negative: above roughly
-  // 1915px the track is narrower than the viewport, and a negative distance
-  // hands ScrollTrigger an end before its start on a pinned section.
-  const railDistance = () =>
-    rail && scroller && railTrack ? Math.max(0, railTrack.scrollWidth - scroller.clientWidth) : 0;
-
-  // Set while the pinned lane owns the horizontal axis; null in the native one.
-  let scrubStart: (() => number) | null = null;
-
-  // ── the rail with a keyboard ──────────────────────────────────────────
-  //
-  // Registered outside `withMotion`, because neither lane can be trusted to the
-  // browser and both of them exist under reduced motion too.
-  //
-  // In the native lane Chrome scrolls a horizontal scroller only part of the way
-  // towards a newly focused card: at 375 the second and fourth cards land 13%
-  // and 6% on screen, which is a focus ring the person who moved focus there
-  // cannot see. In the pinned lane it is worse, because the rail's horizontal
-  // position is a function of the PAGE scroll: scrolling the card into view does
-  // nothing at all, and the last card sits off the right edge.
-  //
-  // So put the card on screen ourselves, through whichever axis is live.
-  if (scroller && railTrack) {
-    const onFocusIn = (e: FocusEvent) => {
-      const card = (e.target as HTMLElement | null)?.closest<HTMLElement>('#rail-track > a');
-      // Keyboard only. `focusin` also fires on a click, and moving the rail out
-      // from under a pointer mid-click is the opposite of helpful.
-      if (!card || !card.matches(':focus-visible')) return;
-      // Measured against the track rather than read off offsetLeft, so the
-      // scrub's own transform cancels out: both rects move together.
-      const offset = card.getBoundingClientRect().left - railTrack.getBoundingClientRect().left;
-      const centred = offset - (scroller.clientWidth - card.offsetWidth) / 2;
-      if (scrubStart) {
-        scrollWindowTo(scrubStart() + Math.min(Math.max(centred, 0), railDistance()));
-      } else {
-        scroller.scrollLeft = centred; // the scroller clamps it for us
-      }
-    };
-    scroller.addEventListener('focusin', onFocusIn);
-    onTeardown(() => scroller.removeEventListener('focusin', onFocusIn));
-  }
+  // The work rail: native scroll at any width, pinned scrub from lg. Shared
+  // with the case-study chapter rail, so the two behave identically.
+  if (rail && scroller && railTrack) horizontalRail(rail, scroller, railTrack);
 
   withMotion(() => {
     // Hero: per-line rise, plus a width-axis settle only Bricolage's wdth axis
-    // allows. The hero has five lines, and seven below lg, rather than a title's
-    // two, so it takes a slightly tighter stagger to finish in the same beat.
-    revealDisplayTitle(0.018);
-    // The shared entrance rises 28px over 0.9s where this page used to rise 40
-    // over 1.0. Deliberate: one entrance across the site is worth more than the
-    // twelve pixels, and nothing on the page was tuned against the old figure.
+    // allows. Two lines, the same as a page title, so the default stagger.
+    revealDisplayTitle();
     revealOnScroll('[data-reveal]');
-
-    // Marquee.
-    const track = document.getElementById('marquee');
-    if (track) {
-      gsap.to(track, { xPercent: -50, duration: 40, ease: 'none', repeat: -1 });
-    }
-
-    // Horizontal rail: pin the section and translate the track by its overflow.
-    //
-    // matchMedia rather than a one-shot innerWidth read, so resizing across the
-    // breakpoint sets the rail up or tears it down instead of stranding it in
-    // whichever state the page happened to load in.
-    if (rail && scroller && railTrack) {
-      const mm = gsap.matchMedia();
-      onTeardown(() => mm.revert());
-
-      mm.add('(min-width: 1024px)', () => {
-        if (railDistance() === 0) return;
-
-        // The native scrollbar would fight the transform. gsap.set inside the
-        // matchMedia scope, so reverting restores the scrollable fallback.
-        gsap.set(scroller, { overflowX: 'hidden' });
-
-        // Hiding the overflow does not make the box unscrollable, only
-        // unscrollable BY HAND. Any leftover scrollLeft from a narrow-width
-        // session, and any the browser adds itself to reveal a focused card,
-        // stacks on top of the scrub transform and offsets the rail for good.
-        // Pin it to zero for as long as the scrub owns the horizontal axis.
-        scroller.scrollLeft = 0;
-        const hold = () => {
-          if (scroller.scrollLeft !== 0) scroller.scrollLeft = 0;
-        };
-        scroller.addEventListener('scroll', hold);
-
-        const scrub = gsap.to(railTrack, {
-          x: () => -railDistance(),
-          ease: 'none',
-          scrollTrigger: {
-            trigger: rail,
-            start: 'top top',
-            // Clamped to a positive length: `+=0` is a degenerate pin.
-            end: () => `+=${Math.max(1, railDistance())}`,
-            pin: true,
-            scrub: 0.6,
-            invalidateOnRefresh: true,
-            anticipatePin: 1,
-          },
-        });
-
-        // Hand the focus handler above the live scrub, so it drives the page
-        // scroll rather than a scrollLeft the `hold` listener would undo.
-        const st = scrub.scrollTrigger;
-        if (st) scrubStart = () => st.start;
-
-        return () => {
-          scrubStart = null;
-          scroller.removeEventListener('scroll', hold);
-        };
-      });
-    }
   });
 </script>
