@@ -155,9 +155,11 @@ disagree with itself the way the old front matter did against the hand-written l
 page. `metrics` values must be traceable to a sentence in the case study. Nothing invented.
 
 **Case-study markdown stays plain markdown.** An image with a title becomes a captioned figure in
-dark browser chrome, via the rehype plugin in `src/plugins/case-study-markdown.mjs`. Do not write
-raw `<figure>` HTML into a case study; that is what the old site did and it could not be
-optimised.
+dark browser chrome, via the plugin in `src/plugins/case-study-markdown.mjs`. It is a **Sätteri
+hast plugin, not a rehype one**: Sätteri is Astro's Markdown processor here, wired up as
+`markdown.processor` in `astro.config.mjs`, and `markdown.rehypePlugins` is a deprecated shim that
+drags the whole unified pipeline back in. Do not write raw `<figure>` HTML into a case study; that
+is what the old site did and it could not be optimised.
 
 **The AI-portfolio tells are still banned.** Dustin named them: gradient hero, emoji section
 headings, `rounded-2xl shadow-lg` card grids, fake stat counters, centred everything, "passionate
@@ -209,7 +211,7 @@ optional `metrics`. Nothing else needs touching: the home page work list and `/p
 both read the collection.
 
 Prose in plain Markdown. A screenshot is an image with a title, `![alt](../../assets/img/x.png
-"The caption.")`, which the rehype plugin turns into a captioned figure in browser chrome. Alt
+"The caption.")`, which the hast plugin turns into a captioned figure in browser chrome. Alt
 text and captions are published text, so the editorial rules apply to them, em-dashes included.
 
 Then add the route's row to `EXPECTATIONS` in `scripts/verify.py` and run the gate.

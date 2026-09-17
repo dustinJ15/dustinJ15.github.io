@@ -12,22 +12,16 @@ and approval is per action, not once.
 
 - [ ] **Work through `REVIEW-CHECKLIST.md`.** It is the list of things the gate cannot judge:
       design calls to look at, the dark-mode read on a real screen, a real screen-reader pass, and
-      the seven re-shot screenshots the supervising session has not opened yet. Nothing there
-      blocks publishing, but it is the last human read before it.
-- [ ] 🔒 **Publish.** Create `dustinJ15/dustinJ15.github.io` as a public repo, push, enable Pages.
-      Ask before creating, ask again before pushing, and ask again before enabling Pages. Three
-      separate approvals. This is the least reversible thing in the list; un-publishing does not
-      un-clone. Run `../career-hub/scripts/screen.sh .` immediately before.
-      The deploy workflow now builds on every push to `main`, so the first push is also the first
-      deploy. Set Pages to the GitHub Actions source **before** that first push, or the run fails
-      at `configure-pages` with "Get Pages site failed". Enabling Pages is not automated on
-      purpose; it is Dustin's to do.
-- [ ] **Verify live.** Load `https://dustinJ15.github.io` in a real browser, logged out, and click
-      every link again. Live is a different environment from local. Then check it on a phone,
-      which is the actual use case.
-- [ ] **Tell career-hub.** Once the site resolves, task 41 there flips `INCLUDE_SITE = True` in
-      `resume/build_resume.py` and rebuilds, and task 32 adds the site to LinkedIn Featured.
-      Do not flip it before the site loads; it prints a dead URL on every copy.
+      the re-shot screenshots the supervising session has not opened yet. Nothing there blocks a
+      deploy, but it is the human read the gate cannot stand in for.
+- [ ] **Verify live, logged out.** Load `https://dustinJ15.github.io` in a real browser, logged
+      out, and click every link. Live is a different environment from local. Only Dustin can do
+      this. The phone half is already closed: he confirmed 2026-08-28 that it looks right there.
+
+**The site is published.** It went live 2026-08-28, and every push to `main` redeploys it. So
+`../career-hub/scripts/screen.sh .` and `npm run verify` both have to pass **before** any push,
+not before some future first one, and 🔒 **every push needs Dustin's approval**. Un-publishing
+does not un-clone.
 
 ## Backlog, not blocking
 
@@ -35,6 +29,16 @@ and approval is per action, not once.
 
 ## Done
 
+- [x] **README rewritten for a stranger, 2026-09-17.** The footer's new `Source` link means a
+      reader can arrive at the repo cold, so the README opens on what the site is and what is
+      interesting about it rather than on `npm install`, and `scripts/verify.py` gets a section
+      instead of a line. The working content stayed: Local, Structure, Adding a project and the
+      publishing rules, all corrected where they had gone stale.
+- [x] **Published, 2026-08-28.** `dustinJ15/dustinJ15.github.io` is public, Pages is on the
+      GitHub Actions source, and the deploy ran in 44 seconds. Task 40 in career-hub.
+- [x] **career-hub told, 2026-08-28 and 2026-09-17.** Task 41 flipped `INCLUDE_SITE = True` in
+      `resume/build_resume.py` and rebuilt all four variants, each still one page and each
+      printing the site on the contact line. Task 32 added the site to LinkedIn Featured.
 - [x] **Pre-publish trims, 2026-09-15.** Quote generator study cut by a fifth: the three
       build-process sections are one, "How it was built", and the defect ledger lives on Process
       alone. Third metric is `1.5` with the unit in the label, so the tiles share a baseline. Stack
