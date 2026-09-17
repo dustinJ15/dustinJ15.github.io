@@ -14,6 +14,9 @@ export const site = {
   github: 'https://github.com/dustinJ15',
   githubHandle: 'github.com/dustinJ15',
   linkedin: 'https://www.linkedin.com/in/dustinj15',
+  /** This site's own source, linked from the footer. Not the same as `github`,
+      which is the profile: this is the repo a reader can check the site against. */
+  repo: 'https://github.com/dustinJ15/dustinJ15.github.io',
   /** Built in career-hub with `build_resume.py general --no-phone`, copied into public/. */
   resume: '/Dustin-Jones-Resume.pdf',
   description:

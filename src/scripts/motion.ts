@@ -73,12 +73,25 @@ export function scrollWindowTo(y: number) {
  * of PAGE scroll, so scrolling the card into view does nothing at all. So the
  * card is put on screen here, through whichever axis is live.
  */
-export function horizontalRail(rail: HTMLElement, scroller: HTMLElement, track: HTMLElement) {
+export function horizontalRail(
+  rail: HTMLElement,
+  scroller: HTMLElement,
+  track: HTMLElement,
+  control?: HTMLElement | null,
+) {
   // Never negative: on a very wide screen the track is narrower than the
   // viewport, and a negative distance hands ScrollTrigger an end before its start.
   const distance = () => Math.max(0, track.scrollWidth - scroller.clientWidth);
   // Set while the pinned lane owns the horizontal axis; null in the native one.
   let scrubStart: (() => number) | null = null;
+
+  // How far along the rail is, in track pixels, through whichever axis is live.
+  // In the pinned lane the rail's position IS page scroll, measured from where
+  // the pin begins; in the native lane it is just the scroller's own offset.
+  const offsetNow = () =>
+    scrubStart
+      ? Math.min(Math.max(window.scrollY - scrubStart(), 0), distance())
+      : scroller.scrollLeft;
 
   const onFocusIn = (e: FocusEvent) => {
     const card = (e.target as HTMLElement | null)?.closest<HTMLElement>('a');
@@ -94,6 +107,55 @@ export function horizontalRail(rail: HTMLElement, scroller: HTMLElement, track: 
   };
   scroller.addEventListener('focusin', onFocusIn);
   onTeardown(() => scroller.removeEventListener('focusin', onFocusIn));
+
+  // The "Scroll" affordance in the rail header. It ships `hidden` and is only
+  // revealed here, so it never offers a click that JavaScript did not arrive to
+  // handle; without JS the rail is still natively scrollable. Registered outside
+  // withMotion for the same reason the keyboard handling is: the native lane
+  // exists under reduced motion, and the control has to work there too.
+  if (control) {
+    // One card plus the gap, so a click lands the next card where the last sat.
+    const step = () => {
+      const card = track.firstElementChild as HTMLElement | null;
+      const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+      return card ? card.offsetWidth + gap : Math.round(scroller.clientWidth * 0.8);
+    };
+
+    const sync = () => {
+      // Nothing to scroll past on a screen wide enough to hold the whole track.
+      const scrollable = distance() > 0;
+      control.hidden = !scrollable;
+      // Within a pixel or two of the end, so float rounding still reads as done.
+      const atEnd = scrollable && offsetNow() >= distance() - 2;
+      control.toggleAttribute('disabled', atEnd);
+      control.setAttribute('aria-disabled', String(atEnd));
+    };
+
+    const onClick = () => {
+      const target = Math.min(offsetNow() + step(), distance());
+      // In the pinned lane the horizontal axis is page scroll, and a raw window
+      // scroll would be snapped back by Lenis on the next wheel event.
+      if (scrubStart) scrollWindowTo(scrubStart() + target);
+      else
+        scroller.scrollTo({
+          left: target,
+          behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+        });
+    };
+
+    control.addEventListener('click', onClick);
+    scroller.addEventListener('scroll', sync);
+    window.addEventListener('scroll', sync, { passive: true });
+    window.addEventListener('resize', sync);
+    sync();
+    onTeardown(() => {
+      control.removeEventListener('click', onClick);
+      scroller.removeEventListener('scroll', sync);
+      window.removeEventListener('scroll', sync);
+      window.removeEventListener('resize', sync);
+      control.hidden = true;
+    });
+  }
 
   withMotion(() => {
     // matchMedia rather than a one-shot innerWidth read, so resizing across the

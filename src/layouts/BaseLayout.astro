@@ -124,6 +124,10 @@ const year = new Date().getFullYear();
         <a class="label transition-colors hover:text-accent" href={site.resume}>Resume</a>
         <a class="label transition-colors hover:text-accent" href={site.github}>GitHub</a>
         <a class="label transition-colors hover:text-accent" href={site.linkedin}>LinkedIn</a>
+        {/* This site's own source. A portfolio for an engineer is itself a work
+            sample, and the repo is the only place a reader can check that the
+            claim and the code agree. */}
+        <a class="label transition-colors hover:text-accent" href={site.repo}>Source</a>
       </nav>
     </footer>
   </body>

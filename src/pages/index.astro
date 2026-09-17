@@ -9,7 +9,11 @@ import { site, hero } from '../data/site';
 const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
 ---
 
-<BaseLayout title="Work" description={site.description}>
+{/* The nav calls this page "Work", but the title is not just a tab label: BaseLayout
+    feeds it to og:title and twitter:title too, so "Work · Dustin Jones" was the
+    headline on every shared link card. It reads the same tokens the hero prints,
+    so the tab and the page cannot drift apart. */}
+<BaseLayout title={`${site.role}, ${site.location}`} description={site.description}>
   <!-- ── hero ──────────────────────────────────────────────────────────── -->
   <section
     class="relative flex min-h-[calc(100svh-6rem)] flex-col justify-between px-(--gutter) pb-10"
@@ -96,7 +100,19 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
   >
     <div class="flex items-center justify-between px-(--gutter) py-6">
       <h2 class="label">Work</h2>
-      <span class="label" aria-hidden="true">Scroll →</span>
+      {/* Was a bare span, which looked like a control and was not one: the first
+          person shown the site tried to click it. It ships `hidden` and
+          horizontalRail reveals it, so it only ever appears when it works. */}
+      <button
+        type="button"
+        id="rail-next"
+        hidden
+        aria-controls="rail-scroller"
+        aria-label="Scroll the work list right"
+        class="label cursor-pointer transition-colors hover:text-accent disabled:pointer-events-none disabled:opacity-40"
+      >
+        Scroll <span aria-hidden="true">→</span>
+      </button>
     </div>
     <div id="rail-scroller" class="overflow-x-auto overscroll-x-contain">
       <div id="rail-track" class="flex w-max gap-6 px-(--gutter) pb-10">
@@ -177,10 +193,11 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
   const rail = document.getElementById('rail');
   const scroller = document.getElementById('rail-scroller');
   const railTrack = document.getElementById('rail-track');
+  const railNext = document.getElementById('rail-next');
 
   // The work rail: native scroll at any width, pinned scrub from lg. Shared
   // with the case-study chapter rail, so the two behave identically.
-  if (rail && scroller && railTrack) horizontalRail(rail, scroller, railTrack);
+  if (rail && scroller && railTrack) horizontalRail(rail, scroller, railTrack, railNext);
 
   withMotion(() => {
     // Hero: per-line rise, plus a width-axis settle only Bricolage's wdth axis
