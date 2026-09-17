@@ -23,10 +23,14 @@ The Jekyll site this replaced was deleted in ticket 10. Nothing here builds with
 
 1. **Never push, create a repo, change visibility, or enable Pages without asking Dustin first,
    per action.** Not "once at the start". Each time.
-2. **Never publish employer internals.** Naming Frontage Laboratories is fine and deliberate.
-   Describing how their systems work internally, or reproducing anything specific to their
-   business or their clients, is not. Same rule for `rental-pipeline`, which is separate work
-   with its own client data.
+2. **Never name the employer, and never publish their internals.** As of 2026-09-17 the employer
+   is not named anywhere on this site: not in page copy, not in alt text or captions, not inside
+   an image. This reverses the earlier rule that naming them was fine, so older log entries
+   disagree with it. This file wins. The single deliberate exception is
+   `public/Dustin-Jones-Resume.pdf`, which names them because that is employment history and it
+   matches the resume Dustin sends out. Describing how their systems work internally, or
+   reproducing anything specific to their business or their clients, stays forbidden. Same rule
+   for `rental-pipeline`, which is separate work with its own client data.
 3. **Run the screen before every publish.** It lives outside this repo on purpose, so the list of
    strings being screened for is never itself published:
    ```bash
@@ -170,15 +174,28 @@ their real inputs are real client data.
 (built in career-hub with `build_resume.py general --no-phone`, no phone number) and `og.png`.
 Open both before every publish.
 
-The pipeline lives in career-hub because it depends on private repos:
+The pipeline lives in career-hub because it depends on private repos. **Always shoot through
+`../career-hub/scripts/shoot_site.py`**, which is the entry point for both tools:
 
-- `../career-hub/scripts/shoot_clean.py`, the quoting app. Wraps its shoot tool and rewrites
-  every fee, legal note and item name to invented values first. **A naive shoot leaks real
-  pricing**; read the 2026-08-28 entry in `../career-hub/workflow/LOG.md` before touching it.
-- `../career-hub/scripts/shoot-offline-tools.py` and `gen-billing-demo.js`, the label maker and
-  the billing analyzer. Generates synthetic workbooks and drives the real apps.
-  **It blanks every `<img>` before shooting**, because the label preview renders the employer
-  logo. Keep that step.
+```bash
+QG=~/sync/code/work/quote-generator
+$QG/.venv/bin/python ../career-hub/scripts/shoot_site.py quote   OUTDIR
+$QG/.venv/bin/python ../career-hub/scripts/shoot_site.py offline OUTDIR
+```
+
+It forces the shipped geometry (1500x950 CSS at 2x) and rewrites the employer name out of the
+app chrome, then **aborts the shoot if the name is still in the page**, so hard rule 2 cannot be
+broken by re-shooting. It delegates to, and does not replace:
+
+- `shoot_clean.py`, the quoting app. Rewrites every fee, legal note and item name to invented
+  values first. **A naive shoot leaks real pricing**; read the 2026-08-28 entry in
+  `../career-hub/workflow/LOG.md` before touching it.
+- `shoot-offline-tools.py` and `gen-billing-demo.js`, the label maker and the billing analyzer.
+  Generates synthetic workbooks and drives the real apps. **It blanks every `<img>` before
+  shooting**, because the label preview renders the employer logo. Keep that step.
+
+Delivered widths: the quoting app and the label maker are resampled from 3000 to 2400; the
+billing analyzer ships at its native 3000. Crop heights are in the 2026-09-17 LOG entry.
 
 Deliberately not shipped: any screenshot with a visible fee column. The figures in them are
 invented, but a stranger reading a picture cannot tell an invented rate from a real one.

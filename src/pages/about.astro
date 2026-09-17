@@ -17,10 +17,14 @@ import PageTitle from '../components/PageTitle.astro';
 import { site } from '../data/site';
 import portrait from '../assets/img/dustin-jones.jpg';
 
-// Titles and dates only, as they stand on the resume. The case studies are the
-// descriptions, so none are repeated here. Ranges use "to": the gate fails on a dash.
+// Titles and dates only. The case studies are the descriptions, so none are
+// repeated here. Ranges use "to": the gate fails on a dash.
+//
+// The first entry deliberately does NOT match the resume, which names the
+// employer. The employer is not named anywhere on this site (2026-09-17). The
+// resume PDF in public/ is the one deliberate exception. Do not "fix" this.
 const experience = [
-  { org: 'Frontage Laboratories, Exton PA', role: 'Software Engineering Intern', when: 'Jun to Aug 2026' },
+  { org: 'A clinical CRO, Pennsylvania', role: 'Software Engineering Intern', when: 'Jun to Aug 2026' },
   { org: 'MSU Denver Honors Program', role: 'Student Assistant', when: 'Jan 2026 to present' },
   { org: 'Ember Capital Partners, Denver', role: 'Software Engineering Intern', when: 'Nov 2025 to Mar 2026' },
   { org: 'Vail Resorts, Colorado and Australia', role: 'Ski Instructor', when: '2020 to 2025' },
@@ -85,7 +89,7 @@ const experience = [
 
     <p>
       Ski school runs on requests, priority lists, and who is visible to the people handing out
-      work. That is the model the quoting system at Frontage Laboratories was built on: who got
+      work. That is the model the quoting system was built on: who got
       to see what, how a task arrived on someone's screen, what people did and did not know about
       each other's work. Its six roles are a model of the organization more than they are a
       security feature.

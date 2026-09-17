@@ -42,10 +42,21 @@ in `scripts/verify.py`.
 
 ## Before publishing anything
 
-Three of the four case studies describe tools built at Frontage Laboratories. Naming the employer
-is fine; describing their internals is not. No pricing or margin, internal identifiers, study
-IDs, client names, hostnames, IPs, or coworker names may appear on the site or inside an image.
-`rental-pipeline` is separate work with its own client data, and the same rules apply.
+Three of the four case studies describe tools built at a clinical CRO.
+
+**The employer is not named on this site**, in page copy, in alt text, or inside any image. This
+was decided on 2026-09-17 and reverses the earlier position that naming them was fine. The
+screenshots are shot through a wrapper that rewrites the app chrome to neutral demo branding and
+aborts the shoot if the name survives into the page, so a re-shoot cannot quietly reintroduce it.
+
+The one deliberate exception is `public/Dustin-Jones-Resume.pdf`, which does name the employer.
+That is employment history, it matches the resume Dustin sends to employers, and making the two
+disagree would be worse than the exception. Do not "fix" it.
+
+Describing their internals stays forbidden: no real pricing or margin, internal identifiers,
+study IDs, client names, hostnames, IPs, or coworker names may appear on the site or inside an
+image. Invented figures in a clearly synthetic demo are allowed, and the caption has to say they
+are invented. `rental-pipeline` is separate work with its own client data, same rules.
 
 Run the screening script before every publish. It lives outside this repo on purpose, so the list
 of strings being screened for is never itself published:
