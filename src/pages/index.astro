@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { site, hero } from '../data/site';
+import portrait from '../assets/img/dustin-jones.jpg';
 
 // The work list reads the collection, so the home page and a case study cannot
 // disagree about a project's year, stack or tagline.
@@ -18,7 +19,23 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
   <section
     class="relative flex min-h-[calc(100svh-6rem)] flex-col justify-between px-(--gutter) pb-10"
   >
-    <p class="label">{site.role}, {site.location}</p>
+    {/* The portrait sits top-right at every width. Below lg it is in flow beside
+        the label; from lg it is lifted out of flow (`.hero-portrait` in
+        global.css), because the hero type is sized from the viewport and
+        anything that narrows the h1 wraps the name. A bare div, not a figure:
+        it has no caption. No reveal either, so it is there on first paint. */}
+    <div class="flex items-start justify-between gap-6">
+      <p class="label">{site.role}, {site.location}</p>
+      <div class="portrait hero-portrait">
+        <Image
+          src={portrait}
+          alt="Dustin Jones"
+          widths={[240, 320, 480, 640, 832, 1000]}
+          sizes="(min-width: 1024px) 26rem, 32vw"
+          loading="eager"
+        />
+      </div>
+    </div>
 
     {/* Rows, not lines. A row is one visual line from lg up; below lg each phrase
         in it takes its own line, so the size is bound by "applications" rather
@@ -26,7 +43,7 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
         phone. `.hero-title` in global.css owns both sizes; the gate's wrap check
         is what keeps their constants honest. */}
     <h1
-      class="hero-title my-auto py-4 font-display font-extrabold uppercase tracking-[-0.03em] sm:py-10"
+      class="hero-title relative z-10 my-auto py-4 font-display font-extrabold uppercase tracking-[-0.03em] sm:py-10"
     >
       {
         hero.displayRows.map((row, i) => (

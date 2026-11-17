@@ -29,6 +29,10 @@ does not un-clone.
 
 ## Done
 
+- [x] **Portrait in the home hero, 2026-11-17.** Top-right at every width, same treatment as
+      `/about/`, where it also stays. In flow beside the label below `lg`, out of flow from `lg`
+      so it cannot narrow the name. Checked for overlap with the name, label and hero foot from
+      375 to 1920 wide and on short windows.
 - [x] **README rewritten for a stranger, 2026-09-17.** The footer's new `Source` link means a
       reader can arrive at the repo cold, so the README opens on what the site is and what is
       interesting about it rather than on `npm install`, and `scripts/verify.py` gets a section

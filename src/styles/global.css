@@ -542,6 +542,37 @@
   line-height: 0.9;
 }
 
+/* The portrait in the home hero. Treatment comes from `.portrait`; this is only
+   where it sits and how big it is.
+
+   Below lg it is in flow at the top right, beside the label, and the name keeps
+   the full width underneath. From lg it is taken out of flow, because the type
+   above is sized from the viewport and not from its container: a portrait that
+   took a column from the h1 would not shrink the name, it would wrap it.
+
+   The lg width is tied to the same content width the type is sized from, so the
+   photo scales with the gap the name leaves and never reaches it. The svh term
+   keeps its foot above the hero's rule on a short window. No text may ever sit
+   over the photo: the gate's contrast check reads background colours only and
+   cannot see a picture. */
+.hero-portrait {
+  flex: none;
+  width: clamp(7rem, 32vw, 12rem);
+}
+
+@media (min-width: 64rem) {
+  .hero-portrait {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-end: var(--gutter);
+    width: min(
+      calc((100vw - 2 * var(--gutter)) * 0.27),
+      26rem,
+      calc((100svh - 16rem) * 0.84)
+    );
+  }
+}
+
 /* Explicitly a block. A row is a <span> holding block-level lines, and left
    inline it becomes a block-in-inline split, which silently drops any padding on
    the row itself. */

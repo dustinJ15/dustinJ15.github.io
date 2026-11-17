@@ -262,11 +262,11 @@ EXPECTATIONS: dict[str, dict] = {
             "/projects/rental-pipeline/",
         ],
         "text": [
+            # The hero, as ONE name. The display type sets each word on its own
+            # row, and the two have to still be two words to a copy-paste and to
+            # the computed accessible name. The portrait beside them adds no
+            # figure (it has no caption) and is covered by the alt check.
             "Dustin Jones",
-            # The hero, as ONE sentence. The display type is broken across five
-            # rows at 1440 and seven lines at 375, and the words have to still be
-            # words to a copy-paste and to the computed accessible name whichever
-            # way it broke.
             "Four case studies",
             "Sixteen parsers into one schema",
         ],

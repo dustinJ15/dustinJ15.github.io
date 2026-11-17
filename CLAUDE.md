@@ -136,6 +136,14 @@ removes the animation. The scale is fluid and clamp-based throughout.
 `--measure`. Heroes, work rails and figures use the full viewport. Case-study body copy keeps a
 comfortable measure, because reading is what those pages are for.
 
+**The portrait is in the home hero as well as on `/about/`**, since 2026-11-17, top-right at
+every width, with the same `.portrait` treatment on both pages. From `lg` it is positioned
+absolutely: the hero type is sized from the viewport, not from its container, so a portrait that
+took a column from the `h1` would wrap the name instead of shrinking it. **No text may ever sit
+over the photograph.** The gate's contrast check reads background colours only and cannot see a
+picture, so that one is held by the layout and by looking. It has no reveal: it is there on
+first paint.
+
 **Motion policy**, in `src/scripts/motion.ts`, in order of importance:
 
 1. Reduced motion wins. Nothing is hidden and nothing is scroll-jacked.
